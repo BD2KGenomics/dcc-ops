@@ -1,0 +1,98 @@
+version: '2'
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+    - "8888:443"
+    volumes:
+    - /etc/nginx/conf.d
+    - /etc/nginx/vhost.d
+    - /usr/share/nginx/html
+    - ./certs:/etc/nginx/certs:ro
+  dockergen:
+    image: jwilder/docker-gen
+    container_name: nginx-gen
+    command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    volumes_from:
+    - nginx
+    volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - ./conf/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
+    depends_on:
+    - nginx
+  nginx-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-letsencrypt
+    volumes_from:
+    - nginx
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.so:ro
+    - ./certs:/etc/nginx/certs:rw
+    environment:
+    - NGINX_DOCKER_GEN_CONTAINER=nginx-gen
+    depends_on:
+    - nginx
+    - nginx-gen
+  redwood-auth-server:
+    container_name: redwood-auth-server
+    image: redwood-auth-server
+    ports:
+    - "8443:8443"
+    - "8543:8543"
+#    - "8000:8000"
+    environment:
+    - VIRTUAL_HOST=auth.ucsc-cgl.org
+    - VIRTUAL_PORT=8443
+    - LETSENCRYPT_HOST=auth.ucsc-cgl.org
+    - LETSENCRYPT_EMAIL=benjaminran@ucsc.edu
+    depends_on:
+    - redwood-auth-db
+    - nginx-letsencrypt
+  redwood-auth-db:
+    container_name: redwood-auth-db
+    image: postgres
+    volumes:
+    - ./conf/auth-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
+    - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
+    depends_on:
+    - nginx-letsencrypt
+  redwood-metadata-server:
+    container_name: redwood-metadata-server
+    image: redwood-metadata-server
+    ports:
+    - "8444:8444"
+    - "8544:8544"
+#    - "8001:8000"
+    environment:
+    - VIRTUAL_HOST=metadata.ucsc-cgl.org
+    - VIRTUAL_PORT=8444
+    - LETSENCRYPT_HOST=metadata.ucsc-cgl.org
+    - LETSENCRYPT_EMAIL=benjaminran@ucsc.edu
+    depends_on:
+    - redwood-metadata-db
+    - redwood-auth-server
+    - nginx-letsencrypt
+  redwood-metadata-db:
+    container_name: redwood-metadata-db
+    image: mongo
+    depends_on:
+    - nginx-letsencrypt
+  redwood-storage-server:
+    container_name: redwood-storage-server
+    image: redwood-storage-server
+    ports:
+    - "5431:5431"
+#    - "8002:8000"
+    volumes:
+    - ./conf/application.storage.properties:/dcc/conf/application.properties
+    - ~/.aws/credentials:/root/.aws/credentials
+    environment:
+    - VIRTUAL_HOST=storage.ucsc-cgl.org
+    - VIRTUAL_PORT=5431
+    - LETSENCRYPT_HOST=storage.ucsc-cgl.org
+    - LETSENCRYPT_EMAIL=benjaminran@ucsc.edu
+    depends_on:
+    - redwood-auth-server
+    - redwood-metadata-server
+    - nginx-letsencrypt

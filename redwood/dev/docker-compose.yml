@@ -5,8 +5,10 @@ services:
     container_name: nginx
     ports:
     - "80:80"
+    - "443:443"
     volumes:
     - /etc/nginx/conf.d
+    - ./certs:/etc/nginx/certs
   dockergen:
     image: jwilder/docker-gen
     container_name: docker-gen
@@ -26,6 +28,7 @@ services:
     environment:
     - VIRTUAL_HOST=auth.ucsc-cgl.org
     - VIRTUAL_PORT=8443
+    - HTTPS_METHOD=nohttp
     depends_on:
     - redwood-auth-db
   redwood-auth-db:
@@ -44,6 +47,7 @@ services:
     environment:
     - VIRTUAL_HOST=metadata.ucsc-cgl.org
     - VIRTUAL_PORT=8444
+    - HTTPS_METHOD=nohttp
     depends_on:
     - redwood-metadata-db
     - redwood-auth-server
@@ -62,6 +66,7 @@ services:
     environment:
     - VIRTUAL_HOST=storage.ucsc-cgl.org
     - VIRTUAL_PORT=5431
+    - HTTPS_METHOD=nohttp
     depends_on:
     - redwood-auth-server
     - redwood-metadata-server

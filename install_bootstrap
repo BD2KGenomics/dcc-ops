@@ -406,13 +406,15 @@ CONFIG
     [[ -d "consonance_launcher_config" ]] || mkdir "consonance_launcher_config"
     # cp ~/.consonance/compose.config consonance_launcher_config/compose.config
     # template out stuff
-    mustache consonance_launcher_config/compose.config consonance/aws.config.template > consonance/aws.config
-    mustache consonance_launcher_config/compose.config consonance/bag_params.json.template  > consonance/bag_params.json
-    mustache consonance_launcher_config/compose.config consonance/config.template  > consonance/config
-    mustache consonance_launcher_config/compose.config consonance/youxia_config.template  > consonance/youxia_config
+    mustache consonance_launcher_config/compose.config consonance/aws.config.template > aws.config
+    mustache consonance_launcher_config/compose.config consonance/bag_params.json.template  > bag_params.json
+    mustache consonance_launcher_config/compose.config consonance/config.template  > config
+    mustache consonance_launcher_config/compose.config consonance/youxia_config.template  > youxia_config
     cat ${user_pem_path} > consonance/key.pem
 
-    sudo docker-compose build
+    cd consonance
+		sudo docker-compose build
+		sudo docker-compose up -d
     ################sudo docker-compose run client
     elif [ "${run_consonance_launcher^^}" = 'N' ] ; then
         echo "You can run this script at another time to run the consonance launcher"

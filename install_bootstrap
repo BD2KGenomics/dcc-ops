@@ -421,5 +421,26 @@ CONFIG
         exit 0
     fi
 done
-echo "Exiting now."
+
+run_redwood=''
+while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
+    echo "Would you like to run the redwood installer now? [Y/N]"
+    read run_redwood
+
+		if [ "${run_redwood^^}" = 'Y' ] ; then
+# TODO: need to templatize the config files.  How is Beni handling certificate signing?
+		fi
+done
+
+run_boardwalk=''
+while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
+    echo "Would you like to run the boardwalk installer now? [Y/N]"
+    read run_boardwalk
+
+		if [ "${run_boardwalk^^}" = 'Y' ] ; then
+# TODO: need to dockerize
+		fi
+done
+
+echo "Done, exiting now."
 set +e

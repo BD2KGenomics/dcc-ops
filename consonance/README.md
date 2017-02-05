@@ -17,7 +17,7 @@ You can exit and re-enter via:
     exit
     docker-compose run client
 
-**NOTE:** The Bash install_bootstrap script depends on Ubuntu 16.04 but sets up the templates required to run `docker-compose up` if needed. 
+**NOTE:** The Bash install_bootstrap script depends on Ubuntu 16.04 but sets up the templates required to run `docker-compose up` if needed.
 
 ## Developing
 
@@ -34,7 +34,7 @@ Now, you should have your webservice running on port 8080, you can monitor rabbi
 You are now ready to submit some work (from within the admin docker container).
 
     consonance run  --flavour m1.xlarge --image-descriptor Dockstore.cwl --run-descriptor sample_configs.json
-    
+
 Note that you will also need to configure your security group to allow for SSH access between nodes in the security group on public IP addresses.
 
 TODO: how to get Youxia to launch m1.xlarge and have it attach all 4 ephemerial drives, only 1 is attached -- WORKED AROUND
@@ -42,3 +42,7 @@ TODO: how to get Youxia to launch m1.xlarge and have it attach all 4 ephemerial 
 NOTE: We make the simplfying assumption that the ip address at eth0 of the launcher is reachable from the children. If it is different (i.e. a public ip address is preferred, modify sample_params.json in /container-host-bag in the provisioner container before launching jobs)
 
 Take a look at `/consonance_logs` for daemon and webservice logs in any container
+
+## TODO
+
+* need to make the dockerfiles so they can be built on Quay.io

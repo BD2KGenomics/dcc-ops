@@ -32,7 +32,8 @@ Use the AWS console or command line tool to create a host, I chose:
 * r4.large
 * 250GB disk
 * make a note of your security group name and ID
+* your pem key installed somewhere on this box
 
 ### Running the Bootstrap Script
 
-    curl -L https://install.perlbrew.pl | bash
+    curl -L https://<url>/install_bootstrap | bash

@@ -413,8 +413,8 @@ CONFIG
     cat ${user_pem_path} > consonance/key.pem
 
     cd consonance
-		sudo docker-compose build
-		sudo docker-compose up -d
+		sudo docker-compose -f docker-compose.yml build
+		sudo docker-compose -f docker-compose.yml up -d
     ################sudo docker-compose run client
     elif [ "${run_consonance_launcher^^}" = 'N' ] ; then
         echo "You can run this script at another time to run the consonance launcher"

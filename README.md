@@ -22,3 +22,17 @@ These are related projects that are either already setup and available for use o
 
 * [Dockstore](http://dockstore.org): our workflow and tool sharing platform
 * [Toil](https://github.com/BD2KGenomics/toil): our workflow engine, these workflows are shared via Dockstore
+
+## Launching the Commons
+
+### Starting an AWS VM
+
+Use the AWS console or command line tool to create a host, I chose:
+
+* r4.large
+* 250GB disk
+* make a note of your security group name and ID
+
+### Running the Bootstrap Script
+
+    curl -L https://install.perlbrew.pl | bash

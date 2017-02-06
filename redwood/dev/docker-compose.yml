@@ -20,7 +20,7 @@ services:
     - ./conf/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
   redwood-auth-server:
     container_name: redwood-auth-server
-    image: redwood-auth-server
+    image: quay.io/ucsc_cgl/redwood-auth-server
     ports:
     - "8443:8443"
     - "8543:8543"
@@ -39,7 +39,7 @@ services:
     - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
   redwood-metadata-server:
     container_name: redwood-metadata-server
-    image: redwood-metadata-server
+    image: quay.io/ucsc_cgl/redwood-metadata-server
     ports:
     - "8444:8444"
     - "8544:8544"
@@ -56,7 +56,7 @@ services:
     image: mongo
   redwood-storage-server:
     container_name: redwood-storage-server
-    image: redwood-storage-server
+    image: quay.io/ucsc_cgl/redwood-storage-server
     ports:
     - "5431:5431"
     - "8002:8000"

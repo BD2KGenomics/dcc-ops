@@ -93,7 +93,7 @@ create unique index ix_auth_username on authorities (username,authority);
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dcc_auth;
 
 -- Populate tables
-INSERT INTO users (username, password, enabled) VALUES ('mgmt', '$2a$08$OmW3e3kE1PcL/wZ0DzWnzOTjD7WCsY7t0T23aVFsD2jQD/m9lnlVm', true);
+INSERT INTO users (username, password, enabled) VALUES ('mgmt', 'pass', true);
 INSERT INTO authorities (username, authority) VALUES ('mgmt', 'ROLE_MANAGEMENT');
 
 INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('mgmt', '', 'pass', 's3.upload,s3.download,ckcc.upload,ckcc.download,project2.upload,project2.download', 'password', '', 'ROLE_MANAGEMENT', 31536000, NULL, '{}', '');

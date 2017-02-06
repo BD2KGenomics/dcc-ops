@@ -5,7 +5,7 @@ ICGC Storage System Adapted for UCSC in Docker Compose
 This project runs the Redwood storage-server, metadata-server, and auth-server (closely based off of ICGC's storage system servers) as well as the MongoDB and PostgreSQL databases that the servers require.
 
 ## Run the System for Development
-You'll need maven (3.2.5), docker, and docker-compose installed.
+You'll need [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) installed.
 
 This project composes the two requisite databases and the `ucsc-storage-server`, `ucsc-metadata-server`, and `ucsc-auth-server` Docker images into a 5-container docker-compose setup.The _ucsc-*-server_ images should be built on the current machine. To build them, clone the _dcc-storage_, _dcc-metadata_, and _dcc-auth_ repositories and run the following from a directory containing _dcc-storage_, _dcc-metadata_, and _dcc-auth_:
 

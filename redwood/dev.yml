@@ -1,0 +1,22 @@
+version: '2'
+services:
+  nginx:
+  dockergen:
+  redwood-auth-server:
+    ports:
+    - "8443:8443"
+    - "8543:8543"
+    - "8000:8000"
+  redwood-auth-db:
+  redwood-metadata-server:
+    ports:
+    - "8444:8444"
+    - "8544:8544"
+    - "8001:8000"
+  redwood-metadata-db:
+  redwood-storage-server:
+    ports:
+    - "5431:5431"
+    - "8002:8000"
+    volumes:
+    - ~/.aws/credentials:/root/.aws/credentials

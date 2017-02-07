@@ -92,3 +92,15 @@ Run the system
 - You should schedule this command to run on boot as an upstart/systemd job
 
 At this point, Redwood should be up and running.
+
+To confirm this: generate an accessToken with `scripts/createAccessToken.sh` then do a test upload/download from the server:
+```
+docker run --rm -it --net=redwood_default --link redwood-nginx:storage.ucsc-cgl.org --link redwood-nginx:metadata.ucsc-cgl.org \
+    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=ucsc-cgl.org \
+    quay.io/ucsc_cgl/redwood-client:dev bash
+$ upload data/someFile
+<note the object id outputted>
+$ download <objectid> .
+```
+
+If everything is as expected, congratulations! You've deployed Redwood.

@@ -1,8 +1,10 @@
-# dcc-redwood-compose
-ICGC Storage System Adapted for UCSC in Docker Compose
+# Redwood
+Highly Automated Cloud Data Storage
 
 ## Overview
-This project runs the Redwood storage-server, metadata-server, and auth-server (closely based off of ICGC's storage system servers) as well as the MongoDB and PostgreSQL databases that the servers require.
+Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store.
+If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times.
+Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
 
 ## Run the System for Development
 You'll need docker and docker-compose installed.
@@ -66,7 +68,7 @@ Connect to the EC2.
 - `ssh ubuntu@your-server`
 
 Prepare the system.
-- install docker and docker-compose
+- install [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/)
 
 Point your domain to your server
 - URLs _storage.yourdomain.com_ and _metadata.yourdomain.com_ should resolve to your ec2.

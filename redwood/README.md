@@ -11,13 +11,31 @@ You'll need docker and docker-compose installed.
 
 _Note:_ If you're making changes to the storage system source code you should build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
 
-Then:
+Start the system with:
 
 ```
-docker-compose up -f base.yml -f dev.yml
+docker-compose -f base.yml -f dev.yml up
 ```
 
 _Note:_ A `~/.aws/credentials` file is assumed to exist to exist on the host.
+
+
+Then create a testing accessToken with
+
+```
+scripts/createAccessToken.sh
+```
+
+Now you should be able to upload and download files:
+```
+docker run --rm -it --net=redwood_default --link redwood-nginx:storage.ucsc-cgl.org --link redwood-nginx:metadata.ucsc-cgl.org \
+    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=ucsc-cgl.org \
+    quay.io/ucsc_cgl/redwood-client:dev bash
+$ upload data/someFile
+<note the object id outputted>
+$ download <objectid> .
+```
+
 
 ## Automated Backups
 In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.
@@ -88,7 +106,7 @@ Update _.env_
 - see inline comments
 
 Run the system
-- `docker-compose up -f base.yml -f prod.yml -d`
+- `docker-compose -f base.yml -f prod.yml up -d`
 - You should schedule this command to run on boot as an upstart/systemd job
 
 At this point, Redwood should be up and running.

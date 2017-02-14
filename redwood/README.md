@@ -6,36 +6,65 @@ Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3
 If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times.
 Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
 
-## Run the System for Development
-You'll need docker and docker-compose installed and this repository cloned.
+## Development Guide
+Run the system for development
 
-_Note:_ If you're making changes to the storage system source code you should build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
+### Set Up
+You only have to do this once
 
-From _dcc-ops/redwood_, start the system with:
+#### On AWS
+Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
 
+Create an S3 bucket where the storage system will put all its data.
+- Note the name and region you use
+
+Create an IAM (KMS) Encryption Key.
+- Create it in the same region as your S3 bucket
+- Give yourself (at least) permission to manage the key
+- Give yourself and the storage system user (if different) permission to use the key
+- Note the id of the key
+
+#### On Your Machine
+Put your (or whichever account's credentials will be used to run the storage system) AWS access key and secret key in a _~/.aws/credentials_ file.
+```
+sudo apt-get install -y python-pip && sudo pip install awscli && aws configure
+```
+
+Install [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/).
+
+Clone this project.
+```
+cd && sudo apt-get install -y git && git clone https://github.com/BD2KGenomics/dcc-ops.git
+```
+
+Go to the redwood directory and edit the storage server config.
+```
+cd dcc-ops/redwood
+<edit conf/application.storage.properties>
+```
+- bucket.name.object=... # your bucket name
+- s3.endpoint=... # your s3 endpoint (region-specific if on aws)
+- s3.masterEncryptionKeyId=... # your KMS key id if on AWS
+    - don't specify if not on AWS
+- No need to edit any other configuration in the file
+
+### Run the System for Development
+Run the system in one terminal window:
 ```
 docker-compose -f base.yml -f dev.yml up
 ```
 
-_Note:_ A `~/.aws/credentials` file is assumed to exist to exist on the host (if you have the aws cli, just `aws configure`).
+_Note:_ If you're making changes to the storage system source code you should build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
 
-
-Then create a testing accessToken with
-
-```
-scripts/createAccessToken.sh
-```
-
-Now you should be able to upload and download files:
+Test it in another (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
 ```
 docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
-    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=redwood.io \
+    -e ACCESS_TOKEN=$(scripts/createAccessToken.sh) -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload data/someFile
 <note the object id outputted>
 $ download <objectid> .
 ```
-
 
 ## Automated Backups
 In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.

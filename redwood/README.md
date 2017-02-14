@@ -10,7 +10,7 @@ Each bundle of files includes a _metadata.json_ file that can be used to trigger
 Run the system for development
 
 ### Set Up
-You only have to do this once
+Create an S3 bucket and encryption key
 
 #### On AWS
 Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
@@ -37,26 +37,20 @@ Clone this project.
 cd && sudo apt-get install -y git && git clone https://github.com/BD2KGenomics/dcc-ops.git
 ```
 
-Go to the redwood directory and edit the storage server config.
-```
-cd dcc-ops/redwood
-<edit conf/application.storage.properties>
-```
-- bucket.name.object=... # your bucket name
-- s3.endpoint=... # your s3 endpoint (region-specific if on aws)
-- s3.masterEncryptionKeyId=... # your KMS key id if on AWS
-    - don't specify if not on AWS
-- No need to edit any other configuration in the file
+Edit the following properties in the _dcc-ops/redwood/.env_ file. See the inline comments.
+- _s3_bucket_
+- _s3_endpoint_
+- _kms_key_
 
 ### Run the System for Development
-Run the system in one terminal window:
+From _dcc-ops/redwood_, run the system:
 ```
 docker-compose -f base.yml -f dev.yml up
 ```
 
-_Note:_ If you're making changes to the storage system source code you should build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
+_Note:_ For storage system development you should edit code then build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
 
-Test it in another (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
+In another terminal, test the system (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
 ```
 docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
     -e ACCESS_TOKEN=$(scripts/createAccessToken.sh) -e REDWOOD_ENDPOINT=redwood.io \
@@ -65,6 +59,8 @@ $ upload data/someFile
 <note the object id outputted>
 $ download <objectid> .
 ```
+
+If that's as expected, you've successfully set up Redwood for development.
 
 ## Automated Backups
 In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.
@@ -123,18 +119,10 @@ Point your domain to your server
 Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 - `git clone git@github.com:BD2KGenomics/dcc-redwood-compose.git`
 
-Update _conf/application.storage.properties_
-- s3.accessKey: your _redwood_ IAM user's access key
-- s3.secretKey: your _redwood_ IAM user's secret key
-- s3.masterEncryptionKeyId: the id of your KMS key
-- s3.endpoint: the s3 endpoint to use (depends on your s3 bucket region)
-- bucket.name.object: your s3 bucket's name
-- server.ssl.key-store-password: the password to your server's ssl keystore
+Update all properties in _dcc-ops/redwood/.env_.
+- See the inline comments
 
-Update _.env_
-- see inline comments
-
-Run the system
+Run the system (from the _dcc-ops/redwood_ directory)
 - `docker-compose -f base.yml -f prod.yml up -d`
 - You should schedule this command to run on boot as an upstart/systemd job
 

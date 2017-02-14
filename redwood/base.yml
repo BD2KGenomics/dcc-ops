@@ -56,11 +56,14 @@ services:
     container_name: redwood-storage-server
     image: quay.io/ucsc_cgl/redwood-storage-server
     volumes:
-    - ./conf/application.storage.properties:/dcc/conf/application.properties
+    - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:
     - VIRTUAL_HOST=storage.${base_url}
     - VIRTUAL_PORT=5431
     - HTTPS_METHOD=nohttp
+    - REDWOOD_BUCKET=${s3_bucket}
+    - REDWOOD_S3_ENDPOINT=${s3_endpoint}
+    - REDWOOD_KMS_KEY=${kms_key}
     depends_on:
     - redwood-auth-server
     - redwood-metadata-server

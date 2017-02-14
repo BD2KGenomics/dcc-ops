@@ -428,7 +428,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
     read run_redwood
 
 		if [ "${run_redwood^^}" = 'Y' ] ; then
-# TODO: need to templatize the config files.  How is Beni handling certificate signing?
+    # TODO: Beni, put your bootstrap here
 		fi
 done
 
@@ -438,7 +438,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
     read run_boardwalk
 
 		if [ "${run_boardwalk^^}" = 'Y' ] ; then
-# TODO: need to dockerize
+    # TODO: Carlos needs to dockerize
 		fi
 done
 

@@ -37,3 +37,9 @@ Use the AWS console or command line tool to create a host, I chose:
 ### Running the Bootstrap Script
 
     curl -L https://<url>/install_bootstrap | bash
+
+Until we get a URL to host this one you just do:
+
+    bash install_bootstrap
+
+On the AWS VM.  It will ask you to configure each service.

@@ -7,17 +7,17 @@ If applicable, server-side encryption is performed behind the scenes, and multip
 Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
 
 ## Run the System for Development
-You'll need docker and docker-compose installed.
+You'll need docker and docker-compose installed and this repository cloned.
 
 _Note:_ If you're making changes to the storage system source code you should build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
 
-Start the system with:
+From _dcc-ops/redwood_, start the system with:
 
 ```
 docker-compose -f base.yml -f dev.yml up
 ```
 
-_Note:_ A `~/.aws/credentials` file is assumed to exist to exist on the host.
+_Note:_ A `~/.aws/credentials` file is assumed to exist to exist on the host (if you have the aws cli, just `aws configure`).
 
 
 Then create a testing accessToken with
@@ -28,8 +28,8 @@ scripts/createAccessToken.sh
 
 Now you should be able to upload and download files:
 ```
-docker run --rm -it --net=redwood_default --link redwood-nginx:storage.ucsc-cgl.org --link redwood-nginx:metadata.ucsc-cgl.org \
-    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=ucsc-cgl.org \
+docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
+    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload data/someFile
 <note the object id outputted>
@@ -113,8 +113,8 @@ At this point, Redwood should be up and running.
 
 To confirm this: generate an accessToken with `scripts/createAccessToken.sh` then do a test upload/download from the server:
 ```
-docker run --rm -it --net=redwood_default --link redwood-nginx:storage.ucsc-cgl.org --link redwood-nginx:metadata.ucsc-cgl.org \
-    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=ucsc-cgl.org \
+docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
+    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload data/someFile
 <note the object id outputted>

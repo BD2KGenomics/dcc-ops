@@ -41,6 +41,7 @@ Edit the following properties in the _dcc-ops/redwood/.env_ file. See the inline
 - _s3_bucket_
 - _s3_endpoint_
 - _kms_key_
+  - If on open stack or not intending to use server-side encryption, comment out this property
 
 ### Run the System for Development
 From _dcc-ops/redwood_, run the system:
@@ -121,6 +122,7 @@ Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 
 Update all properties in _dcc-ops/redwood/.env_.
 - See the inline comments
+- If on open stack or not intending to use server-side encryption, comment out _kms_key_
 
 Run the system (from the _dcc-ops/redwood_ directory)
 - `docker-compose -f base.yml -f prod.yml up -d`

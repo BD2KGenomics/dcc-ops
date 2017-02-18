@@ -432,6 +432,37 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
               read -ep $'What is the name of the base URL? \n' base_url
       fi
 
+      email_address=''
+      if [ ! -z $EMAIL_ADDRESS ] ; then
+              read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
+          else
+              read -ep $'What is the email address for notification? \n' email_address
+      fi
+
+      user_aws_key='user_aws_key'
+      ask_question "What is your AWS Key?" "$AWS_ACCESS_KEY_ID" "AWS Key name" $user_aws_key
+
+      user_aws_secret_key='user_aws_secret_key'
+      ask_question "What is your AWS Secret Key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Key name" $user_aws_secret_key
+
+      s3_bucket='s3_bucket'
+      ask_question "What is your AWS S3 bucket?" "$S3_BUCKET" "S3 bucket name" $s3_bucket
+
+      s3_bucket_backup='s3_bucket_backup'
+      ask_question "What is your AWS S3 backup bucket?" "$S3_BUCKET_BACKUP" "S3 bucket backup name" $s3_bucket_backup
+
+      s3_endpoint='s3_endpoint'
+      ask_question "What is your AWS S3 endpoint?" "$S3_ENDPOINT" "S3 endpoint" $s3_endpoint
+
+      kms_key='kms_key'
+      ask_question "What is your AWS AIM KMS key ID?" "$KMS_KEY" "AIM KMS key ID" $kms_key
+
+      auth_db_password='auth_db_password'
+      ask_question "What is your auth DB password?" "$AUTH_DB_PASSWORD" "auth DB password" $auth_db_password
+
+      metadata_db_password='metadata_db_password'
+      ask_question "What is your metadata db password?" "$METADATA_DB_PASSWORD" "metadata db password" $metadata_db_password
+
       # Now write a config for this file.
       [[ -f redwood_launcher_config/redwood.config ]] || mkdir -p redwood_launcher_config
       # Note: You can't have ANY blank lines in .consonance/redwood.config because the python library that will eventually process it does not like blank lines and will fail.

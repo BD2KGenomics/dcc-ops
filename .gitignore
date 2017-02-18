@@ -84,3 +84,7 @@ hs_err_pid*
 
 consonance/aws.config
 consonance/key.pem
+
+redwood/aws.config
+redwood/.env
+redwood_launcher_config/redwood.config

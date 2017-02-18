@@ -1,19 +1,20 @@
 # Redwood
-Highly Automated Cloud Data Storage
+
+Cloud Data Storage
 
 ## Overview
-Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store.
-If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times.
-Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
+
+Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store. If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times. Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
 
 ## Development Guide
+
 Run the system for development
 
 ### Set Up
-Create an S3 bucket and encryption key
+
+Create an S3 bucket and IAM KMS encryption key, make a note of both.  Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
 
 #### On AWS
-Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
 
 Create an S3 bucket where the storage system will put all its data.
 - Note the name and region you use
@@ -24,7 +25,8 @@ Create an IAM (KMS) Encryption Key.
 - Give yourself and the storage system user (if different) permission to use the key
 - Note the id of the key
 
-#### On Your Machine
+#### On the Host Running Redwood
+
 Put your (or whichever account's credentials will be used to run the storage system) AWS access key and secret key in a _~/.aws/credentials_ file.
 ```
 sudo apt-get install -y python-pip && sudo pip install awscli && aws configure
@@ -62,6 +64,10 @@ $ download <objectid> .
 ```
 
 If that's as expected, you've successfully set up Redwood for development.
+
+### Alternative Setup with Bootstrapper
+
+You can use the `install_bootstrap` script one directory up to automatically run the setup.  You still need to perform the AWS tasks.
 
 ## Automated Backups
 In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.

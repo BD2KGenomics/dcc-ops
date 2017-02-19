@@ -6,9 +6,6 @@ services:
     ports:
     - "80:80"
     - "443:443"
-    - "8443:8443"
-    - "8444:8444"
-    - "5431:5431"
     volumes:
     - /etc/nginx/conf.d
     - ./certs:/etc/nginx/certs

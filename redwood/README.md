@@ -121,7 +121,7 @@ Prepare the system.
 - install [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/)
 
 Point your domain to your server
-- URLs _storage.yourdomain.com_ and _metadata.yourdomain.com_ should resolve to your ec2.
+- URLs _storage.yourdomain.com_, _auth.yourdomain.com_, and _metadata.yourdomain.com_ should resolve to your ec2.
 
 Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 - `git clone git@github.com:BD2KGenomics/dcc-redwood-compose.git`

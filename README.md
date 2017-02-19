@@ -34,6 +34,10 @@ Use the AWS console or command line tool to create a host, I chose:
 * make a note of your security group name and ID
 * your pem key installed somewhere on this box
 
+#### Setup for Redwood
+
+See [README](redwood/README.md) for various tasks that need to be done before running the install_bootstrap script for this system.
+
 ### Running the Bootstrap Script
 
     curl -L https://<url>/install_bootstrap | bash

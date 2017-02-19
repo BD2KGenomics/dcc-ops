@@ -4,6 +4,9 @@
 # Hacked by Denis Yuen
 # Hacked by Brian O'Connor <briandoconnor@gmail.com>
 
+# TODO:
+# * we need a mechanism to shutdown since this script launches services in daemon mode
+
 set -e
 CONSONANCE_LAUNCHER_VERSION=feature/consonance_cleanup
 
@@ -492,7 +495,7 @@ CONFIG
       mustache redwood_launcher_config/redwood.config redwood/conf/aws.config.template > redwood/aws.config
 
       cd redwood
-      sudo docker-compose -f base.yml -f dev.yml up -d
+      sudo docker-compose -f base.yml -f prod.yml up -d
 
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"

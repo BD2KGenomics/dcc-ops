@@ -415,7 +415,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       echo "Installing various apt packages"
       # need to install regardless
       set +e
-      sudo apt-get install python-pip --yes &> install_python.log && sudo pip install awscli &> install_python.log && aws configure &> install_python.log
+      sudo apt-get install python-pip --yes &> install_python.log && sudo pip install awscli &> install_python.log 
       install_result=$?
       set -e
 

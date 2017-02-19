@@ -6,6 +6,9 @@ services:
     ports:
     - "80:80"
     - "443:443"
+    - "8443:8443"
+    - "8444:8444"
+    - "5431:5431"
     volumes:
     - /etc/nginx/conf.d
     - ./certs:/etc/nginx/certs
@@ -21,8 +24,6 @@ services:
   redwood-auth-server:
     container_name: redwood-auth-server
     image: quay.io/ucsc_cgl/redwood-auth-server
-    ports:
-    - "8443:8443"
     environment:
     - VIRTUAL_HOST=auth.${base_url}
     - VIRTUAL_PORT=8443
@@ -41,8 +42,6 @@ services:
   redwood-metadata-server:
     container_name: redwood-metadata-server
     image: quay.io/ucsc_cgl/redwood-metadata-server
-    ports:
-    - "8444:8444"
     environment:
     - VIRTUAL_HOST=metadata.${base_url}
     - VIRTUAL_PORT=8444
@@ -59,8 +58,6 @@ services:
   redwood-storage-server:
     container_name: redwood-storage-server
     image: quay.io/ucsc_cgl/redwood-storage-server
-    ports:
-    - "5431:5431"
     volumes:
     - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:

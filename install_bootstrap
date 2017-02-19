@@ -486,7 +486,7 @@ CONFIG
       mustache redwood_launcher_config/redwood.config redwood/conf/aws.config.template > redwood/aws.config
 
       cd redwood
-      sudo docker-compose -f base.yml -f dev.yml up
+      sudo docker-compose -f base.yml -f dev.yml up -d
 
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"
@@ -500,7 +500,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
     read run_boardwalk
 
     if [ "${run_boardwalk^^}" = 'Y' ] ; then
-    # TODO: Carlos needs to dockerize
+      echo "Carlos needs to dockerize"
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the boardwalk installer"
     fi

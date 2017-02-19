@@ -55,6 +55,8 @@ services:
   redwood-storage-server:
     container_name: redwood-storage-server
     image: quay.io/ucsc_cgl/redwood-storage-server
+    ports:
+    - "5431":"5431"
     volumes:
     - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:

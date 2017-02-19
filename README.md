@@ -47,3 +47,7 @@ Until we get a URL to host this one you just do:
     bash install_bootstrap
 
 On the AWS VM.  It will ask you to configure each service.
+
+### Cleaning up Docker Images/Containers/Volumes
+
+This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes) is helpful if you want to clean up previous images/containers/volumes.

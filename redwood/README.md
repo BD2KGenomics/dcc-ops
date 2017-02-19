@@ -6,6 +6,10 @@ Cloud Data Storage
 
 Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store. If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times. Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
 
+## Setup with the Bootstrapper
+
+You can use the `install_bootstrap` script one directory up to automatically run the setup.  You still need to perform the AWS tasks described below.
+
 ## Development Guide
 
 Run the system for development
@@ -64,10 +68,6 @@ $ download <objectid> .
 ```
 
 If that's as expected, you've successfully set up Redwood for development.
-
-### Alternative Setup with Bootstrapper
-
-You can use the `install_bootstrap` script one directory up to automatically run the setup.  You still need to perform the AWS tasks.
 
 ## Automated Backups
 In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.

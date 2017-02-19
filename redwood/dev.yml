@@ -19,4 +19,4 @@ services:
     - "5431:5431"
     - "8002:8000"
     volumes:
-    - aws.config:/root/.aws/credentials
+    - ./aws.config:/root/.aws/credentials

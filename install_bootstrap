@@ -388,10 +388,10 @@ CONFIG
   [[ -d "commons_launcher_config" ]] || mkdir "commons_launcher_config"
   # cp ~/.consonance/consonance.config commons_launcher_config/consonance.config
   # template out stuff
-  mustache commons_launcher_config/consonance.config consonance/aws.config.template > aws.config
-  mustache commons_launcher_config/consonance.config consonance/bag_params.json.template  > bag_params.json
-  mustache commons_launcher_config/consonance.config consonance/config.template  > config
-  mustache commons_launcher_config/consonance.config consonance/youxia_config.template  > youxia_config
+  mustache commons_launcher_config/consonance.config consonance/aws.config.template > consonance/aws.config
+  mustache commons_launcher_config/consonance.config consonance/bag_params.json.template  > consonance/bag_params.json
+  mustache commons_launcher_config/consonance.config consonance/config.template  > consonance/config
+  mustache commons_launcher_config/consonance.config consonance/youxia_config.template  > consonance/youxia_config
   cat ${user_pem_path} > consonance/key.pem
 
   cd consonance

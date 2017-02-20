@@ -1,19 +1,24 @@
 # Redwood
-Highly Automated Cloud Data Storage
+
+Cloud Data Storage
 
 ## Overview
-Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store.
-If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times.
-Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
+
+Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3 or an S3-compliant data store. If applicable, server-side encryption is performed behind the scenes, and multipart upload/download are used to improve data transfer times. Each bundle of files includes a _metadata.json_ file that can be used to trigger analysis or workflow result reporting.
+
+## Setup with the Bootstrapper
+
+You can use the `install_bootstrap` script one directory up to automatically run the setup.  You still need to perform the AWS tasks described below.
 
 ## Development Guide
+
 Run the system for development
 
 ### Set Up
-Create an S3 bucket and encryption key
+
+Create an S3 bucket and IAM KMS encryption key, make a note of both.  Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
 
 #### On AWS
-Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
 
 Create an S3 bucket where the storage system will put all its data.
 - Note the name and region you use
@@ -24,7 +29,8 @@ Create an IAM (KMS) Encryption Key.
 - Give yourself and the storage system user (if different) permission to use the key
 - Note the id of the key
 
-#### On Your Machine
+#### On the Host Running Redwood
+
 Put your (or whichever account's credentials will be used to run the storage system) AWS access key and secret key in a _~/.aws/credentials_ file.
 ```
 sudo apt-get install -y python-pip && sudo pip install awscli && aws configure
@@ -101,7 +107,7 @@ Prepare the system.
 - install [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/)
 
 Point your domain to your server
-- URLs _storage.yourdomain.com_ and _metadata.yourdomain.com_ should resolve to your ec2.
+- URLs _storage.yourdomain.com_, _auth.yourdomain.com_, and _metadata.yourdomain.com_ should resolve to your ec2.
 
 Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 - `git clone git@github.com:BD2KGenomics/dcc-redwood-compose.git`

@@ -69,20 +69,6 @@ $ download <objectid> .
 
 If that's as expected, you've successfully set up Redwood for development.
 
-## Automated Backups
-In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.
-
-Soon this will be handled by the production compose file.
-
-```
-docker run --net storageservice_default --link ucsc-metadata-db:mongo -d -e MONGO_HOST=mongo -e MONGO_DB=dcc-metadata -e S3_BUCKET=redwood-backups -e AWS_ACCESS_KEY_ID=123 -e AWS_SECRET_ACCESS_KEY=123 -e BACKUP_INTERVAL=1 -e FILE_PREFIX=metadata-backup- --name metadata-backup agmangas/mongo-backup-s3
-```
-
-Sim. for the auth database.
-
-```
-docker run --net storageservice_default --link ucsc-auth-db:db -e SCHEDULE="@daily" -e S3_ACCESS_KEY_ID=123 -e S3_SECRET_ACCESS_KEY=123 -e S3_BUCKET=redwood-backups -e S3_PREFIX=auth-backup -e POSTGRES_DATABASE=dcc -e POSTGRES_USER=dcc_auth -e POSTGRES_PASSWORD=pass -e POSTGRES_HOST=db -d schickling/postgres-backup-s3
-```
 
 ## Deploy to Production
 This is a guide for deploying Redwood to production on AWS.
@@ -129,6 +115,7 @@ Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 Update all properties in _dcc-ops/redwood/.env_.
 - See the inline comments
 - If on open stack or not intending to use server-side encryption, comment out _kms_key_
+- Daily backups of all metadata and auth data will be uploaded to the S3 bucket specified by backup_bucket. This should be properly access-controlled.
 
 Run the system (from the _dcc-ops/redwood_ directory)
 - `docker-compose -f base.yml -f prod.yml up -d`

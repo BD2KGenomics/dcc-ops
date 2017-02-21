@@ -34,6 +34,10 @@ Use the AWS console or command line tool to create a host, I chose:
 * make a note of your security group name and ID
 * your pem key installed somewhere on this box
 
+#### Setup for Redwood
+
+See [README](redwood/README.md) for various tasks that need to be done before running the install_bootstrap script for this system.
+
 ### Running the Bootstrap Script
 
     curl -L https://<url>/install_bootstrap | bash
@@ -43,3 +47,7 @@ Until we get a URL to host this one you just do:
     bash install_bootstrap
 
 On the AWS VM.  It will ask you to configure each service.
+
+### Cleaning up Docker Images/Containers/Volumes
+
+This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes) is helpful if you want to clean up previous images/containers/volumes.

@@ -51,3 +51,7 @@ On the AWS VM.  It will ask you to configure each service.
 ### Cleaning up Docker Images/Containers/Volumes
 
 This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes) is helpful if you want to clean up previous images/containers/volumes.
+
+## TODO
+
+* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable 

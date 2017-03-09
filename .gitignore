@@ -91,4 +91,13 @@ consonance/youxia_config
 redwood/aws.config
 redwood/.env
 redwood_launcher_config/redwood.config
+redwood/certs/*
 
+aws.config
+bag_params.json
+commons_launcher_config/
+config
+install_python.log
+install_wget_curl.log
+redwood/manifest.tsv
+youxia_config

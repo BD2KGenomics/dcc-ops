@@ -21,8 +21,6 @@ services:
   redwood-auth-server:
     container_name: redwood-auth-server
     image: quay.io/ucsc_cgl/redwood-auth-server
-    ports:
-    - "8443:8443"
     environment:
     - VIRTUAL_HOST=auth.${base_url}
     - VIRTUAL_PORT=8443
@@ -33,7 +31,7 @@ services:
     container_name: redwood-auth-db
     image: postgres
     volumes:
-    - ./conf/auth-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
+    - ./conf/auth-1-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
     - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
     depends_on:
     - nginx
@@ -41,8 +39,6 @@ services:
   redwood-metadata-server:
     container_name: redwood-metadata-server
     image: quay.io/ucsc_cgl/redwood-metadata-server
-    ports:
-    - "8444:8444"
     environment:
     - VIRTUAL_HOST=metadata.${base_url}
     - VIRTUAL_PORT=8444
@@ -59,11 +55,11 @@ services:
   redwood-storage-server:
     container_name: redwood-storage-server
     image: quay.io/ucsc_cgl/redwood-storage-server
-    ports:
-    - "5431:5431"
     volumes:
     - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:
+    - AWS_ACCESS_KEY_ID=${access_key}
+    - AWS_SECRET_ACCESS_KEY=${secret_key}
     - VIRTUAL_HOST=storage.${base_url}
     - VIRTUAL_PORT=5431
     - HTTPS_METHOD=nohttp

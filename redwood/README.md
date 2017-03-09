@@ -16,73 +16,57 @@ Run the system for development
 
 ### Set Up
 
-Create an S3 bucket and IAM KMS encryption key, make a note of both.  Have the AWS access key and secret key of whichever account you want to use to run the system (probably your own) ready.
+You'll need:
+- aws secret key and access key
+- an s3 bucket
+- iam kms encryption (if serverside encryption desired)
+- [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/)
+- this repo cloned locally
 
-#### On AWS
-
-Create an S3 bucket where the storage system will put all its data.
-- Note the name and region you use
-
-Create an IAM (KMS) Encryption Key.
-- Create it in the same region as your S3 bucket
-- Give yourself (at least) permission to manage the key
-- Give yourself and the storage system user (if different) permission to use the key
-- Note the id of the key
-
-#### On the Host Running Redwood
-
-Put your (or whichever account's credentials will be used to run the storage system) AWS access key and secret key in a _~/.aws/credentials_ file.
+Create a `dcc-ops/redwood/.env` file with contents like the following:
 ```
-sudo apt-get install -y python-pip && sudo pip install awscli && aws configure
+base_url=redwood.io
+email=me@domain
+
+# AWS credentials
+access_key=AKIA...
+secret_key=asfd...
+
+# AWS S3 bucket for primary data storage and backups
+s3_bucket=your-bucket
+backup_bucket=your-bucket
+
+# AWS S3 endpoint to reach buckets
+s3_endpoint=s3-external-1.amazonaws.com
+
+# AWS IAM Encryption Key id for server-side encryption of S3 data. Comment this out for no SSE
+kms_key=0asd...
+
+# root passwords to auth and metadata dbs
+auth_db_password=pass
+metadata_db_password=password
 ```
 
-Install [docker](https://docs.docker.com/engine/installation/linux/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/).
+### Development
+You can use the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images as is or edit the server source and rebuild the images.
 
-Clone this project.
-```
-cd && sudo apt-get install -y git && git clone https://github.com/BD2KGenomics/dcc-ops.git
-```
-
-Edit the following properties in the _dcc-ops/redwood/.env_ file. See the inline comments.
-- _s3_bucket_
-- _s3_endpoint_
-- _kms_key_
-  - If on open stack or not intending to use server-side encryption, comment out this property
-
-### Run the System for Development
 From _dcc-ops/redwood_, run the system:
 ```
 docker-compose -f base.yml -f dev.yml up
 ```
-
-_Note:_ For storage system development you should edit code then build the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images locally as appropriate.
 
 In another terminal, test the system (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
 ```
 docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
     -e ACCESS_TOKEN=$(scripts/createAccessToken.sh) -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
-$ upload data/someFile
+$ upload -p DEV data/someFile
 <note the object id outputted>
 $ download <objectid> .
 ```
 
-If that's as expected, you've successfully set up Redwood for development.
+If that's as expected, things are looking good.
 
-## Automated Backups
-In the past, automatic daily backups were scheduled with the following command on the metadata database host. This uses [this](https://github.com/agmangas/mongo-backup-s3/) docker image.
-
-Soon this will be handled by the production compose file.
-
-```
-docker run --net storageservice_default --link ucsc-metadata-db:mongo -d -e MONGO_HOST=mongo -e MONGO_DB=dcc-metadata -e S3_BUCKET=redwood-backups -e AWS_ACCESS_KEY_ID=123 -e AWS_SECRET_ACCESS_KEY=123 -e BACKUP_INTERVAL=1 -e FILE_PREFIX=metadata-backup- --name metadata-backup agmangas/mongo-backup-s3
-```
-
-Sim. for the auth database.
-
-```
-docker run --net storageservice_default --link ucsc-auth-db:db -e SCHEDULE="@daily" -e S3_ACCESS_KEY_ID=123 -e S3_SECRET_ACCESS_KEY=123 -e S3_BUCKET=redwood-backups -e S3_PREFIX=auth-backup -e POSTGRES_DATABASE=dcc -e POSTGRES_USER=dcc_auth -e POSTGRES_PASSWORD=pass -e POSTGRES_HOST=db -d schickling/postgres-backup-s3
-```
 
 ## Deploy to Production
 This is a guide for deploying Redwood to production on AWS.
@@ -129,6 +113,7 @@ Copy or clone this project (_dcc-redwood-compose_) over to the the ec2
 Update all properties in _dcc-ops/redwood/.env_.
 - See the inline comments
 - If on open stack or not intending to use server-side encryption, comment out _kms_key_
+- Daily backups of all metadata and auth data will be uploaded to the S3 bucket specified by backup_bucket. This should be properly access-controlled.
 
 Run the system (from the _dcc-ops/redwood_ directory)
 - `docker-compose -f base.yml -f prod.yml up -d`

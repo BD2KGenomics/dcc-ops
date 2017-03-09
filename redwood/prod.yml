@@ -33,8 +33,6 @@ services:
     - letsencrypt-proxy-companion
   redwood-storage-server:
     environment:
-    - AWS_ACCESS_KEY_ID=${access_key}
-    - AWS_SECRET_ACCESS_KEY=${secret_key}
     - LETSENCRYPT_HOST=storage.${base_url}
     - LETSENCRYPT_EMAIL=${email}
   redwood-metadata-backup:

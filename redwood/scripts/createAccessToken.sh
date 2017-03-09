@@ -13,7 +13,7 @@ OPTIONS
   -a password for the auth-server admin user (default: secret)
   -h show this heplp message
   -m password for the auth-server mgmt user (default: pass)
-  -s string of space-delimited scopes to granted (default: 's3.upload s3.download')
+  -s string of space-delimited scopes to granted (default: 'aws.DEV.upload aws.DEV.download')
   -u user name to be granted (default: testuser)
   -v show verbose output
 EOF
@@ -21,8 +21,8 @@ EOF
 
 admin_pass=secret
 mgmt_pass=pass
-scopes="s3.upload s3.download"
-user=testuser
+scopes="aws.DEV.upload aws.DEV.download"
+user=dev@gmail.com
 verbose=0
 
 while getopts ":ahm:s:u:v" opt; do
@@ -52,6 +52,7 @@ while getopts ":ahm:s:u:v" opt; do
             ;;
     esac
 done
+shift "$((OPTIND - 1))"
 
 docker exec -it redwood-auth-server curl -XPUT "http://localhost:8543/admin/scopes/$user" -u admin:${admin_pass} -d"${scopes}"
 token_output=$(docker exec -it redwood-auth-server curl http://localhost:8443/oauth/token -H "Accept: application/json" -dgrant_type=password -dusername="${user}" -dscope="${scopes}" -ddesc="test access token" -u mgmt:${mgmt_pass})

@@ -64,6 +64,14 @@ Make sure you do the following:
 
 See [README](redwood/README.md) for various tasks that need to be done before running the install_bootstrap script for this system.
 
+### Setup for Consonance
+
+You probably want to install the Consonance command line on the VM above so you can submit work.
+
+Download the command line from:
+
+https://github.com/Consonance/consonance/releases
+
 ### Running the Bootstrap Script
 
     curl -L https://<url>/install_bootstrap | bash

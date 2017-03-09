@@ -89,4 +89,4 @@ This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-
 ## TODO
 
 * should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable 
-* the bootstrapper should install Java and the Consonance command line
+* the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI

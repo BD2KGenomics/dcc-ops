@@ -25,6 +25,15 @@ These are related projects that are either already setup and available for use o
 
 ## Launching the Commons
 
+These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
+
+### Collecting Information
+
+Make sure you have:
+
+* your AWS key/secret key
+* you know what region your running in e.g. `us-west-2`
+
 ### Starting an AWS VM
 
 Use the AWS console or command line tool to create a host, I chose:
@@ -34,7 +43,24 @@ Use the AWS console or command line tool to create a host, I chose:
 * make a note of your security group name and ID
 * your pem key installed somewhere on this box
 
-#### Setup for Redwood
+### AWS Tasks
+
+Make sure you do the following:
+
+* assign an Elastic IP (a static IP address) to your instance
+* open inbound ports on your security group
+    * 80 <- world
+    * 8080 <- world
+    * 22 <- world
+    * 443 <- world
+    * 8444 <- world (Redwood)
+    * 5000 <- world (Redwood)
+    * 5431 <- world (Redwood)
+    * 8443 <- world (Redwood)
+    * all TCP <- the elastic IP of the VM
+    * all TCP <- the security group itself
+
+### Setup for Redwood
 
 See [README](redwood/README.md) for various tasks that need to be done before running the install_bootstrap script for this system.
 

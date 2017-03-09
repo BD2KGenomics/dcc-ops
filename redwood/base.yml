@@ -58,6 +58,8 @@ services:
     volumes:
     - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:
+    - AWS_ACCESS_KEY_ID=${access_key}
+    - AWS_SECRET_ACCESS_KEY=${secret_key}
     - VIRTUAL_HOST=storage.${base_url}
     - VIRTUAL_PORT=5431
     - HTTPS_METHOD=nohttp

@@ -8,7 +8,7 @@ services:
 #      USER_GROUP: "$(stat -c '%u:%g' $HOME)"
       USER_GROUP: "${USER_GROUP}"
       REDWOOD_ACCESS_TOKEN: "${REDWOOD_ACCESS_TOKEN}"
-    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host storage.ucsc-cgl.org --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST"
+    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host storage.ucsc-cgl.org --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service elasticsearch1" 
     volumes:
       - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
@@ -19,8 +19,11 @@ services:
       - elasticsearch1
 #      - ~/dcc-metadata-indexer/test:/app/dcc-metadata-indexer/test
     networks:
-      - esnet
+      - esnet 
   dcc-dashboard-service:
+    environment:
+      APACHE_PATH: "${APACHE_PATH}"
+      ES_SERVICE: "${ES_SERVICE}"
     build: dcc-dashboard-service
     ports:
       - "80"
@@ -98,7 +101,7 @@ services:
       - TERM=xterm
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    container_name: elasticsearch1
+    container_name: "${ES_SERVICE}"
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -129,7 +132,8 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+      - "discovery.zen.ping.unicast.hosts=${ES_SERVICE}"
     ulimits:
       memlock:
         soft: -1

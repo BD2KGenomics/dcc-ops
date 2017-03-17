@@ -25,6 +25,15 @@ These are related projects that are either already setup and available for use o
 
 ## Launching the Commons
 
+These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
+
+### Collecting Information
+
+Make sure you have:
+
+* your AWS key/secret key
+* you know what region your running in e.g. `us-west-2`
+
 ### Starting an AWS VM
 
 Use the AWS console or command line tool to create a host, I chose:
@@ -34,9 +43,34 @@ Use the AWS console or command line tool to create a host, I chose:
 * make a note of your security group name and ID
 * your pem key installed somewhere on this box
 
-#### Setup for Redwood
+### AWS Tasks
+
+Make sure you do the following:
+
+* assign an Elastic IP (a static IP address) to your instance
+* open inbound ports on your security group
+    * 80 <- world
+    * 8080 <- world
+    * 22 <- world
+    * 443 <- world
+    * 8444 <- world (Redwood)
+    * 5000 <- world (Redwood)
+    * 5431 <- world (Redwood)
+    * 8443 <- world (Redwood)
+    * all TCP <- the elastic IP of the VM
+    * all TCP <- the security group itself
+
+### Setup for Redwood
 
 See [README](redwood/README.md) for various tasks that need to be done before running the install_bootstrap script for this system.
+
+### Setup for Consonance
+
+You probably want to install the Consonance command line on the VM above so you can submit work.
+
+Download the command line from:
+
+https://github.com/Consonance/consonance/releases
 
 ### Running the Bootstrap Script
 
@@ -51,3 +85,8 @@ On the AWS VM.  It will ask you to configure each service.
 ### Cleaning up Docker Images/Containers/Volumes
 
 This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes) is helpful if you want to clean up previous images/containers/volumes.
+
+## TODO
+
+* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable 
+* the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI

@@ -4,8 +4,7 @@ services:
     image: nginx
     container_name: redwood-nginx
     ports:
-    - "80:80"
-    - "443:443"
+    - "9443:443"
     volumes:
     - /etc/nginx/conf.d
     - ./certs:/etc/nginx/certs

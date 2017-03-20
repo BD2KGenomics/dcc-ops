@@ -595,7 +595,7 @@ CONFIG
       mustache boardwalk_launcher_config/boardwalk.config boardwalk/conf/aws.config.template > boardwalk/aws.config
 
       cd boardwalk
-      sudo docker-compose -f base.yml -f prod.yml up -d
+      sudo docker-compose up -d
 
    elif [ "${run_boardwalk^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the boardwalk installer"

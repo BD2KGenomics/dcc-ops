@@ -2,13 +2,13 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-#    image: quay.io/ucsc_cgl/metadata-indexer
-    build: dcc-metadata-indexer
+    image: quay.io/ucsc_cgl/metadata-indexer
     environment:
-#      USER_GROUP: "$(stat -c '%u:%g' $HOME)"
       USER_GROUP: "${USER_GROUP}"
       REDWOOD_ACCESS_TOKEN: "${REDWOOD_ACCESS_TOKEN}"
-    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host storage.ucsc-cgl.org --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service elasticsearch1" 
+      ES_SERVICE: "${ES_SERVICE}"
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host ${REDWOOD_SERVER} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${ES_SERVICE} --cron-job" 
     volumes:
       - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
@@ -17,14 +17,14 @@ services:
       - "9200"
     links:
       - elasticsearch1
-#      - ~/dcc-metadata-indexer/test:/app/dcc-metadata-indexer/test
     networks:
       - esnet 
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${APACHE_PATH}"
       ES_SERVICE: "${ES_SERVICE}"
-    build: dcc-dashboard-service
+      DATABASE_URL: "${DATABASE_URL}"
+    image: quay.io/ucsc_cgl/dashboard-service
     ports:
       - "80"
       - "443"
@@ -36,7 +36,7 @@ services:
     ports:
       - "9200"
   dcc-dashboard:
-    build: dcc-dashboard
+    image: quay.io/ucsc_cgl/dashboard
     ports:
       - "80"
       - "443"
@@ -50,19 +50,16 @@ services:
       DCC_DASHBOARD_HOST: "${DCC_DASHBOARD_HOST}"
       DCC_DASHBOARD_PROTOCOL: "${DCC_DASHBOARD_PROTOCOL}"
       DCC_DASHBOARD_SERVICE: "${DCC_DASHBOARD_SERVICE}"
+      DCC_INVOICING_SERVICE: "${DCC_INVOICING_SERVICE}"
+      DCC_ACTION_SERVICE: "${DCC_ACTION_SERVICE}"
     volumes_from:
       - letsencrypt
     networks:
       - esnet
       - server
-#  flask-helloworld:
-#    build: flask-helloworld
-#    ports:
-#      - "80"
   nginx:
     build: nginx-image
     links:
-#      - flask-helloworld
       - dcc-dashboard
       - letsencrypt
       - dcc-dashboard-service
@@ -70,10 +67,6 @@ services:
       MY_DOMAIN_NAME: "${DCC_DASHBOARD_HOST}"
     mem_limit: 2g
     cpu_shares: 256
-    #Testing switching the volumes
-    #volumes:
-    #  - /etc/letsencrypt:/etc/letsencrypt
-    #  - /var/lib/letsencrypt:/var/lib/letsencrypt
     ports:
       - "80:80"
       - "443:443"
@@ -120,8 +113,6 @@ services:
     volumes:
       - esdata1:/usr/share/elasticsearch/data
     ports:
-#      - localhost:9200:9200
-#       - 9200:9200
        - 9200
     networks:
       - esnet
@@ -132,7 +123,6 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
       - "discovery.zen.ping.unicast.hosts=${ES_SERVICE}"
     ulimits:
       memlock:

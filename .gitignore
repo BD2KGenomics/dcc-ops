@@ -101,3 +101,7 @@ install_python.log
 install_wget_curl.log
 redwood/manifest.tsv
 youxia_config
+
+# vagrant
+.vagrant
+ubuntu-xenial-16.04-cloudimg-console.log

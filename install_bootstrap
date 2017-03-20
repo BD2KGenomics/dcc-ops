@@ -545,6 +545,12 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       dcc_dashboard_service='dcc_dashboard_service'
       ask_question "What is your DCC Dashboard Service?" "$DCC_DASHBOARD_SERVICE" "DCC Dashboard Service" $dcc_dashboard_service
 
+      dcc_invoicing_service='dcc_invoicing_service'
+      ask_question "What is your DCC Invocing Service?" "$DCC_INVOICING_SERVICE" "DCC Invoicing Service" $dcc_invoicing_service
+
+      dcc_action_service='dcc_action_service'
+      ask_question "What is your DCC Action Service?" "$DCC_ACTION_SERVICE" "DCC Action Service" $dcc_action_service
+
       dcc_letsencrypt_staging='dcc_letsencrypt_staging'
       ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
 
@@ -554,6 +560,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       es_service='es_service'
       ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
 
+      database_url='database_url'
+      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
 
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
@@ -571,6 +579,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "DCC_DASHBOARD_PROTOCOL":"${dcc_dashboard_protocol}",
 "REDWOOD_ACCESS_TOKEN":"${redwood_access_token}",
 "DCC_DASHBOARD_SERVICE":"${dcc_dashboard_service}",
+"DCC_INVOICING_SERVICE":"${dcc_invoicing_service}",
+"DCC_ACTION_SERVICE":"${dcc_action_service}",
 "DATABASE_URL":"${database_url}",
 "DCC_LETSENCRYPT_EMAIL":"${dcc_email_address}",
 "DCC_LETSENCRYPT_STAGING":"${dcc_letsencrypt_staging}",

@@ -105,3 +105,7 @@ youxia_config
 # vagrant
 .vagrant
 ubuntu-xenial-16.04-cloudimg-console.log
+
+# log files
+install_compose.log
+install_docker.log

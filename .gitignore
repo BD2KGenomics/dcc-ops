@@ -93,6 +93,10 @@ redwood/.env
 redwood_launcher_config/redwood.config
 redwood/certs/*
 
+boardwalk/.env
+boardwalk/aws.config
+boardwalk_launcher_config/boardwalk.config
+
 aws.config
 bag_params.json
 commons_launcher_config/

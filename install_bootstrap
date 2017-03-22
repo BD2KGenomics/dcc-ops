@@ -524,8 +524,13 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       #echo "Carlos needs to dockerize"
       #Per ES specifications to run their docker image on production:
       #Set vm.max_map_count to 262144
+      #Set the default elasticsearch1 service name
+      es_service=elasticsearch1
+      dcc_dashboard_protocol=https
+      dcc_dashboard_port=8080
       sudo sysctl -w vm.max_map_count=262144
-      USER_GROUP=$(stat -c '%u:%g' $HOME)
+      #USER_GROUP=$(stat -c '%u:%g' $HOME)
+
       if [ -f boardwalk_launcher_config/boardwalk.config ] ; then
         	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" boardwalk_launcher_config/boardwalk.config)
       fi
@@ -588,6 +593,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       dcc_letsencrypt_email='dcc_letsencrypt_email'
       ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
 
+      user_group='user_group'
+      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME)" "$USER_GROUP" "User Group" $user_group
+
 #      es_service='es_service'
 #      ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
 
@@ -627,7 +635,6 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "REDWOOD_SERVER":"${redwood_server}",
 "REDWOOD_ADMIN_PORT":"${redwood_admin_port}",
 "DCC_DASHBOARD_HOST":"${dcc_dashboard_host}",
-"DCC_DASHBOARD_PORT":${dcc_dashboard_port},
 "DCC_DASHBOARD_PROTOCOL":"${dcc_dashboard_protocol}",
 "REDWOOD_ACCESS_TOKEN":"${redwood_access_token}",
 "DCC_DASHBOARD_SERVICE":"${dcc_dashboard_service}",
@@ -637,7 +644,6 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "DCC_LETSENCRYPT_EMAIL":"${dcc_letsencrypt_email}",
 "DCC_LETSENCRYPT_STAGING":"${dcc_letsencrypt_staging}",
 "USER_GROUP":"${user_group}",
-"APACHE_PATH":"${apache_path}",
 "ES_SERVICE":"${es_service}",
 "AWS_PROFILE":"${aws_profile}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",

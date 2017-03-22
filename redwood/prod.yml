@@ -6,7 +6,7 @@ services:
     - /usr/share/nginx/html
   dockergen:
   letsencrypt-proxy-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.4
     container_name: redwood-letsencrypt-proxy-companion
     volumes_from:
     - nginx
@@ -18,6 +18,7 @@ services:
     depends_on:
     - nginx
   redwood-auth-server:
+    image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.3
     environment:
     - LETSENCRYPT_HOST=auth.${base_url}
     - LETSENCRYPT_EMAIL=${email}
@@ -25,6 +26,7 @@ services:
     depends_on:
     - letsencrypt-proxy-companion
   redwood-metadata-server:
+    image: quay.io/ucsc_cgl/redwood-metadata-server:r0.0.23
     environment:
     - LETSENCRYPT_HOST=metadata.${base_url}
     - LETSENCRYPT_EMAIL=${email}
@@ -32,6 +34,7 @@ services:
     depends_on:
     - letsencrypt-proxy-companion
   redwood-storage-server:
+    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.24
     environment:
     - LETSENCRYPT_HOST=storage.${base_url}
     - LETSENCRYPT_EMAIL=${email}

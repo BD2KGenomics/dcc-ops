@@ -45,7 +45,7 @@ services:
     - redwood-auth-server
   redwood-metadata-db:
     container_name: redwood-metadata-db
-    image: mongo:3.0.14
+    image: mongo:3.4.2
     depends_on:
     - nginx
     - dockergen

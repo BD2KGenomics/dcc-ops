@@ -526,6 +526,20 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
         	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" boardwalk_launcher_config/boardwalk.config)
       fi
 
+      echo "Do you want to run boardwalk in dev mode or prod? [dev/prod]"
+      boardwalk_mode=-1
+      while [[ "${boardwalk_mode}" = "-1" ]]; do
+          read boardwalk_mode
+          if [[ "${boardwalk_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
+              boardwalk_mode=dev
+          elif [[ "${boardwalk_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
+              boardwalk_mode=prod
+          else
+              echo "bad input: ${boardwalk_mode}" >&2
+              boardwalk_mode=-1
+          fi
+      done
+
 #      base_url=''
 #      if [ ! -z $BASE_URL ] ; then
 #            read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
@@ -622,7 +636,7 @@ CONFIG
       mustache boardwalk_launcher_config/boardwalk.config boardwalk/conf/aws.config.template > boardwalk/aws.config
 
       cd boardwalk
-      sudo docker-compose up -d
+      sudo docker-compose -f ${boardwalk_mode}.yml up -d
 
    elif [ "${run_boardwalk^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the boardwalk installer"

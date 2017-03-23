@@ -1,0 +1,153 @@
+version: '2'
+
+services:
+  dcc-metadata-indexer:
+    image: quay.io/ucsc_cgl/metadata-indexer
+    environment:
+      USER_GROUP: "${USER_GROUP}"
+      REDWOOD_ACCESS_TOKEN: "${REDWOOD_ACCESS_TOKEN}"
+      ES_SERVICE: "${ES_SERVICE}"
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host ${REDWOOD_SERVER} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${ES_SERVICE} --cron-job" 
+    volumes:
+      - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
+      - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
+      - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
+    ports:
+      - "9200"
+    links:
+      - elasticsearch1
+    networks:
+      - esnet 
+  dcc-dashboard-service:
+    environment:
+      APACHE_PATH: "${APACHE_PATH}"
+      ES_SERVICE: "${ES_SERVICE}"
+      DATABASE_URL: "${DATABASE_URL}"
+    image: quay.io/ucsc_cgl/dashboard-service
+    ports:
+      - "80"
+      - "443"
+    volumes_from:
+      - letsencrypt
+    networks:
+      - esnet
+      - server
+    ports:
+      - "9200"
+  dcc-dashboard:
+    image: quay.io/ucsc_cgl/dashboard
+    ports:
+      - "80"
+      - "443"
+    environment:
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      REDWOOD_ADMIN: "${REDWOOD_ADMIN}"
+      REDWOOD_ADMIN_PASSWORD: "${REDWOOD_ADMIN_PASSWORD}"
+      REDWOOD_SERVER: "${REDWOOD_SERVER}"
+      REDWOOD_ADMIN_PORT: "${REDWOOD_ADMIN_PORT}"
+      DCC_DASHBOARD_HOST: "${DCC_DASHBOARD_HOST}"
+      DCC_DASHBOARD_PROTOCOL: "${DCC_DASHBOARD_PROTOCOL}"
+      DCC_DASHBOARD_SERVICE: "${DCC_DASHBOARD_SERVICE}"
+      DCC_INVOICING_SERVICE: "${DCC_INVOICING_SERVICE}"
+      DCC_ACTION_SERVICE: "${DCC_ACTION_SERVICE}"
+    volumes_from:
+      - letsencrypt
+    networks:
+      - esnet
+      - server
+  nginx:
+    build: nginx-image
+    links:
+      - dcc-dashboard
+      - letsencrypt
+      - dcc-dashboard-service
+    environment:
+      MY_DOMAIN_NAME: "${DCC_DASHBOARD_HOST}"
+    mem_limit: 2g
+    cpu_shares: 256
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - server
+    volumes_from:
+      - letsencrypt
+  letsencrypt:
+    image: quay.io/letsencrypt/letsencrypt:latest
+    command:  bash -c "sleep 6 && certbot certonly --standalone ${DCC_LETSENCRYPT_STAGING}  --debug -d ${DCC_DASHBOARD_HOST} --text --agree-tos --email ${DCC_LETSENCRYPT_EMAIL} --server https://acme-v01.api.letsencrypt.org/directory --rsa-key-size 4096 -vvvv --renew-by-default --preferred-challenges http-01"
+# --preferred-challenges http-01
+    entrypoint: ""
+    #volumes_from:
+    #  - nginx 
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+    ports:
+      - "80"
+      - "443"
+    networks:
+      - esnet
+      - server
+    environment:
+      - TERM=xterm
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+    container_name: "${ES_SERVICE}"
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+       - 9200
+    networks:
+      - esnet
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=${ES_SERVICE}"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+
+networks:
+  esnet:
+    driver: bridge
+  server:
+    driver: bridge
+

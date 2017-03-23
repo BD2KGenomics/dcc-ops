@@ -1,7 +1,7 @@
 version: '2'
 services:
   nginx:
-    image: nginx
+    image: nginx:1.11.10
     container_name: redwood-nginx
     ports:
     - "9443:443"
@@ -9,7 +9,7 @@ services:
     - /etc/nginx/conf.d
     - ./certs:/etc/nginx/certs
   dockergen:
-    image: jwilder/docker-gen
+    image: jwilder/docker-gen:0.7.3
     container_name: redwood-docker-gen
     command: -notify-sighup redwood-nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     volumes_from:
@@ -19,7 +19,6 @@ services:
     - ./conf/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
   redwood-auth-server:
     container_name: redwood-auth-server
-    image: quay.io/ucsc_cgl/redwood-auth-server
     environment:
     - VIRTUAL_HOST=auth.${base_url}
     - VIRTUAL_PORT=8443
@@ -28,7 +27,7 @@ services:
     - redwood-auth-db
   redwood-auth-db:
     container_name: redwood-auth-db
-    image: postgres
+    image: postgres:9.6.2
     volumes:
     - ./conf/auth-1-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
     - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
@@ -37,7 +36,6 @@ services:
     - dockergen
   redwood-metadata-server:
     container_name: redwood-metadata-server
-    image: quay.io/ucsc_cgl/redwood-metadata-server
     environment:
     - VIRTUAL_HOST=metadata.${base_url}
     - VIRTUAL_PORT=8444
@@ -47,13 +45,12 @@ services:
     - redwood-auth-server
   redwood-metadata-db:
     container_name: redwood-metadata-db
-    image: mongo
+    image: mongo:3.4.2
     depends_on:
     - nginx
     - dockergen
   redwood-storage-server:
     container_name: redwood-storage-server
-    image: quay.io/ucsc_cgl/redwood-storage-server
     volumes:
     - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:

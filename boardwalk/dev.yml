@@ -4,11 +4,13 @@ services:
   dcc-metadata-indexer:
     image: quay.io/ucsc_cgl/metadata-indexer:feature_new-redwood-client
     environment:
-      USER_GROUP: "${USER_GROUP}"
-      REDWOOD_ACCESS_TOKEN: "${REDWOOD_ACCESS_TOKEN}"
-      ES_SERVICE: "${ES_SERVICE}"
-      DATABASE_URL: "${DATABASE_URL}"
-    command: "--storage-access-token ${REDWOOD_ACCESS_TOKEN} --server-host ${REDWOOD_SERVER} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${ES_SERVICE} --cron-job" 
+      USER_GROUP: "${user_group}"
+      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
+      REDWOOD_SERVER: "${redwood_server}"
+      ES_SERVICE: "${es_service}"
+      DATABASE_URL: "${database_url}"
+      #REDWOOD_ENDPOINT: "${redwood_server}"
+    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job" 
     volumes:
       - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
@@ -17,14 +19,26 @@ services:
       - "9200"
     links:
       - elasticsearch1
+    external_links:
+      - redwood-nginx:storage.redwood.io
+      - redwood-nginx:metadata.redwood.io
     networks:
-      - esnet 
+      - esnet
+      - redwood
   dcc-dashboard-service:
     environment:
-      APACHE_PATH: "${APACHE_PATH}"
-      ES_SERVICE: "${ES_SERVICE}"
-      DATABASE_URL: "${DATABASE_URL}"
-    image: quay.io/ucsc_cgl/dashboard-service
+      APACHE_PATH: "${apache_path}"
+      ES_SERVICE: "${es_service}"
+      DATABASE_URL: "${database_url}"
+      AWS_PROFILE: "${aws_profile}"
+      LUIGI_SERVER: "${luigi_server}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_DB: "${postgres_db}"
+      AWS_PROFILE: "${aws_profile}"
+      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
+    image: quay.io/ucsc_cgl/dashboard-service:develop
     ports:
       - "80"
       - "443"
@@ -33,25 +47,28 @@ services:
     networks:
       - esnet
       - server
+      - action
     ports:
       - "9200"
+    links:
+      - db
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard
+    image: quay.io/ucsc_cgl/dashboard:develop
     ports:
       - "80"
       - "443"
     environment:
-      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
-      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
-      REDWOOD_ADMIN: "${REDWOOD_ADMIN}"
-      REDWOOD_ADMIN_PASSWORD: "${REDWOOD_ADMIN_PASSWORD}"
-      REDWOOD_SERVER: "${REDWOOD_SERVER}"
-      REDWOOD_ADMIN_PORT: "${REDWOOD_ADMIN_PORT}"
-      DCC_DASHBOARD_HOST: "${DCC_DASHBOARD_HOST}"
-      DCC_DASHBOARD_PROTOCOL: "${DCC_DASHBOARD_PROTOCOL}"
-      DCC_DASHBOARD_SERVICE: "${DCC_DASHBOARD_SERVICE}"
-      DCC_INVOICING_SERVICE: "${DCC_INVOICING_SERVICE}"
-      DCC_ACTION_SERVICE: "${DCC_ACTION_SERVICE}"
+      GOOGLE_CLIENT_ID: "${google_client_id}"
+      GOOGLE_CLIENT_SECRET: "${google_client_secret}"
+      REDWOOD_ADMIN: "${redwood_admin}"
+      REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
+      REDWOOD_SERVER: "${redwood_server}"
+      REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
+      DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
+      DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
+      DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
+      DCC_ACTION_SERVICE: "${dcc_action_service}"
     volumes_from:
       - letsencrypt
     networks:
@@ -64,7 +81,7 @@ services:
       - letsencrypt
       - dcc-dashboard-service
     environment:
-      MY_DOMAIN_NAME: "${DCC_DASHBOARD_HOST}"
+      MY_DOMAIN_NAME: "${dcc_dashboard_host}"
     mem_limit: 2g
     cpu_shares: 256
     ports:
@@ -76,11 +93,9 @@ services:
       - letsencrypt
   letsencrypt:
     image: quay.io/letsencrypt/letsencrypt:latest
-    command:  bash -c "sleep 6 && certbot certonly --standalone ${DCC_LETSENCRYPT_STAGING}  --debug -d ${DCC_DASHBOARD_HOST} --text --agree-tos --email ${DCC_LETSENCRYPT_EMAIL} --server https://acme-v01.api.letsencrypt.org/directory --rsa-key-size 4096 -vvvv --renew-by-default --preferred-challenges http-01"
+    command:  bash -c "sleep 6 && certbot certonly --standalone ${dcc_letsencrypt_staging}  --debug -d ${dcc_dashboard_host} --text --agree-tos --email ${dcc_letsencrypt_email} --server https://acme-v01.api.letsencrypt.org/directory --rsa-key-size 4096 -vvvv --renew-by-default --preferred-challenges http-01"
 # --preferred-challenges http-01
     entrypoint: ""
-    #volumes_from:
-    #  - nginx 
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/lib/letsencrypt:/var/lib/letsencrypt
@@ -94,7 +109,7 @@ services:
       - TERM=xterm
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    container_name: "${ES_SERVICE}"
+    container_name: "${es_service}"
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -123,7 +138,7 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=${ES_SERVICE}"
+      - "discovery.zen.ping.unicast.hosts=${es_service}"
     ulimits:
       memlock:
         soft: -1
@@ -139,15 +154,31 @@ services:
     networks:
       - esnet
 
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_DB: "${postgres_db}"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - action
+
 volumes:
   esdata1:
     driver: local
   esdata2:
     driver: local
+  postgres:
 
 networks:
   esnet:
     driver: bridge
   server:
     driver: bridge
-
+  action:
+    driver: bridge
+  redwood:
+    external:
+      name: redwood_default

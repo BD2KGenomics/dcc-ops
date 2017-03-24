@@ -57,6 +57,7 @@ Make sure you do the following:
     * 5000 <- world (Redwood)
     * 5431 <- world (Redwood)
     * 8443 <- world (Redwood)
+    * 9443 <- world (Redwood)
     * all TCP <- the elastic IP of the VM
     * all TCP <- the security group itself
 
@@ -88,5 +89,5 @@ This [blog post](https://www.digitalocean.com/community/tutorials/how-to-remove-
 
 ## TODO
 
-* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable 
+* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI

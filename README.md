@@ -32,7 +32,7 @@ These directions below assume you are using AWS.  We will include additional clo
 Make sure you have:
 
 * your AWS key/secret key
-* you know what region your running in e.g. `us-west-2`
+* you know what region you're running in e.g. `us-west-2`
 
 ### Starting an AWS VM
 
@@ -54,10 +54,6 @@ Make sure you do the following:
     * 8080 <- world
     * 22 <- world
     * 443 <- world
-    * 8444 <- world (Redwood)
-    * 5000 <- world (Redwood)
-    * 5431 <- world (Redwood)
-    * 8443 <- world (Redwood)
     * 9443 <- world (Redwood)
     * all TCP <- the elastic IP of the VM (Make sure you add /32 to the Elastic IP)
     * all TCP <- the security group itself
@@ -83,12 +79,6 @@ Here is a summary of what you need to do:
 #### Create an AWS IAM Encryption Key
 * Go [here](http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and follow the instruction for making an AWS IAM Encryption key. Make sure you create them using the same region where you created your VM!
 * Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console by going to [here](https://console.aws.amazon.com/iam/home#/encryptionKeys/).
-
-#### Get your AWS Access Key and AWS Secret Key
-* You can obtain your AWS access and secret key if you don't have a pair by clicking "Services" > "Security, Identity & Compliance" > "IAM".
-* On the left side, click on Users. Select your user.
-* Select the "Security Credentials" tab. Under the "Access Keys" section, click on "Create access key".
-* Keep the key pair in a secure location, as this is sensitive information.
 
 Now that you have the required components and information, let's go ahead and do the actual installation.
 

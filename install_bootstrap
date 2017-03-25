@@ -524,10 +524,163 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
     read run_boardwalk
 
     if [ "${run_boardwalk^^}" = 'Y' ] ; then
-      echo "Carlos needs to dockerize"
-    elif [ "${run_redwood^^}" = 'N' ] ; then
+      #echo "Carlos needs to dockerize"
+      #Per ES specifications to run their docker image on production:
+      #Set vm.max_map_count to 262144
+      #Set the default elasticsearch1 service name
+      es_service=elasticsearch1
+      dcc_dashboard_protocol=https
+      dcc_dashboard_port=8080
+      sudo sysctl -w vm.max_map_count=262144
+      #USER_GROUP=$(stat -c '%u:%g' $HOME)
+
+      if [ -f boardwalk_launcher_config/boardwalk.config ] ; then
+        	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" boardwalk_launcher_config/boardwalk.config)
+      fi
+
+      echo "Do you want to run boardwalk in dev mode or prod? [dev/prod]"
+      boardwalk_mode=-1
+      while [[ "${boardwalk_mode}" = "-1" ]]; do
+          read boardwalk_mode
+          if [[ "${boardwalk_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
+              boardwalk_mode=dev
+          elif [[ "${boardwalk_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
+              boardwalk_mode=prod
+          else
+              echo "bad input: ${boardwalk_mode}" >&2
+              boardwalk_mode=-1
+          fi
+      done
+
+#      base_url=''
+#      if [ ! -z $BASE_URL ] ; then
+#            read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
+#         else
+#            read -ep $'What is the name of the base URL? \n' base_url
+#      fi
+
+#      email_address=''
+#            read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
+#         else
+#            read -ep $'What is the email address for notification? \n' email_address
+#      fi
+
+      google_client_id='google_client_id'
+      ask_question "What is your Google Client ID?" "$GOOGLE_CLIENT_ID" "Google Client ID" $google_client_id
+
+      google_client_secret='google_client_secret'
+      ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
+
+      redwood_admin='redwood_admin'
+      ask_question "What is your Redwood Username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
+
+      redwood_admin_password='redwood_admin_password'
+      ask_question "What is your Redwood password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
+
+      redwood_server='redwood_server'
+      ask_question "What is your Redwood Server?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
+
+      redwood_admin_port='redwood_admin_port'
+      ask_question "What is your Redwood Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
+
+		redwood_access_token='redwood_access_token'
+      ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
+
+      dcc_dashboard_host='dcc_dashboard_host'
+      ask_question "What is your DCC Dashboard Host?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+
+#      dcc_dashboard_port='dcc_dashboard_port'
+#      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port
+
+#      dcc_dashboard_protocol='dcc_dashboard_protocol'
+#      ask_question "What is your DCC Dashboard Protocol (http/https)?" "$DCC_DASHBOARD_PROTOCOL" "DCC Dashboard Protocol" $dcc_dashboard_protocol
+
+      dcc_dashboard_service='dcc_dashboard_service'
+      ask_question "Where is your DCC Dashboard Service domain?" "$DCC_DASHBOARD_SERVICE" "DCC Dashboard Service" $dcc_dashboard_service
+
+      dcc_invoicing_service='dcc_invoicing_service'
+      ask_question "What is your DCC Invocing Service domain?" "$DCC_INVOICING_SERVICE" "DCC Invoicing Service" $dcc_invoicing_service
+
+      dcc_action_service='dcc_action_service'
+      ask_question "What is your DCC Action Service domain?" "$DCC_ACTION_SERVICE" "DCC Action Service" $dcc_action_service
+
+      dcc_letsencrypt_staging='dcc_letsencrypt_staging'
+      ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
+
+      dcc_letsencrypt_email='dcc_letsencrypt_email'
+      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
+
+      user_group='user_group'
+      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME)" "$USER_GROUP" "User Group" $user_group
+
+#      es_service='es_service'
+#      ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
+
+      database_url='database_url'
+      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
+
+      aws_profile='aws_profile'
+      ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
+
+      aws_access_key_id='aws_access_key_id'
+      ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+
+      aws_secret_access_key='aws_secret_access_key'
+      ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+
+      luigi_server='luigi_server'
+      ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
+
+      postgres_db='postgres_db'
+      ask_question "What is the Postgres Database name?" "$POSTGRES_DB" "Postgres Database" $postgres_db
+
+      postgres_user='postgres_user'
+      ask_question "What is the Postgres Database user?" "$POSTGRES_USER" "Postgres Database User" $postgres_user
+
+      postgres_password='postgres_password'
+      ask_question "What is the Postgres Database password?" "$POSTGRES_PASSWORD" "Postgres Database Password" $postgres_password
+
+      # Now write a config for this file.
+      [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
+
+      cat > boardwalk_launcher_config/boardwalk.config <<CONFIG
+{
+"GOOGLE_CLIENT_ID":"${google_client_id}",
+"GOOGLE_CLIENT_SECRET":"${google_client_secret}",
+"REDWOOD_ADMIN":"${redwood_admin}",
+"REDWOOD_ADMIN_PASSWORD":"${redwood_admin_password}",
+"REDWOOD_SERVER":"${redwood_server}",
+"REDWOOD_ADMIN_PORT":"${redwood_admin_port}",
+"DCC_DASHBOARD_HOST":"${dcc_dashboard_host}",
+"DCC_DASHBOARD_PROTOCOL":"${dcc_dashboard_protocol}",
+"REDWOOD_ACCESS_TOKEN":"${redwood_access_token}",
+"DCC_DASHBOARD_SERVICE":"${dcc_dashboard_service}",
+"DCC_INVOICING_SERVICE":"${dcc_invoicing_service}",
+"DCC_ACTION_SERVICE":"${dcc_action_service}",
+"DATABASE_URL":"${database_url}",
+"DCC_LETSENCRYPT_EMAIL":"${dcc_letsencrypt_email}",
+"DCC_LETSENCRYPT_STAGING":"${dcc_letsencrypt_staging}",
+"USER_GROUP":"${user_group}",
+"ES_SERVICE":"${es_service}",
+"AWS_PROFILE":"${aws_profile}",
+"AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
+"AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
+"LUIGI_SERVER":"${luigi_server}",
+"POSTGRES_USER":"${postgres_user}",
+"POSTGRES_PASSWORD":"${postgres_password}",
+"POSTGRES_DB":"${postgres_db}"
+}
+CONFIG
+      # template out stuff
+      mustache boardwalk_launcher_config/boardwalk.config boardwalk/conf/boardwalk.config.template > boardwalk/.env
+      mustache boardwalk_launcher_config/boardwalk.config boardwalk/conf/aws.config.template > boardwalk/aws.config
+
+      cd boardwalk
+      sudo docker-compose -f ${boardwalk_mode}.yml up -d
+
+   elif [ "${run_boardwalk^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the boardwalk installer"
-    fi
+   fi
 done
 
 # CORE COMMONS: bring up the primary nginx gateway server

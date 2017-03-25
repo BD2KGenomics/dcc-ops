@@ -140,6 +140,9 @@ while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^
   fi
 done
 
+# CORE COMMONS: initial steps
+docker network create core_public
+
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''
 while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}" != 'N' ]] ; do
@@ -508,7 +511,7 @@ CONFIG
       
       cd redwood
       sudo docker-compose -f base.yml -f ${redwood_mode}.yml up -d
-
+      cd ..
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"
     fi
@@ -526,6 +529,12 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       echo "You can run this script at another time to run the boardwalk installer"
     fi
 done
+
+# CORE COMMONS: bring up the primary nginx gateway server
+echo "bringing up the primary nginx gateway server"
+cd common
+sudo docker-compose -f base.yml -f prox.yml up -d
+cd ..
 
 # FINISHED INSTALLER
 echo "Done with installation, exiting now."

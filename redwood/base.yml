@@ -1,67 +1,63 @@
 version: '2'
+
 services:
-  nginx:
-    image: nginx:1.11.10
-    container_name: redwood-nginx
-    ports:
-    - "9443:443"
-    volumes:
-    - /etc/nginx/conf.d
-    - ./certs:/etc/nginx/certs
-  dockergen:
-    image: jwilder/docker-gen:0.7.3
-    container_name: redwood-docker-gen
-    command: -notify-sighup redwood-nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
-    volumes_from:
-    - nginx
-    volumes:
-    - /var/run/docker.sock:/tmp/docker.sock:ro
-    - ./conf/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
   redwood-auth-server:
     container_name: redwood-auth-server
     environment:
-    - VIRTUAL_HOST=auth.${base_url}
-    - VIRTUAL_PORT=8443
-    - HTTPS_METHOD=nohttp
+      - VIRTUAL_HOST=auth.${base_url}
+      - VIRTUAL_PORT=8443
+      - HTTPS_METHOD=nohttp
     depends_on:
-    - redwood-auth-db
+      - redwood-auth-db
+    networks:
+      - core_public
+      - redwood_internal
   redwood-auth-db:
     container_name: redwood-auth-db
     image: postgres:9.6.2
     volumes:
-    - ./conf/auth-1-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
-    - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
-    depends_on:
-    - nginx
-    - dockergen
+      - ./conf/auth-1-schema-postgresql.sql:/docker-entrypoint-initdb.d/dcc-auth-db.sql
+      - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
+    networks:
+      - redwood_internal
   redwood-metadata-server:
     container_name: redwood-metadata-server
     environment:
-    - VIRTUAL_HOST=metadata.${base_url}
-    - VIRTUAL_PORT=8444
-    - HTTPS_METHOD=nohttp
+      - VIRTUAL_HOST=metadata.${base_url}
+      - VIRTUAL_PORT=8444
+      - HTTPS_METHOD=nohttp
     depends_on:
-    - redwood-metadata-db
-    - redwood-auth-server
+      - redwood-metadata-db
+      - redwood-auth-server
+    networks:
+      - core_public
+      - redwood_internal
   redwood-metadata-db:
     container_name: redwood-metadata-db
     image: mongo:3.4.2
-    depends_on:
-    - nginx
-    - dockergen
+    networks:
+      - redwood_internal
   redwood-storage-server:
     container_name: redwood-storage-server
     volumes:
-    - ./conf/application.storage.properties:/dcc/conf/application-external.properties
+      - ./conf/application.storage.properties:/dcc/conf/application-external.properties
     environment:
-    - AWS_ACCESS_KEY_ID=${access_key}
-    - AWS_SECRET_ACCESS_KEY=${secret_key}
-    - VIRTUAL_HOST=storage.${base_url}
-    - VIRTUAL_PORT=5431
-    - HTTPS_METHOD=nohttp
-    - REDWOOD_BUCKET=${s3_bucket}
-    - REDWOOD_S3_ENDPOINT=${s3_endpoint}
-    - REDWOOD_KMS_KEY=${kms_key}
+      - AWS_ACCESS_KEY_ID=${access_key}
+      - AWS_SECRET_ACCESS_KEY=${secret_key}
+      - VIRTUAL_HOST=storage.${base_url}
+      - VIRTUAL_PORT=5431
+      - HTTPS_METHOD=nohttp
+      - REDWOOD_BUCKET=${s3_bucket}
+      - REDWOOD_S3_ENDPOINT=${s3_endpoint}
+      - REDWOOD_KMS_KEY=${kms_key}
     depends_on:
-    - redwood-auth-server
-    - redwood-metadata-server
+      - redwood-auth-server
+      - redwood-metadata-server
+    networks:
+      - core_public
+      - redwood_internal
+
+networks:
+  core_public:
+    external: true
+  redwood_internal:

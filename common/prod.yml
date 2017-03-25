@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+    letsencrypt-nginx-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.4
+    container_name: core-letsencrypt-nginx-companion
+    volumes_from:
+      - nginx
+    volumes:
+      - ./certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NGINX_DOCKER_GEN_CONTAINER=core-config-gen
+    depends_on:
+      - nginx
+    networks:
+      - core_public
+      - common_internal

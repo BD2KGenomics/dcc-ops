@@ -577,19 +577,20 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
       redwood_admin='redwood_admin'
-      ask_question "What is your Redwood Username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
+      ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
 
       redwood_admin_password='redwood_admin_password'
-      ask_question "What is your Redwood password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
+      ask_question "What is your Redwood auth-server admin user password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
 
       redwood_server='redwood_server'
-      ask_question "What is your Redwood Server?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
+      ask_question "What is your Redwood endpoint?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
 
       redwood_admin_port='redwood_admin_port'
-      ask_question "What is your Redwood Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
+      ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
-		redwood_access_token='redwood_access_token'
-      ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
+      # generate redwood access token
+      redwood_access_token=$(redwood/scripts/createAccessToken.sh -u indexer -s 'aws.upload aws.download')
+      #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
       dcc_dashboard_host='dcc_dashboard_host'
       ask_question "What is your DCC Dashboard Host?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host

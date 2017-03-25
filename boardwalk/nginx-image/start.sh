@@ -6,15 +6,19 @@ sleep 3
 echo build starting nginx config
 
 
-echo replacing ___my.example.com___/$MY_DOMAIN_NAME
+echo replacing ___my.example.com___/${VIRTUAL_HOST}
 
 # Put your domain name into the nginx reverse proxy config.
-sed -i "s/___my.example.com___/$MY_DOMAIN_NAME/g" /etc/nginx/nginx.conf
+sed -i "s/___my.example.com___/${VIRTUAL_HOST}/g" /etc/nginx/nginx.conf
 
 cat /etc/nginx/nginx.conf
 echo .
-echo Firing up nginx in the background.
-nginx
+#echo Firing up nginx in the background.
+#nginx
+
+echo starting nginx
+nginx -g 'daemon off;'
+exit 0
 
 # Check user has specified domain name
 if [ -z "$MY_DOMAIN_NAME" ]; then
@@ -57,4 +61,3 @@ echo repplacing nginx.conf file
 cp /etc/nginx/nginx-secure.conf /etc/nginx/nginx.conf
 
 nginx -g 'daemon off;'
-

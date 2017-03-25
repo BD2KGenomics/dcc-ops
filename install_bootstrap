@@ -141,7 +141,12 @@ while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^
 done
 
 # CORE COMMONS: initial steps
-docker network create core_public
+if [[ $(docker network ls | grep core_public | wc -l) = "0" ]]; then
+    echo "creating core_public docker network"
+    docker network create core_public
+else
+    echo "core_public docker network already exists"
+fi
 
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''
@@ -683,11 +688,26 @@ CONFIG
    fi
 done
 
-# CORE COMMONS: bring up the primary nginx gateway server
-echo "bringing up the primary nginx gateway server"
-cd common
-sudo docker-compose -f base.yml -f prox.yml up -d
-cd ..
+# CORE COMMON: bring up the primary nginx gateway server
+run_common=''
+while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' ]] ; do
+    echo "Are you ready to launch the core's public-facing gateway nginx server? [Y/N]"
+    read run_common
+done
+
+if [[ "${run_common^^}" = 'Y' ]]; then
+    if [[ $(docker ps | grep 'core-' | wc -l) = "0" ]]; then
+        echo "starting core primary nginx gateway and common containers"
+        cd common
+        sudo docker-compose -f base.yml -f prod.yml up -d
+        cd ..
+    else
+        echo "core common containers already running."
+    fi
+    echo 'you can stop the core common containers with `cd common && docker-compose -f base.yml -f prod.yml down`'
+else
+    echo "the core won't be publicly accessible until the gateway is started"
+fi
 
 # FINISHED INSTALLER
 echo "Done with installation, exiting now."

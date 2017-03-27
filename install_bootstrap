@@ -503,7 +503,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       # redwood-metadata-db metadata db password
       metadata_db_password='password'
       #ask_question "What is your metadata db password?" "$METADATA_DB_PASSWORD" "metadata db password" $metadata_db_password
-p
+
       echo generating random auth-server admin password
       auth_admin_pass="$(generate_password)"
 

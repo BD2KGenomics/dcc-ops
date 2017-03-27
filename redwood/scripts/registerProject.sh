@@ -4,7 +4,7 @@ script_name=$(basename $0)
 
 function help {
     cat <<EOF
-Usage: ${script_name} [-s "site"] [-hv]
+Usage: ${script_name} [-s "site"] [-hv] PROJECT...
 
 Register new projects to be managed by the mgmt client
 
@@ -40,5 +40,5 @@ done
 shift "$((OPTIND - 1))"
 
 for project in "$@"; do
-    docker exec -it redwood-auth-db psql -d dcc -U dcc_auth -c "update oauth_client_details set scope = '${site}.${project}.upload,${site}.${project}.download,' || scope where client_id='mgmt';"
+    sudo docker exec -it redwood-auth-db psql -d dcc -U dcc_auth -c "update oauth_client_details set scope = '${site}.${project}.upload,${site}.${project}.download,' || scope where client_id='mgmt';"
 done

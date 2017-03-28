@@ -14,7 +14,7 @@ services:
       - /usr/share/nginx/html
     networks:
       - core_public
-      - common_internal
+      - internal
   dockergen:
     image: jwilder/docker-gen:0.7.3
     container_name: core-config-gen
@@ -26,9 +26,9 @@ services:
       - ./conf/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
     networks:
       - core_public
-      - common_internal
+      - internal
 
 networks:
   core_public:
     external: true
-  common_internal:
+  internal:

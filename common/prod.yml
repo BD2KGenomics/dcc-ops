@@ -17,4 +17,4 @@ services:
       - nginx
     networks:
       - core_public
-      - common_internal
+      - internal

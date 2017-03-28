@@ -459,6 +459,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
           base_url='redwood.io'
       fi
 
+      # this should move to the COMMON section
       if [[ ${redwood_mode} = 'prod' ]]; then
           email_address=''
           if [ ! -z $EMAIL_ADDRESS ] ; then
@@ -489,33 +490,46 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       s3_endpoint='s3_endpoint'
       ask_question "What is your AWS S3 endpoint?" "$S3_ENDPOINT" "S3 endpoint" $s3_endpoint
 
-      kms_key='kms_key'
-      ask_question "What is your AWS AIM KMS key ID? (leave blank for no SSE)" "$KMS_KEY" "AIM KMS key ID" $kms_key
+      # KMS key
+      read -ep $'What is your AWS IAM Encryption Key ID? (leave black for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
-      # redwood-auth-db postgresql superuser (postgres) password
-      auth_db_postgres_password='password'
+      # s3 sentinel object
+      (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1
+      
+      mkdir -p ~/.aws
+      echo '[redwood_install]' >>~/.aws/credentials
+      echo "aws_access_key_id=${user_aws_key}" >>~/.aws/credentials
+      echo "aws_secret_access_key=${user_aws_secret_key}" >>~/.aws/credentials
+
+      echo "creating sentinel object for s3 connectivity verification"
+      echo "this sentinel file is used for verifying s3 connectivity" >/tmp/heliograph
+      aws --profile redwood_install --endpoint-url http://${s3_endpoint} s3 mv /tmp/heliograph s3://${s3_bucket}/data/heliograph
+
+      sed -ie '/\[redwood_install\]/,+3d' ~/.aws/credentials
+
+      echo "generating redwood-auth-db postgresql superuser (postgres) password"
+      auth_db_postgres_password="$(generate_password)"
       #ask_question "What is your auth DB password?" "$AUTH_DB_PASSWORD" "auth DB password" $auth_db_password
 
-      # redwood-auth-db auth-server postgresql user (dcc_auth) password
-      auth_db_dcc_password='pass'
+      echo "generating redwood-auth-db auth-server postgresql user (dcc_auth) password"
+      auth_db_dcc_password="$(generate_password)"
       #ask_question "What is your auth DB password?" "$AUTH_DB_PASSWORD" "auth DB password" $auth_db_dcc_password
 
-      # redwood-metadata-db metadata db password
-      metadata_db_password='password'
+      echo "generating redwood-metadata-db metadata db password"
+      metadata_db_password="$(generate_password)"
       #ask_question "What is your metadata db password?" "$METADATA_DB_PASSWORD" "metadata db password" $metadata_db_password
 
-      echo generating random auth-server admin password
+      echo "generating random auth-server admin password"
       auth_admin_pass="$(generate_password)"
 
-      echo generating random metadata-server oauth client secret
+      echo "generating random metadata-server oauth client secret"
       metadata_client_secret="$(generate_password)"
 
-      echo generating random storage-server oauth client secret
+      echo "generating random storage-server oauth client secret"
       storage_client_secret="$(generate_password)"
 
-      echo generating random management oauth client secret
-      mgmt_client_secret=pass
-      #"$(generate_password)"
+      echo "generating random management oauth client secret"
+      mgmt_client_secret="$(generate_password)"
 
       # Now write a config for this file.
       [[ -f redwood_launcher_config/redwood.config ]] || mkdir -p redwood_launcher_config
@@ -616,17 +630,21 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       google_client_secret='google_client_secret'
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
-      redwood_admin='redwood_admin'
-      ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
+      # redwood auth-server admin user - most probably always 'admin'
+      redwood_admin='admin'
+      #ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
 
-      redwood_admin_password='redwood_admin_password'
-      ask_question "What is your Redwood auth-server admin user password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
+      # redwood auth-server admin password - peek at redwood/.env
+      redwood_admin_password=$(cat redwood/.env | grep 'auth_admin_password=' | sed 's/[^=]*=//')
+      #ask_question "What is your Redwood auth-server admin user password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
 
-      redwood_server='redwood_server'
-      ask_question "What is your Redwood endpoint?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
+      # redwood endpoint - peek at redwood/.env
+      redwood_server=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//')
+      #ask_question "What is your Redwood endpoint?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
 
-      redwood_admin_port='redwood_admin_port'
-      ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
+      # not really relevant anymore; always 443 (but have to use auth-server vhost)
+      redwood_admin_port='443'
+      #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
       # generate redwood access token
       redwood_access_token=$(redwood/scripts/createAccessToken.sh -u indexer -s 'aws.upload aws.download')
@@ -653,6 +671,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       dcc_letsencrypt_staging='dcc_letsencrypt_staging'
       ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
 
+      # this should move to the COMMON section
       dcc_letsencrypt_email='dcc_letsencrypt_email'
       ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
 
@@ -733,7 +752,7 @@ done
 # CORE COMMON: bring up the primary nginx gateway server
 run_common=''
 while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' ]] ; do
-    read -ep $'Are you ready to launch the core''s public-facing gateway nginx server? [Y/N]' run_common
+    read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]' run_common
 done
 
 if [[ "${run_common^^}" = 'Y' ]]; then

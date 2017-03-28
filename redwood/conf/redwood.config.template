@@ -25,3 +25,4 @@ metadata_db_password={{ METADATA_DB_PASSWORD }}
 auth_admin_password={{ AUTH_ADMIN_PASSWORD }}
 metadata_client_secret={{ METADATA_CLIENT_SECRET }}
 storage_client_secret={{ STORAGE_CLIENT_SECRET }}
+mgmt_client_secret={{ MGMT_CLIENT_SECRET }}

@@ -2,17 +2,17 @@ version: '2'
 
 services:
   redwood-auth-server:
-    image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.3
+    image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.4
     environment:
       - LETSENCRYPT_HOST=auth.${base_url}
       - LETSENCRYPT_EMAIL=${email}
   redwood-metadata-server:
-    image: quay.io/ucsc_cgl/redwood-metadata-server:r0.0.23
+    image: quay.io/ucsc_cgl/redwood-metadata-server:r0.0.24
     environment:
     - LETSENCRYPT_HOST=metadata.${base_url}
     - LETSENCRYPT_EMAIL=${email}
   redwood-storage-server:
-    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.24
+    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.25
     environment:
     - LETSENCRYPT_HOST=storage.${base_url}
     - LETSENCRYPT_EMAIL=${email}
@@ -35,7 +35,7 @@ services:
     environment:
     - POSTGRES_HOST=redwood-auth-db
     - POSTGRES_USER=dcc_auth
-    - POSTGRES_PASSWORD=${auth_db_password}
+    - POSTGRES_PASSWORD=${auth_db_dcc_password}
     - POSTGRES_DATABASE=dcc
     - S3_PREFIX=auth-backup
     - S3_BUCKET=${backup_bucket}

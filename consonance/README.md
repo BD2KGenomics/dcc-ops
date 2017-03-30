@@ -24,6 +24,7 @@ You can exit and re-enter via:
 In `dcc-ops/consonance`:
 
     docker-compose -f docker-compose.yml up -d
+    docker-compose -f docker-compose.yml down
 
 ## Developing
 

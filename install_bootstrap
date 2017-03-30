@@ -715,6 +715,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "REDWOOD_ADMIN":"${redwood_admin}",
 "REDWOOD_ADMIN_PASSWORD":"${redwood_admin_password}",
 "REDWOOD_SERVER":"${redwood_server}",
+"REDWOOD_ENDPOINT":"${redwood_server}",
 "REDWOOD_ADMIN_PORT":"${redwood_admin_port}",
 "DCC_DASHBOARD_HOST":"${dcc_dashboard_host}",
 "DCC_DASHBOARD_PROTOCOL":"${dcc_dashboard_protocol}",

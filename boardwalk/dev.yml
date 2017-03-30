@@ -2,15 +2,18 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:feature_new-redwood-client
+    #image: quay.io/ucsc_cgl/metadata-indexer:feature_new-redwood-client
+    build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"
       REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
+      ACCESS_TOKEN: "${redwood_access_token}"
       REDWOOD_SERVER: "${redwood_server}"
+      REDWOOD_ENDPOINT: "${redwood_server}"
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-      #REDWOOD_ENDPOINT: "${redwood_server}"
-    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job" 
+#    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
+    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
     volumes:
       - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
@@ -18,13 +21,9 @@ services:
     ports:
       - "9200"
     links:
-      - elasticsearch1
-    external_links:
-      - redwood-nginx:storage.redwood.io
-      - redwood-nginx:metadata.redwood.io
+      - "${es_service}"
     networks:
-      - esnet
-      - redwood
+      - esnet 
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
@@ -38,12 +37,11 @@ services:
       AWS_PROFILE: "${aws_profile}"
       AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
       AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-    image: quay.io/ucsc_cgl/dashboard-service:develop
+#    image: quay.io/ucsc_cgl/dashboard-service:develop
+    build: dcc-dashboard-service
     ports:
       - "80"
       - "443"
-    volumes_from:
-      - letsencrypt
     networks:
       - esnet
       - server
@@ -53,7 +51,8 @@ services:
     links:
       - db
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:develop
+#    image: quay.io/ucsc_cgl/dashboard:develop
+    build: dcc-dashboard
     ports:
       - "80"
       - "443"
@@ -69,8 +68,6 @@ services:
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
       DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
       DCC_ACTION_SERVICE: "${dcc_action_service}"
-    volumes_from:
-      - letsencrypt
     networks:
       - esnet
       - server
@@ -78,35 +75,31 @@ services:
     build: nginx-image
     links:
       - dcc-dashboard
-      - letsencrypt
       - dcc-dashboard-service
     environment:
-      MY_DOMAIN_NAME: "${dcc_dashboard_host}"
+      - VIRTUAL_HOST=${dcc_dashboard_host}
+      - VIRTUAL_PORT=80
+      - HTTPS_METHOD=nohttp
+      - LETSENCRYPT_HOST=${dcc_dashboard_host}
+      - LETSENCRYPT_EMAIL=${dcc_letsencrypt_email}
     mem_limit: 2g
     cpu_shares: 256
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - server
-    volumes_from:
-      - letsencrypt
-  letsencrypt:
-    image: quay.io/letsencrypt/letsencrypt:latest
-    command:  bash -c "sleep 6 && certbot certonly --standalone ${dcc_letsencrypt_staging}  --debug -d ${dcc_dashboard_host} --text --agree-tos --email ${dcc_letsencrypt_email} --server https://acme-v01.api.letsencrypt.org/directory --rsa-key-size 4096 -vvvv --renew-by-default --preferred-challenges http-01"
-# --preferred-challenges http-01
-    entrypoint: ""
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /var/lib/letsencrypt:/var/lib/letsencrypt
     ports:
       - "80"
       - "443"
     networks:
-      - esnet
+      - core_public
       - server
+  boardwalk:
+    image: quay.io/ucsc_cgl/boardwalk
     environment:
-      - TERM=xterm
+      - BOARDWALK_HOST=${dcc_dashboard_host}
+    networks:
+      - server
+    ports:
+      - "80"
+      - "443"
+      - "3000"
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
     container_name: "${es_service}"
@@ -173,12 +166,11 @@ volumes:
   postgres:
 
 networks:
+  core_public:
+    external: true
   esnet:
     driver: bridge
   server:
     driver: bridge
   action:
     driver: bridge
-  redwood:
-    external:
-      name: redwood_default

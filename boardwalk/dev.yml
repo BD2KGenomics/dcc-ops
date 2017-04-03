@@ -24,6 +24,7 @@ services:
       - "${es_service}"
     networks:
       - esnet 
+    restart: always
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
@@ -50,6 +51,7 @@ services:
       - "9200"
     links:
       - db
+    restart: always
   dcc-dashboard:
 #    image: quay.io/ucsc_cgl/dashboard:develop
     build: dcc-dashboard
@@ -71,6 +73,7 @@ services:
     networks:
       - esnet
       - server
+    restart: always
   nginx:
     build: nginx-image
     links:
@@ -90,6 +93,7 @@ services:
     networks:
       - core_public
       - server
+    restart: always
   boardwalk:
     image: quay.io/ucsc_cgl/boardwalk
     environment:
@@ -107,7 +111,7 @@ services:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
     ulimits:
       memlock:
         soft: -1
@@ -115,7 +119,7 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    mem_limit: 1g
+    mem_limit: 2g
     cap_add:
       - IPC_LOCK
     volumes:
@@ -124,13 +128,14 @@ services:
        - 9200
     networks:
       - esnet
+    restart: always
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.zen.ping.unicast.hosts=${es_service}"
     ulimits:
       memlock:
@@ -139,13 +144,14 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    mem_limit: 1g
+    mem_limit: 2g
     cap_add:
       - IPC_LOCK
     volumes:
       - esdata2:/usr/share/elasticsearch/data
     networks:
       - esnet
+    restart: always
 
   db:
     image: postgres:9.6-alpine
@@ -157,6 +163,7 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - action
+    restart: always
 
 volumes:
   esdata1:

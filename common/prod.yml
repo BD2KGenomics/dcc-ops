@@ -12,7 +12,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - NGINX_DOCKER_GEN_CONTAINER=core-config-gen
-      - ACME_CA_URI=https://acme-staging.api.letsencrypt.org/directory # for staging only
+      #- ACME_CA_URI=https://acme-staging.api.letsencrypt.org/directory # for staging only
     depends_on:
       - nginx
     networks:

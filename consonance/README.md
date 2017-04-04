@@ -19,6 +19,13 @@ You can exit and re-enter via:
 
 **NOTE:** The Bash install_bootstrap script depends on Ubuntu 16.04 but sets up the templates required to run `docker-compose up` if needed.
 
+### Manual Docker Compose
+
+In `dcc-ops/consonance`:
+
+    docker-compose -f docker-compose.yml up -d
+    docker-compose -f docker-compose.yml down
+
 ## Developing
 
 The following files are created from templates by the install script:

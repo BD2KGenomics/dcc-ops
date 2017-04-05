@@ -85,6 +85,13 @@ Download the command line from:
 
 https://github.com/Consonance/consonance/releases
 
+### Setup for Boardwalk
+
+Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
+
+#### Create a Google Oauth2 app
+* Follow the instructions on [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project". This will create your Google Oauth2 app, and will provide you with the Google Client ID and the Google Client Secret which you will require for the boardwalk installation. 
+
 ### Running the Installer
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
@@ -101,8 +108,24 @@ It will ask you to configure each service.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
   * On question 'What is your AWS IAM KMS key ID?', put your encryption key ID (See 'Create an AWS IAM Encryption Key" above). If you don't want server-side encryption, you can leave this blank.
 * Boardwalk
-  * Install in prod mode
+  * Install in dev mode
+  * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
+  * On question `What is your Google Client Secret?`, put your Google Client Secret. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
+  * On question `What is your DCC Dashboard Host?`, put the domain name resolving to your Virtual Machine (e.g. `example.com`)
+  * On question `What is the user and group that should own the files from the metadata-indexer?`, type the `USER:GROUP` pair you want the files downloaded by the indexer to be owned by. The question will show the current `USER:GROUP` pair for the current home directory. Highly recommended to type the same value in there (e.g. `1000:1000`)
+  * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
+  * On question `What should the username be for the billing database?`, type the username for the billing database.
+  * On question `What should the username password be for the billing database?`, type some password for the billing database. 
+  * On question `What is the AWS profile?`, type some random string (DEV)
+  * On question `What is the AWS Access key ID?`, type some random string (DEV)
+  * On question `What is the AWS secret access key?`, type some random string (DEV)
+  * On question `What is the Luigi Server?`, type some random string (DEV)
+  * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
+  * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.
+  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database. 
+  
 * Common
+  * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
 
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 

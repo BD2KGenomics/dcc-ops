@@ -493,7 +493,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       ask_question "What is your AWS S3 endpoint?" "$S3_ENDPOINT" "S3 endpoint" $s3_endpoint
 
       # KMS key
-      read -ep $'What is your AWS IAM Encryption Key ID? (leave black for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
+      read -ep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
       # s3 sentinel object
       (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1

@@ -2,8 +2,8 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    #image: quay.io/ucsc_cgl/metadata-indexer:feature_new-redwood-client
-    build: dcc-metadata-indexer/v2
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.0
+    #build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"
       REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
@@ -22,8 +22,10 @@ services:
       - "9200"
     links:
       - "${es_service}"
+      - boardwalk-billing
     networks:
       - esnet 
+      - billing
     restart: always
   dcc-dashboard-service:
     environment:
@@ -38,8 +40,15 @@ services:
       AWS_PROFILE: "${aws_profile}"
       AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
       AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-#    image: quay.io/ucsc_cgl/dashboard-service:develop
-    build: dcc-dashboard-service
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_DB: "${postgres_db}"
+      B_POSTGRES_PASSWORD: "${billing_password}"
+      B_POSTGRES_USER: "${billing_user}"
+      B_POSTGRES_DB: "${billing_db}"
+      FLASK_APP: "/app/mapi.py"
+    image: quay.io/ucsc_cgl/dashboard-service:develop
+    #build: dcc-dashboard-service
     ports:
       - "80"
       - "443"
@@ -47,14 +56,16 @@ services:
       - esnet
       - server
       - action
+      - billing
     ports:
       - "9200"
     links:
       - db
+      - boardwalk-billing
     restart: always
   dcc-dashboard:
-#    image: quay.io/ucsc_cgl/dashboard:develop
-    build: dcc-dashboard
+    image: quay.io/ucsc_cgl/dashboard:1.0.0
+    #build: dcc-dashboard
     ports:
       - "80"
       - "443"
@@ -63,7 +74,7 @@ services:
       GOOGLE_CLIENT_SECRET: "${google_client_secret}"
       REDWOOD_ADMIN: "${redwood_admin}"
       REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
-      REDWOOD_SERVER: "${redwood_server}"
+      REDWOOD_SERVER: "auth.${redwood_server}"
       REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
@@ -82,9 +93,9 @@ services:
     environment:
       - VIRTUAL_HOST=${dcc_dashboard_host}
       - VIRTUAL_PORT=80
-      - HTTPS_METHOD=nohttp
+      - HTTPS_METHOD=redirect
       - LETSENCRYPT_HOST=${dcc_dashboard_host}
-      - LETSENCRYPT_EMAIL=${dcc_letsencrypt_email}
+      - LETSENCRYPT_EMAIL="default@email.com"
     mem_limit: 2g
     cpu_shares: 256
     ports:
@@ -111,7 +122,7 @@ services:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     ulimits:
       memlock:
         soft: -1
@@ -119,7 +130,7 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    mem_limit: 2g
+    mem_limit: 4g
     cap_add:
       - IPC_LOCK
     volumes:
@@ -135,7 +146,7 @@ services:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "discovery.zen.ping.unicast.hosts=${es_service}"
     ulimits:
       memlock:
@@ -144,7 +155,7 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    mem_limit: 2g
+    mem_limit: 4g
     cap_add:
       - IPC_LOCK
     volumes:
@@ -165,12 +176,28 @@ services:
       - action
     restart: always
 
+  boardwalk-billing:
+    image: postgres:9.6-alpine
+    container_name: "boardwalk-billing"
+    environment:
+      POSTGRES_PASSWORD: "${billing_password}"
+      POSTGRES_USER: "${billing_user}"
+      POSTGRES_DB: "${billing_db}"
+    volumes:
+      - billing_postgres:/var/lib/postgresql/data
+    ports:
+      - 5432
+    networks:
+      - billing
+    restart: always
+
 volumes:
   esdata1:
     driver: local
   esdata2:
     driver: local
   postgres:
+  billing_postgres:
 
 networks:
   core_public:
@@ -181,3 +208,6 @@ networks:
     driver: bridge
   action:
     driver: bridge
+  billing:
+    driver: bridge
+

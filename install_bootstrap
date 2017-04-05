@@ -631,11 +631,12 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
       # redwood auth-server admin user - most probably always 'admin'
-      redwood_admin='admin'
+      # EDIT: The login function requires the mgmt user. admin wouldn't work. 
+      redwood_admin='mgmt'
       #ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
 
       # redwood auth-server admin password - peek at redwood/.env
-      redwood_admin_password=$(cat redwood/.env | grep 'auth_admin_password=' | sed 's/[^=]*=//')
+      redwood_admin_password=$(cat redwood/.env | grep 'mgmt_client_secret=' | sed 's/[^=]*=//')
       #ask_question "What is your Redwood auth-server admin user password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
 
       # redwood endpoint - peek at redwood/.env
@@ -659,30 +660,47 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #      dcc_dashboard_protocol='dcc_dashboard_protocol'
 #      ask_question "What is your DCC Dashboard Protocol (http/https)?" "$DCC_DASHBOARD_PROTOCOL" "DCC Dashboard Protocol" $dcc_dashboard_protocol
 
-      dcc_dashboard_service='dcc_dashboard_service'
-      ask_question "Where is your DCC Dashboard Service domain?" "$DCC_DASHBOARD_SERVICE" "DCC Dashboard Service" $dcc_dashboard_service
+#      dcc_dashboard_service='dcc_dashboard_service'
+#      ask_question "Where is your DCC Dashboard Service domain?" "$DCC_DASHBOARD_SERVICE" "DCC Dashboard Service" $dcc_dashboard_service
 
-      dcc_invoicing_service='dcc_invoicing_service'
-      ask_question "What is your DCC Invocing Service domain?" "$DCC_INVOICING_SERVICE" "DCC Invoicing Service" $dcc_invoicing_service
+       dcc_dashboard_service=$dcc_dashboard_host
 
-      dcc_action_service='dcc_action_service'
-      ask_question "What is your DCC Action Service domain?" "$DCC_ACTION_SERVICE" "DCC Action Service" $dcc_action_service
+#      dcc_invoicing_service='dcc_invoicing_service'
+#      ask_question "What is your DCC Invocing Service domain?" "$DCC_INVOICING_SERVICE" "DCC Invoicing Service" $dcc_invoicing_service
 
-      dcc_letsencrypt_staging='dcc_letsencrypt_staging'
-      ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
+       dcc_invoicing_service=$dcc_dashboard_host
+
+#      dcc_action_service='dcc_action_service'
+#      ask_question "What is your DCC Action Service domain?" "$DCC_ACTION_SERVICE" "DCC Action Service" $dcc_action_service
+
+       dcc_action_service=$dcc_dashboard_host
+
+#      dcc_letsencrypt_staging='dcc_letsencrypt_staging'
+#      ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
 
       # this should move to the COMMON section
-      dcc_letsencrypt_email='dcc_letsencrypt_email'
-      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
+#      dcc_letsencrypt_email='dcc_letsencrypt_email'
+#      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
 
       user_group='user_group'
-      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME)" "$USER_GROUP" "User Group" $user_group
+      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
 
 #      es_service='es_service'
 #      ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
 
-      database_url='database_url'
-      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
+#      database_url='database_url'
+#      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
+
+      billing_db='billing_db'
+      ask_question "How should the database for billing should be called?" "$BILLING_DB" "Billing Database" $billing_db
+
+      billing_user='billing_user'
+      ask_question "What should the username be for the billing database?" "$BILLING_USER" "Billing User" $billing_user
+
+      billing_password='billing_password'
+      ask_question "What should the username password be for the billing database?" "$BILLING_PASSWORD" "Billing User Password" $billing_password
+
+      database_url="postgresql://${billing_user}:${billing_password}@boardwalk-billing:5432/${billing_db}"
 
       aws_profile='aws_profile'
       ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
@@ -697,13 +715,13 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
 
       postgres_db='postgres_db'
-      ask_question "What is the Postgres Database name?" "$POSTGRES_DB" "Postgres Database" $postgres_db
+      ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
 
       postgres_user='postgres_user'
-      ask_question "What is the Postgres Database user?" "$POSTGRES_USER" "Postgres Database User" $postgres_user
+      ask_question "What is the Postgres Database user for the action service?" "$POSTGRES_USER" "Postgres Database User Action Service" $postgres_user
 
       postgres_password='postgres_password'
-      ask_question "What is the Postgres Database password?" "$POSTGRES_PASSWORD" "Postgres Database Password" $postgres_password
+      ask_question "What is the Postgres Database password for the action service?" "$POSTGRES_PASSWORD" "Postgres Database Password Action Service" $postgres_password
 
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
@@ -724,8 +742,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "DCC_INVOICING_SERVICE":"${dcc_invoicing_service}",
 "DCC_ACTION_SERVICE":"${dcc_action_service}",
 "DATABASE_URL":"${database_url}",
-"DCC_LETSENCRYPT_EMAIL":"${dcc_letsencrypt_email}",
-"DCC_LETSENCRYPT_STAGING":"${dcc_letsencrypt_staging}",
+"BILLING_USER":"${billing_user}",
+"BILLING_PASSWORD":"${billing_password}",
+"BILLING_DB":"${billing_db}",
 "USER_GROUP":"${user_group}",
 "ES_SERVICE":"${es_service}",
 "AWS_PROFILE":"${aws_profile}",
@@ -758,9 +777,23 @@ done
 
 if [[ "${run_common^^}" = 'Y' ]]; then
     if [[ $(sudo docker ps | grep 'core-' | wc -l) = "0" ]]; then
+      echo "Do you want to run the public-facing gateway nginx server in dev mode or prod? [dev/prod]"
+      common_mode=-1
+      while [[ "${common_mode}" = "-1" ]]; do
+            read common_mode
+            if [[ "${common_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
+                common_mode=dev
+            elif [[ "${common_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
+                common_mode=prod
+            else
+                echo "bad input: ${common_mode}" >&2
+                common_mode=-1
+            fi
+        done
+
         echo "starting core primary nginx gateway and common containers"
         cd common
-        sudo docker-compose -f base.yml -f prod.yml up -d
+        sudo docker-compose -f base.yml -f ${common_mode}.yml up -d
         cd ..
     else
         echo "core common containers already running."

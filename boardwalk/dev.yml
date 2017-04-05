@@ -1,0 +1,213 @@
+version: '2'
+
+services:
+  dcc-metadata-indexer:
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.0
+    #build: dcc-metadata-indexer/v2
+    environment:
+      USER_GROUP: "${user_group}"
+      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
+      ACCESS_TOKEN: "${redwood_access_token}"
+      REDWOOD_SERVER: "${redwood_server}"
+      REDWOOD_ENDPOINT: "${redwood_server}"
+      ES_SERVICE: "${es_service}"
+      DATABASE_URL: "${database_url}"
+#    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
+    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
+    volumes:
+      - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
+      - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
+      - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
+    ports:
+      - "9200"
+    links:
+      - "${es_service}"
+      - boardwalk-billing
+    networks:
+      - esnet 
+      - billing
+    restart: always
+  dcc-dashboard-service:
+    environment:
+      APACHE_PATH: "${apache_path}"
+      ES_SERVICE: "${es_service}"
+      DATABASE_URL: "${database_url}"
+      AWS_PROFILE: "${aws_profile}"
+      LUIGI_SERVER: "${luigi_server}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_DB: "${postgres_db}"
+      AWS_PROFILE: "${aws_profile}"
+      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_DB: "${postgres_db}"
+      B_POSTGRES_PASSWORD: "${billing_password}"
+      B_POSTGRES_USER: "${billing_user}"
+      B_POSTGRES_DB: "${billing_db}"
+      FLASK_APP: "/app/mapi.py"
+    image: quay.io/ucsc_cgl/dashboard-service:develop
+    #build: dcc-dashboard-service
+    ports:
+      - "80"
+      - "443"
+    networks:
+      - esnet
+      - server
+      - action
+      - billing
+    ports:
+      - "9200"
+    links:
+      - db
+      - boardwalk-billing
+    restart: always
+  dcc-dashboard:
+    image: quay.io/ucsc_cgl/dashboard:1.0.0
+    #build: dcc-dashboard
+    ports:
+      - "80"
+      - "443"
+    environment:
+      GOOGLE_CLIENT_ID: "${google_client_id}"
+      GOOGLE_CLIENT_SECRET: "${google_client_secret}"
+      REDWOOD_ADMIN: "${redwood_admin}"
+      REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
+      REDWOOD_SERVER: "auth.${redwood_server}"
+      REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
+      DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
+      DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
+      DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
+      DCC_ACTION_SERVICE: "${dcc_action_service}"
+    networks:
+      - esnet
+      - server
+    restart: always
+  nginx:
+    build: nginx-image
+    links:
+      - dcc-dashboard
+      - dcc-dashboard-service
+    environment:
+      - VIRTUAL_HOST=${dcc_dashboard_host}
+      - VIRTUAL_PORT=80
+      - HTTPS_METHOD=redirect
+      - LETSENCRYPT_HOST=${dcc_dashboard_host}
+      - LETSENCRYPT_EMAIL="default@email.com"
+    mem_limit: 2g
+    cpu_shares: 256
+    ports:
+      - "80"
+      - "443"
+    networks:
+      - core_public
+      - server
+    restart: always
+  boardwalk:
+    image: quay.io/ucsc_cgl/boardwalk
+    environment:
+      - BOARDWALK_HOST=${dcc_dashboard_host}
+    networks:
+      - server
+    ports:
+      - "80"
+      - "443"
+      - "3000"
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+    container_name: "${es_service}"
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 4g
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+       - 9200
+    networks:
+      - esnet
+    restart: always
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "discovery.zen.ping.unicast.hosts=${es_service}"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 4g
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+    restart: always
+
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_DB: "${postgres_db}"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - action
+    restart: always
+
+  boardwalk-billing:
+    image: postgres:9.6-alpine
+    container_name: "boardwalk-billing"
+    environment:
+      POSTGRES_PASSWORD: "${billing_password}"
+      POSTGRES_USER: "${billing_user}"
+      POSTGRES_DB: "${billing_db}"
+    volumes:
+      - billing_postgres:/var/lib/postgresql/data
+    ports:
+      - 5432
+    networks:
+      - billing
+    restart: always
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+  postgres:
+  billing_postgres:
+
+networks:
+  core_public:
+    external: true
+  esnet:
+    driver: bridge
+  server:
+    driver: bridge
+  action:
+    driver: bridge
+  billing:
+    driver: bridge
+

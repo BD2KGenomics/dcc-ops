@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+
+psql <<EOF
 -- Copyright (c) 2012-2014 The Ontario Institute for Cancer Research. All rights reserved.
 -- 
 -- Script to create the SQL schema for the dcc-auth server
@@ -7,7 +10,7 @@ DROP USER IF EXISTS dcc_auth;
 
 CREATE DATABASE dcc;
 \connect dcc;
-CREATE USER dcc_auth WITH PASSWORD 'pass';
+CREATE USER dcc_auth WITH PASSWORD '${AUTH_DB_PASSWORD}';
 
 CREATE TABLE IF NOT EXISTS oauth_client_details (
   client_id VARCHAR(256) PRIMARY KEY,
@@ -93,13 +96,12 @@ create unique index ix_auth_username on authorities (username,authority);
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dcc_auth;
 
 -- Populate tables
-INSERT INTO users (username, password, enabled) VALUES ('mgmt', 'pass', true);
+INSERT INTO users (username, password, enabled) VALUES ('mgmt', '${MGMT_CLIENT_SECRET}', true);
 INSERT INTO authorities (username, authority) VALUES ('mgmt', 'ROLE_MANAGEMENT');
 
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('mgmt', '', 'pass', 'aws.DEV.upload,aws.DEV.download,aws.upload,aws.download', 'password', '', 'ROLE_MANAGEMENT', 31536000, NULL, '{}', '');
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('resource', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('storage', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('metadata', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('id', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
-
-
+INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('mgmt', '', '${MGMT_CLIENT_SECRET}', 'aws.DEV.upload,aws.DEV.download,aws.upload,aws.download', 'password', '', 'ROLE_MANAGEMENT', 31536000, NULL, '{}', '');
+-- INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('resource', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
+INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('storage', '', '${STORAGE_CLIENT_SECRET}', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
+INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('metadata', '', '${METADATA_CLIENT_SECRET}', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
+-- INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('id', '', 'pass', 'deny_resource_servers_to_generate_tokens_with_valid_scope', '', '', 'ROLE_RESOURCE', 0, NULL, '{}', '');
+EOF

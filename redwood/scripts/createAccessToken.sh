@@ -27,15 +27,9 @@ verbose=0
 
 while getopts ":ahm:s:u:v" opt; do
     case $opt in
-        a)
-            admin_pass=$OPTARG
-            ;;
         h)
             help
             exit
-            ;;
-        m)
-            mgmt_pass=$OPTARG
             ;;
         s)
             scopes="${OPTARG}"
@@ -54,8 +48,12 @@ while getopts ":ahm:s:u:v" opt; do
 done
 shift "$((OPTIND - 1))"
 
-docker exec -it redwood-auth-server curl -XPUT "http://localhost:8543/admin/scopes/$user" -u admin:${admin_pass} -d"${scopes}"
-token_output=$(docker exec -it redwood-auth-server curl http://localhost:8443/oauth/token -H "Accept: application/json" -dgrant_type=password -dusername="${user}" -dscope="${scopes}" -ddesc="test access token" -u mgmt:${mgmt_pass})
+cmd=$(printf 'curl -XPUT "http://localhost:8543/admin/scopes/%s" -u admin:${AUTH_ADMIN_PASSWORD} -d"%s"' "${user}" "${scopes}")
+sudo docker exec -it redwood-auth-server bash -c "${cmd}"
+
+cmd=$(printf 'curl http://localhost:8443/oauth/token -H "Accept: application/json" -dgrant_type=password -dusername="%s" -dscope="%s" -ddesc="test access token" -u mgmt:${MGMT_CLIENT_SECRET}' "${user}" "${scopes}")
+token_output=$(sudo docker exec -it redwood-auth-server bash -c "${cmd}")
+
 if [[ $verbose -eq 0 ]]
 then echo $token_output | sed -e 's/^.*"access_token":"\([^"]*\)".*$/\1/'
 else echo $token_output

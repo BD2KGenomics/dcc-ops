@@ -152,6 +152,42 @@ else
     echo "core_public docker network already exists"
 fi
 
+# CORE COMMON: bring up the primary nginx gateway server
+run_common=''
+while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' ]] ; do
+    read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]' run_common
+done
+
+if [[ "${run_common^^}" = 'Y' ]]; then
+    if [[ $(sudo docker ps | grep 'core-' | wc -l) = "0" ]]; then
+      echo "Do you want to run the public-facing gateway nginx server in dev mode or prod? [dev/prod]"
+      common_mode=-1
+      while [[ "${common_mode}" = "-1" ]]; do
+            read common_mode
+            if [[ "${common_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
+                common_mode=dev
+            elif [[ "${common_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
+                common_mode=prod
+            else
+                echo "bad input: ${common_mode}" >&2
+                common_mode=-1
+            fi
+        done
+
+        echo "starting core primary nginx gateway and common containers"
+        cd common
+        sudo docker-compose -f base.yml -f ${common_mode}.yml up -d
+        cd ..
+    else
+        echo "core common containers already running."
+    fi
+    echo 'you can stop the core common containers with `cd $(pwd)/common && docker-compose -f base.yml -f prod.yml down`'
+else
+    echo "the core won't be publicly accessible until the gateway is started"
+fi
+
+
+
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''
 while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}" != 'N' ]] ; do
@@ -769,39 +805,7 @@ CONFIG
    fi
 done
 
-# CORE COMMON: bring up the primary nginx gateway server
-run_common=''
-while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' ]] ; do
-    read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]' run_common
-done
 
-if [[ "${run_common^^}" = 'Y' ]]; then
-    if [[ $(sudo docker ps | grep 'core-' | wc -l) = "0" ]]; then
-      echo "Do you want to run the public-facing gateway nginx server in dev mode or prod? [dev/prod]"
-      common_mode=-1
-      while [[ "${common_mode}" = "-1" ]]; do
-            read common_mode
-            if [[ "${common_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
-                common_mode=dev
-            elif [[ "${common_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
-                common_mode=prod
-            else
-                echo "bad input: ${common_mode}" >&2
-                common_mode=-1
-            fi
-        done
-
-        echo "starting core primary nginx gateway and common containers"
-        cd common
-        sudo docker-compose -f base.yml -f ${common_mode}.yml up -d
-        cd ..
-    else
-        echo "core common containers already running."
-    fi
-    echo 'you can stop the core common containers with `cd $(pwd)/common && docker-compose -f base.yml -f prod.yml down`'
-else
-    echo "the core won't be publicly accessible until the gateway is started"
-fi
 
 # FINISHED INSTALLER
 echo "Done with installation, exiting now."

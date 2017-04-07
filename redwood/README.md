@@ -26,6 +26,21 @@ $ download <objectid> .
 
 If everything is as expected, congratulations! You've deployed Redwood.
 
+## Administration
+Redwood tracks projects and bundles (collections of files). Users are granted access by being given an access token with certain permission scopes (e.g. upload to project X). Access tokens can be revoked and managed via the auth server.
+
+All projects tracked by redwood must be known to the auth-server. To register a new project:
+```
+scripts/registerProject.sh PROJECT
+# see scripts/registerProject.sh -h for more
+```
+
+Authorization is controlled by which scopes a user's access token is granted. To create an access token for a user with certain scopes:
+```
+scripts/createAccessToken.sh -m <mgmt_client_password> -s "aws.PROJECT1.upload aws.PROJECT1.download aws.PROJECT2.download" -u "user@ucsc.edu"
+# see scripts/createAccessToken.sh -h for more
+```
+
 ## Development Guide
 
 Run the system for development
@@ -73,7 +88,7 @@ docker-compose -f base.yml -f dev.yml up
 
 In another terminal, test the system (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
 ```
-docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
+docker run --rm -it --net=redwood_internal --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
     -e ACCESS_TOKEN=$(scripts/createAccessToken.sh) -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload -p DEV data/someFile

@@ -1,5 +1,30 @@
 version: '2'
+
 services:
+  nginx:
+    image: nginx:1.11.10
+    container_name: redwood-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /etc/nginx/conf.d
+      - ./certs:/etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+    networks:
+      - internal
+  dockergen:
+    image: jwilder/docker-gen:0.7.3
+    container_name: redwood-config-gen
+    command: -notify-sighup redwood-nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./conf/nginx.dev.tmpl:/etc/docker-gen/templates/nginx.tmpl
+    networks:
+      - internal
   redwood-auth-server:
     image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.5-SNAPSHOT
     ports:

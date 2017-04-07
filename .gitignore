@@ -91,7 +91,6 @@ consonance/youxia_config
 redwood/aws.config
 redwood/.env
 redwood_launcher_config/redwood.config
-redwood/certs/*
 
 boardwalk/.env
 boardwalk/aws.config

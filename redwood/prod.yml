@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  redwood-auth-server:
+    image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.4
+    environment:
+      - LETSENCRYPT_HOST=auth.${base_url}
+      - LETSENCRYPT_EMAIL=${email}
+  redwood-metadata-server:
+    image: quay.io/ucsc_cgl/redwood-metadata-server:r0.0.24
+    environment:
+    - LETSENCRYPT_HOST=metadata.${base_url}
+    - LETSENCRYPT_EMAIL=${email}
+  redwood-storage-server:
+    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.25
+    environment:
+    - LETSENCRYPT_HOST=storage.${base_url}
+    - LETSENCRYPT_EMAIL=${email}
+  redwood-metadata-backup:
+    container_name: redwood-metadata-backup
+    image: agmangas/mongo-backup-s3
+    environment:
+    - FILE_PREFIX=metadata-backup-
+    - BACKUP_INTERVAL=1
+    - AWS_ACCESS_KEY_ID=${access_key}
+    - AWS_SECRET_ACCESS_KEY=${secret_key}
+    - S3_BUCKET=${backup_bucket}
+    - MONGO_DB=dcc_metadata
+    - MONGO_HOST=redwood-metadata-db
+    depends_on:
+    - redwood-metadata-db
+  redwood-auth-backup:
+    container_name: redwood-auth-backup
+    image: schickling/postgres-backup-s3
+    environment:
+    - POSTGRES_HOST=redwood-auth-db
+    - POSTGRES_USER=dcc_auth
+    - POSTGRES_PASSWORD=${auth_db_dcc_password}
+    - POSTGRES_DATABASE=dcc
+    - S3_PREFIX=auth-backup
+    - S3_BUCKET=${backup_bucket}
+    - S3_ACCESS_KEY_ID=${access_key}
+    - S3_SECRET_ACCESS_KEY=${secret_key}
+    - SCHEDULE="@daily"
+    depends_on:
+    - redwood-auth-db

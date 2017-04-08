@@ -1,0 +1,74 @@
+version: '2'
+
+services:
+  redwood-auth-server:
+    container_name: redwood-auth-server
+    environment:
+      - AUTH_DB_PASSWORD=${auth_db_dcc_password}
+      - AUTH_ADMIN_PASSWORD=${auth_admin_password}
+      - MGMT_CLIENT_SECRET=${mgmt_client_secret}
+      - VIRTUAL_HOST=auth.${base_url}
+      - VIRTUAL_PORT=8443
+      - HTTPS_METHOD=nohttp
+    depends_on:
+      - redwood-auth-db
+    networks:
+      - core_public
+      - internal
+  redwood-auth-db:
+    container_name: redwood-auth-db
+    image: postgres:9.6.2
+    volumes:
+      - ./conf/auth-1-bootstrap-postgresql.sh:/docker-entrypoint-initdb.d/dcc-auth-db.sh
+      - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
+    environment:
+      - POSTGRES_PASSWORD=${auth_db_postgres_password}
+      - AUTH_DB_PASSWORD=${auth_db_dcc_password}
+      - METADATA_CLIENT_SECRET=${metadata_client_secret}
+      - STORAGE_CLIENT_SECRET=${storage_client_secret}
+      - MGMT_CLIENT_SECRET=${mgmt_client_secret}
+    networks:
+      - internal
+  redwood-metadata-server:
+    container_name: redwood-metadata-server
+    environment:
+      - METADATA_CLIENT_SECRET=${metadata_client_secret}
+      - VIRTUAL_HOST=metadata.${base_url}
+      - VIRTUAL_PORT=8444
+      - HTTPS_METHOD=nohttp
+    depends_on:
+      - redwood-metadata-db
+      - redwood-auth-server
+    networks:
+      - core_public
+      - internal
+  redwood-metadata-db:
+    container_name: redwood-metadata-db
+    image: mongo:3.4.2
+    networks:
+      - internal
+  redwood-storage-server:
+    container_name: redwood-storage-server
+    volumes:
+      - ./conf/application.storage.properties:/dcc/conf/application-external.properties
+    environment:
+      - STORAGE_CLIENT_SECRET=${storage_client_secret}
+      - AWS_ACCESS_KEY_ID=${access_key}
+      - AWS_SECRET_ACCESS_KEY=${secret_key}
+      - VIRTUAL_HOST=storage.${base_url}
+      - VIRTUAL_PORT=5431
+      - HTTPS_METHOD=nohttp
+      - REDWOOD_BUCKET=${s3_bucket}
+      - REDWOOD_S3_ENDPOINT=${s3_endpoint}
+      - REDWOOD_KMS_KEY=${kms_key}
+    depends_on:
+      - redwood-auth-server
+      - redwood-metadata-server
+    networks:
+      - core_public
+      - internal
+
+networks:
+  core_public:
+    external: true
+  internal:

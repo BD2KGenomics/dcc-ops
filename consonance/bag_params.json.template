@@ -1,0 +1,23 @@
+{
+  "SENSU_SERVER_IP_ADDRESS": "localhost",
+  "FLEET_NAME": "fleet_name",
+  "aws_key": "{{ AWS_ACCESS_KEY_ID }}",
+  "aws_secret_key": "{{ AWS_SECRET_ACCESS_KEY }}",
+  "seqware_version": "1.1.1",
+  "workflow_name": "HelloWorld",
+  "workflows": [
+    "Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.1.0"
+  ],
+  "install_workflow": "false",
+  "test_workflows": "true",
+  "queueHost": "{{ LAUNCHER_IP_ADDRESS }}",
+  "queueName": "consonance_arch",
+  "queueUser": "guest",
+  "queuePassword": "guest",
+  "lvm_device_whitelist": "/dev/xvdb",
+  "single_node_lvm": true,
+  "consonance_arch_version": "2.0-alpha.10",
+  "seqware_engine": "whitestar",
+  "seqware_use_custom_settings": false,
+  "azure": false
+}

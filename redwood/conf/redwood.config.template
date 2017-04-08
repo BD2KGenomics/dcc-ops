@@ -1,0 +1,28 @@
+# Server url (requests to storage.${base_url} and metadata.${base_url} should resolve to this server)
+base_url={{ BASE_URL }}
+
+# Email address for notifications
+email={{ EMAIL_ADDRESS }}
+
+# AWS credentials
+access_key={{ AWS_ACCESS_KEY_ID }}
+secret_key={{ AWS_SECRET_ACCESS_KEY }}
+
+# AWS S3 bucket for primary data storage and backups
+s3_bucket={{ S3_BUCKET }}
+backup_bucket={{ S3_BUCKET_BACKUP }}
+
+# AWS S3 endpoint to reach buckets
+s3_endpoint={{ S3_ENDPOINT }}
+
+# AWS IAM Encryption Key id for server-side encryption of S3 data
+kms_key={{ KMS_KEY }}
+
+# passwords
+auth_db_postgres_password={{ AUTH_DB_POSTGRES_PASSWORD }}
+auth_db_dcc_password={{ AUTH_DB_DCC_PASSWORD }}
+metadata_db_password={{ METADATA_DB_PASSWORD }}
+auth_admin_password={{ AUTH_ADMIN_PASSWORD }}
+metadata_client_secret={{ METADATA_CLIENT_SECRET }}
+storage_client_secret={{ STORAGE_CLIENT_SECRET }}
+mgmt_client_secret={{ MGMT_CLIENT_SECRET }}

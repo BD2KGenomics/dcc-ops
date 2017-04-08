@@ -47,7 +47,7 @@ services:
       B_POSTGRES_USER: "${billing_user}"
       B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
-    image: quay.io/ucsc_cgl/dashboard-service:develop
+    image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     #build: dcc-dashboard-service
     ports:
       - "80"

@@ -90,13 +90,26 @@ https://github.com/Consonance/consonance/releases
 Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
 
 #### Create a Google Oauth2 app
-* Follow the instructions on [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project". This will create your Google Oauth2 app, and will provide you with the Google Client ID and the Google Client Secret which you will require for the boardwalk installation. 
+
+You need to create a Google Oauth2 app to enable Login and token download from the dashboard. If you don't want to enable this on the dashboard during installation, simply enter a random string when asked for the *Google Client ID* and the *Google Client Secret*. You can consult [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project" if you want to read more details. Here is a summary of what you need to do:
+
+* Go to [Google's Developer Console](https://console.developers.google.com/).
+* On the upper left side of the screen, click on the drop down button.
+* Create a project by clicking on the plus sign on the pop-up window.
+* On the next pop up window, add a name for your project. 
+* Once you create it, click on the "Credentials" section on the left hand side.
+* Click on the "OAuth Consent Screen". Fill out a product name and choose an email for the Google Application. Fill the rest of the entries as you see fit for your purposes, or leave them blank, as they are optional. Save it.
+* Go to the "Credentials" tab. Click on the "Create Credentials" drop down menu and choose "OAuth Client ID".
+* Choose "Web Application" from the menu. Assign it a name. 
+* Under "Authorized JavaScript origins", enter *http://&lt;YOUR_SITE&gt;*. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
+* Under "Authorized redirect URIs", enter *http://&lt;YOUR_SITE&gt;/gCallback*. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
+* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there. 
 
 ### Running the Installer
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
 
-    git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && bash install_bootstrap
+    git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
 It will ask you to configure each service.
 * Consonance

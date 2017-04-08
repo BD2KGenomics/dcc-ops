@@ -55,7 +55,6 @@ NOTE: We make the simplfying assumption that the ip address at eth0 of the launc
 
 Take a look at `/consonance_logs` for daemon and webservice logs in any container
 
-When developing on the Dockerfile, since there is no way to inherit or inject environment variables, replace the Consonance version with:
+When developing on the Dockerfile, since there is no way to inherit or inject environment variables, replace the Consonance version using this sed command:
 
-    sed -i 's/2.0-alpha.9/2.0-alpha.10/g' {} \;
-
+    sed -i 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;

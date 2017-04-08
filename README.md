@@ -170,10 +170,10 @@ Here is a sample command you can run to download the using a manifest file. On t
 
 ```
 sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
-            -v $(pwd)/<your_manifest_file_name.tsv>:/dcc/dcc-spinnaker-client/data/temp.tsv \
+            -v $(pwd)/<your_manifest_file_name.tsv>:/dcc/dcc-spinnaker-client/data/manifest.tsv \
             -v $(pwd)/samples:/samples -v $(pwd)/outputs:/outputs \
             -v $(pwd):/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha \
-            redwood-download /dcc/dcc-spinnaker-client/data/temp.tsv /dcc/data/
+            redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
 ```
 
 

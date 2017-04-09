@@ -87,6 +87,7 @@ consonance/key.pem
 consonance/bag_params.json
 consonance/config
 consonance/youxia_config
+consonance/web.yml
 
 redwood/aws.config
 redwood/.env

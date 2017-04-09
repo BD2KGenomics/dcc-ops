@@ -26,6 +26,10 @@ In `dcc-ops/consonance`:
     docker-compose -f docker-compose.yml up -d
     docker-compose -f docker-compose.yml down
 
+## Logs
+
+Look in `/var/lib/docker/volumes/consonance_log_volume/_data/` for logs from each of the daemons. 
+
 ## Developing
 
 The following files are created from templates by the install script:

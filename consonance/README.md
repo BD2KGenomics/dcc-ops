@@ -57,4 +57,6 @@ Take a look at `/consonance_logs` for daemon and webservice logs in any containe
 
 When developing on the Dockerfile, since there is no way to inherit or inject environment variables, replace the Consonance version using this sed command:
 
-    sed -i 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;
+    # make sure you run this in just the consonance directory so it doesn't affect .git files
+    cd consonance
+    find ./ -type f -exec sed -i 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;

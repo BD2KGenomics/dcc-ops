@@ -59,4 +59,4 @@ When developing on the Dockerfile, since there is no way to inherit or inject en
 
     # make sure you run this in just the consonance directory so it doesn't affect .git files
     cd consonance
-    find ./ -type f -exec sed -i 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;
+    find ./ -type f -exec sed -i '' 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;

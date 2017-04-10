@@ -15,9 +15,10 @@ services:
 #    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
     command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
     volumes:
-      - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
+      - ~/dcc-metadata-indexer/es-jsonls:/app/dcc-metadata-indexer/es-jsonls
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
       - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
+      - ~/dcc-metadata-indexer/logs:/app/dcc-metadata-indexer/logs
     ports:
       - "9200"
     links:
@@ -69,6 +70,10 @@ services:
     ports:
       - "80"
       - "443"
+    volumes:
+      - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
+    depends_on:
+      - dcc-metadata-indexer
     environment:
       GOOGLE_CLIENT_ID: "${google_client_id}"
       GOOGLE_CLIENT_SECRET: "${google_client_secret}"

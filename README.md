@@ -123,7 +123,7 @@ It will ask you to configure each service.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
   * On question 'What is your AWS IAM KMS key ID?', put your encryption key ID (See 'Create an AWS IAM Encryption Key" above). If you don't want server-side encryption, you can leave this blank.
 * Boardwalk
-  * Install in dev mode
+  * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your Google Client Secret?`, put your Google Client Secret. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your DCC Dashboard Host?`, put the domain name resolving to your Virtual Machine (e.g. `example.com`)
@@ -131,10 +131,10 @@ It will ask you to configure each service.
   * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
   * On question `What should the username be for the billing database?`, type the username for the billing database.
   * On question `What should the username password be for the billing database?`, type some password for the billing database. 
-  * On question `What is the AWS profile?`, type some random string (DEV)
-  * On question `What is the AWS Access key ID?`, type some random string (DEV)
-  * On question `What is the AWS secret access key?`, type some random string (DEV)
-  * On question `What is the Luigi Server?`, type some random string (DEV)
+  * On question `What is the AWS profile?`, type some random string (DEV, PROD)
+  * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
+  * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)
+  * On question `What is the Luigi Server?`, type some random string (DEV, PROD)
   * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
   * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.
   * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database. 

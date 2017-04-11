@@ -90,19 +90,34 @@ https://github.com/Consonance/consonance/releases
 Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
 
 #### Create a Google Oauth2 app
-* Follow the instructions on [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project". This will create your Google Oauth2 app, and will provide you with the Google Client ID and the Google Client Secret which you will require for the boardwalk installation. 
+
+You need to create a Google Oauth2 app to enable Login and token download from the dashboard. If you don't want to enable this on the dashboard during installation, simply enter a random string when asked for the *Google Client ID* and the *Google Client Secret*. You can consult [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project" if you want to read more details. Here is a summary of what you need to do:
+
+* Go to [Google's Developer Console](https://console.developers.google.com/).
+* On the upper left side of the screen, click on the drop down button.
+* Create a project by clicking on the plus sign on the pop-up window.
+* On the next pop up window, add a name for your project. 
+* Once you create it, click on the "Credentials" section on the left hand side.
+* Click on the "OAuth Consent Screen". Fill out a product name and choose an email for the Google Application. Fill the rest of the entries as you see fit for your purposes, or leave them blank, as they are optional. Save it.
+* Go to the "Credentials" tab. Click on the "Create Credentials" drop down menu and choose "OAuth Client ID".
+* Choose "Web Application" from the menu. Assign it a name. 
+* Under "Authorized JavaScript origins", enter `http://<YOUR_SITE>`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
+* Under "Authorized redirect URIs", enter `http://<YOUR_SITE>/gCallback`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
+* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there. 
+
+Please note: at this point, the dashboard only accepts login from emails with a 'ucsc.edu' domain. In the future, it will support different email domains. 
 
 ### Running the Installer
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
 
-    git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && bash install_bootstrap
+    git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
 It will ask you to configure each service.
 * Consonance
 * Redwood
   * Install in prod mode
-  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _<dashboard_vhost>.example.com_ should resolve via DNS to your server.
+  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server.
   * Enter your AWS Key and Secret Key when requested. Redwood will use these to sign requests for upload and download to your S3 bucket
   * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
@@ -140,6 +155,27 @@ To test that everything installed successfully, you can run `cd test && ./integr
 End users should be directed to use the [quay.io/ucsc_cgl/core-client](https://quay.io/repository/ucsc_cgl/core-client)
 docker image as documented in its [README](https://github.com/BD2KGenomics/dcc-spinnaker-client/blob/develop/README.md).
 The `test/integration.sh` file also demonstrates normal core-client usage.
+
+Here is a sample command you can run from the `test` folder to do an upload:
+
+**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/scripts/createAccessToken.sh -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. 
+
+```
+sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
+            -v $(pwd)/manifest.tsv:/dcc/manifest.tsv -v $(pwd)/samples:/samples \
+            -v $(pwd)/outputs:/outputs quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload \
+            --force-upload /dcc/manifest.tsv
+```
+Here is a sample command you can run to download the using a manifest file. On the dashboard, go to the "BROWSER" tab, and click on "Download Manifest" at the bottom of the list. Save this file, and run the following command. This will download the files specified from the manifest:
+
+```
+sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
+            -v $(pwd)/<your_manifest_file_name.tsv>:/dcc/dcc-spinnaker-client/data/manifest.tsv \
+            -v $(pwd)/samples:/samples -v $(pwd)/outputs:/outputs \
+            -v $(pwd):/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha \
+            redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
+```
+
 
 ### Troubleshooting
 

@@ -111,7 +111,7 @@ services:
       - server
     restart: always
   boardwalk:
-    image: quay.io/ucsc_cgl/boardwalk
+    image: quay.io/ucsc_cgl/boardwalk:1.0.0
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
     networks:

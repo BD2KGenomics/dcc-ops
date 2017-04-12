@@ -6,25 +6,27 @@
 
 function recover_auth() {
     auth_dump=$1
-    echo recovering auth data from backup file ${auth_dump}
+    echo "recovering auth data from backup file ${auth_dump}"
+    echo "not yet implemented"
 }
 
 function recover_metadata() {
     metadata_dump=$1
-    echo recovering metadata from backup file ${metadata_dump}
-    echo docker cp "${metadata_dump}" redwood-metadata-db:/tmp/
-    echo docker exec redwood-metadata-db "cd /tmp && tar xvf ${metadata_dump} && mongorestore dump"
+    echo "recovering metadata from backup file ${metadata_dump}"
+    docker cp "${metadata_dump}" redwood-metadata-db:/tmp/
+    dump_file="$(basename "${metadata_dump}")"
+    docker exec -it redwood-metadata-db bash -c "cd /tmp && tar xvf ${dump_file} && mongorestore dump"
 }
 
 case "${1^^}" in
     A|AUTH)
-        recover_auth $2
+        recover_auth "$2"
         ;;
     M|META|METADATA)
-        recover_metadata $2
+        recover_metadata "$2"
         ;;
     *)
-        echo error: invalid service: must be one of auth or metadata
+        echo "error: invalid service: ${1}: must be one of auth or metadata"
         exit 1
         ;;
 esac

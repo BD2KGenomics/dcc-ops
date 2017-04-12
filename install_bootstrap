@@ -539,13 +539,13 @@ CONFIG
           read -ep $'Are you ready to launch redwood now? [Y/N] \n' launch_redwood
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
               cd redwood
-              bin/bin/redwood up
+              admin/bin/redwood up
               
-              sudo bin/bin/redwood install
-              echo "Installed redwood to start on boot. To undo this you can run : $ $(pwd)/redwood/bin/bin/redwood uninstall"
+              sudo admin/bin/redwood install
+              echo "Installed redwood to start on boot. To undo this you can run : $ $(pwd)/redwood/admin/bin/redwood uninstall"
               cd ..
           elif [[ "${launch_redwood^^}" = 'N' ]]; then
-              echo "You can start redwood later with: $ sudo $(pwd)/redwood/bin/bin/redwood up"
+              echo "You can start redwood later with: $ sudo $(pwd)/redwood/admin/bin/redwood up"
           fi
       done
 
@@ -564,7 +564,7 @@ CONFIG
       if [[ ${recover_metadata} -eq 1 ]]; then
           read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
 
-          redwood/bin/bin/redwood recover metadata "${metadata_backup_file}"
+          redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
 
           migrate_metadata=-1
           read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_metadata_response
@@ -576,7 +576,7 @@ CONFIG
           done
           if [[ ${migrate_metadata} -eq 1 ]]; then
               # todo: select migration
-              redwood/bin/bin/redwood migrate
+              redwood/admin/bin/redwood migrate
           fi
       fi
 

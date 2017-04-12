@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Usage: redwood status [-v]
+# Summary: Report redwood's status
+# Help: Show redwood status
+#
+# Verbose mode prints the following status desciptors (tab-separated, in this order)
+#     Status: up|down
+#     Profile: dev|prod
+#
+# OPTIONS
+# -v verbose output ({up|down} {dev|prod})
+set -e
+
+# status types
+UP=up
+DOWN=down
+PROD=prod
+DEV=dev
+
+# 1 if container is up, else 0
+function check_container_by_name() {
+    name=$1
+    docker ps | awk 'NF>1{print $NF}' | grep -ce "^${name}$"
+}
+
+quiet=1
+while getopts ":v" opt; do
+    case $opt in
+        v)
+            quiet=0
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+
+[[ $(check_container_by_name redwood-storage-server) -eq 1
+    && $(check_container_by_name redwood-metadata-server) -eq 1
+    && $(check_container_by_name redwood-auth-server) -eq 1
+    && $(check_container_by_name redwood-metadata-db) -eq 1
+    && $(check_container_by_name redwood-auth-db) -eq 1
+]] && status=${UP} || status=${DOWN}
+# todo: ping redwood-storage-server 
+
+if [[ "${status}" = "${UP}" ]]; then
+    [[ $(check_container_by_name redwood-nginx) -eq 0 ]] && profile=${PROD} || profile=${DEV}
+    if [[ ${quiet} -eq 1 ]]; then
+        printf '%s\n' "${status}"
+    else
+        printf '%s\t%s\n' "${status}" "${profile}"
+    fi
+else
+    if [[ ${quiet} -eq 1 ]]; then
+        printf '%s\n' "${status}"
+    else
+        printf '%s\n' "${status}: see docker ps"
+    fi
+fi

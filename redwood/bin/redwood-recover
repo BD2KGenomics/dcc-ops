@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-# get dump from s3 backup bucket or user input local path
-metadata_dump=metadata-backup.tar.gz
-docker cp "${metadata_dump}" redwood-metadata-db:/tmp/
-docker exec redwood-metadata-db "cd /tmp && tar xvf ${metadata_dump} && mongorestore dump"

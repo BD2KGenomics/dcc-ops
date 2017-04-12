@@ -588,7 +588,8 @@ CONFIG
           fi
       done
       if [[ ${recover_metadata} -eq 1 ]]; then
-          redwood/bin/redwood-recover
+          read -rep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
+          redwood/bin/bin/redwood recover metadata "${metadata_backup_file}"
 
           migrate_metadata=-1
           read -rep $'Do you want to perform any migrations?\n' migrate_metadata_response
@@ -599,7 +600,8 @@ CONFIG
               fi
           done
           if [[ ${migrate_metadata} -eq 1 ]]; then
-              redwood/bin/redwood-migrate
+              # todo: select migration
+              redwood/bin/bin/redwood migrate
           fi
       fi
 

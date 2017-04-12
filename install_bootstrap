@@ -575,6 +575,34 @@ CONFIG
           fi
       done
 
+      recover_metadata=-1
+      read -rep $'Do you want to recover metadata from a backup?\n' recover_metadata_response
+      while [[ "${recover_metadata}" = "-1" ]]; do
+          if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
+              recover_metadata=1
+          elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
+              recover_metadata=0
+          else
+              echo "bad input: ${recover_metadata_response}"
+              recover_metadata=-1
+          fi
+      done
+      if [[ ${recover_metadata} -eq 1 ]]; then
+          redwood/bin/redwood-recover
+
+          migrate_metadata=-1
+          read -rep $'Do you want to perform any migrations?\n' migrate_metadata_response
+          while [[ "${migrate_metadata}" = "-1" ]]; do
+              if [[ "${migrate_metadata_response^^}" =~ ^(Y|YES)$ ]]; then migrate_metadata=1
+              elif [[ "${migrate_metadata_response^^}" =~ ^(N|NO)$ ]]; then migrate_metadata=0
+              else echo "bad input: ${recover_metadata_response}" && migrate_metadata=-1
+              fi
+          done
+          if [[ ${migrate_metadata} -eq 1 ]]; then
+              redwood/bin/redwood-migrate
+          fi
+      fi
+
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"
     fi

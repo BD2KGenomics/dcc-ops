@@ -72,6 +72,7 @@ services:
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
+      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
     environment:
@@ -120,6 +121,8 @@ services:
       - "80"
       - "443"
       - "3000"
+    volumes:
+      - boardwalk1:/usr/src/app
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
     container_name: "${es_service}"
@@ -203,7 +206,10 @@ volumes:
     driver: local
   postgres:
   billing_postgres:
-
+  dashboard1:
+    driver: local
+  boardwalk1:
+    driver: local
 networks:
   core_public:
     external: true

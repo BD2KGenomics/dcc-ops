@@ -11,4 +11,5 @@ if [[ $(grep -c 'redwood up' /etc/rc.local) -gt 0 ]]; then
     exit 1
 fi
 
-echo ${cmd} >> /etc/rc.local
+sed "\$i${cmd}" /etc/rc.local > /etc/rc.local.new
+mv /etc/rc.local.new /etc/rc.local

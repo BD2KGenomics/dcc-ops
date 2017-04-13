@@ -94,7 +94,7 @@ services:
       - server
     restart: always
   nginx:
-    build: nginx-image
+    build: nginx-dev
     links:
       - dcc-dashboard
       - dcc-dashboard-service
@@ -173,7 +173,22 @@ services:
     networks:
       - esnet
     restart: always
-
+  kibana:
+    container_name: "kibana"
+    image: docker.elastic.co/kibana/kibana:5.2.2
+    environment:
+      SERVER_NAME: "ops-dev.ucsc-cgl.org/kibana"
+      SERVER_BASEPATH: "/kibana"
+      ELASTICSEARCH_URL: "http://${es_service}:9200"
+      XPACK_SECURITY_ENABLED: "false"
+    ports:
+      - 5601
+    networks:
+      - esnet
+      - server
+    links:
+      - "${es_service}"
+    restart: always
   db:
     image: postgres:9.6-alpine
     environment:

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo 'DEPRECATED: use `dcc-ops/redwood/admin/redwood token create` instead'
+
 script_name=$(basename "$0")
 
 function help {

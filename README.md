@@ -158,7 +158,7 @@ The `test/integration.sh` file also demonstrates normal core-client usage.
 
 Here is a sample command you can run from the `test` folder to do an upload:
 
-**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/scripts/createAccessToken.sh -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. 
+**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/admin/bin/redwood token create -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. End users should only be given project-specific scopes like _aws.PROJECT.upload_.
 
 ```
 sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \

@@ -527,7 +527,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
 "AUTH_ADMIN_PASSWORD":"${auth_admin_pass}",
 "METADATA_CLIENT_SECRET":"${metadata_client_secret}",
 "STORAGE_CLIENT_SECRET":"${storage_client_secret}",
-"MGMT_CLIENT_SECRET":"${mgmt_client_secret}",
+"MGMT_CLIENT_SECRET":"${mgmt_client_secret}"
 }
 CONFIG
       # template out stuff
@@ -693,7 +693,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
       # generate redwood access token
-      redwood_access_token=$(redwood/scripts/createAccessToken.sh -u indexer -s 'aws.upload aws.download')
+      redwood_access_token=$(redwood/admin/bin/redwood token create -u indexer -s 'aws.upload aws.download')
       #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
       dcc_dashboard_host='dcc_dashboard_host'

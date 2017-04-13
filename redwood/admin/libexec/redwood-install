@@ -7,7 +7,7 @@ set -e
 cmd="${_REDWOOD_ROOT}/bin/redwood up"
 
 if [[ $(grep -c 'redwood up' /etc/rc.local) -gt 0 ]]; then
-    echo "ERROR: redwood seems to already have been added to /etc/rc.local"
+    echo "ERROR: redwood seems to already have been added to /etc/rc.local - try dcc-ops/redwood/admin/bin/redwood uninstall"
     exit 1
 fi
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: token revoke <token>
 # Summary: Revoke an access token
-# Help: This command revokes an access token. Once revoked, it will be appear as deleted.
+# Help: This command revokes an access token. Once revoked, it will be appear as deleted in the token digest.
 set -e
 
 token=$1

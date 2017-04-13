@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Usage: token revoke <token>
+# Summary: Revoke an access token
+# Help: This command revokes an access token. Once revoked, it will be appear as deleted.
+set -e
+
+token=$1
+cmd=$(printf 'curl -XDELETE http://localhost:8443/tokens/%s -u mgmt:${MGMT_CLIENT_SECRET}' "${token}")
+docker exec redwood-auth-server bash -c "${cmd}"

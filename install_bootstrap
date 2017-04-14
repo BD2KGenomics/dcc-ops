@@ -435,46 +435,20 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
         source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" redwood_launcher_config/redwood.config)
       fi
 
-      redwood_mode=""
-      while [[ "${redwood_mode}" = "" ]]; do
-          if [ -z ${REDWOOD_MODE} ]; then
-              read -ep $'Do you want to run redwood in dev mode or prod? [dev/prod] Default value: \n' -i 'prod' redwood_mode
-          else
-              read -ep $'Do you want to run redwood in dev mode or prod? [dev/prod] \n' -i "$REDWOOD_MODE" redwood_mode
-          fi
-          if [[ "${redwood_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
-              redwood_mode=dev
-          elif [[ "${redwood_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
-              redwood_mode=prod
-          else
-              echo "bad input: ${redwood_mode}" >&2
-              redwood_mode=""
-          fi
-      done
-
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          base_url=''
-          if [ ! -z $BASE_URL ] ; then
-              read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
-          else
-              read -ep $'What is the name of the base URL? \n' base_url
-          fi
+      base_url=''
+      if [ ! -z $BASE_URL ] ; then
+          read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
       else
-          base_url='redwood.io'
+          read -ep $'What is the name of the base URL? \n' base_url
       fi
 
       # this should move to the COMMON section
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          email_address=''
-          if [ ! -z $EMAIL_ADDRESS ] ; then
-              read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
-          else
-              read -ep $'What is the email address for notification? \n' email_address
-          fi
+      email_address=''
+      if [ ! -z $EMAIL_ADDRESS ] ; then
+          read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
       else
-          email_address=place@hold.er
+          read -ep $'What is the email address for notification? \n' email_address
       fi
-
       user_aws_key='user_aws_key'
       ask_question "What is your AWS Key?" "$AWS_ACCESS_KEY_ID" "AWS Key name" $user_aws_key
 
@@ -484,26 +458,24 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       s3_bucket='s3_bucket'
       ask_question "What is your AWS S3 bucket?" "$S3_BUCKET" "S3 bucket name" $s3_bucket
 
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          s3_bucket_backup='s3_bucket_backup'
-          ask_question "What is your AWS S3 backup bucket?" "$S3_BUCKET_BACKUP" "S3 bucket backup name" $s3_bucket_backup
-      else
-          s3_bucket_backup=${s3_bucket}
-      fi
+      s3_bucket_backup='s3_bucket_backup'
+      ask_question "What is your AWS S3 backup bucket?" "$S3_BUCKET_BACKUP" "S3 bucket backup name" $s3_bucket_backup
 
       s3_endpoint='s3_endpoint'
       ask_question "What is your AWS S3 endpoint?" "$S3_ENDPOINT" "S3 endpoint" $s3_endpoint
 
       # KMS key
-      read -ep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
+      read -rep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
       # s3 sentinel object
       (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1
 
       mkdir -p ~/.aws
-      echo '[redwood_install]' >>~/.aws/credentials
-      echo "aws_access_key_id=${user_aws_key}" >>~/.aws/credentials
-      echo "aws_secret_access_key=${user_aws_secret_key}" >>~/.aws/credentials
+      {
+          echo '[redwood_install]'
+          echo "aws_access_key_id=${user_aws_key}"
+          echo "aws_secret_access_key=${user_aws_secret_key}"
+      } >> ~/.aws/credentials
 
       echo "creating sentinel object for s3 connectivity verification"
       echo "this sentinel file is used for verifying s3 connectivity" >/tmp/heliograph
@@ -541,7 +513,6 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
 
       cat > redwood_launcher_config/redwood.config <<CONFIG
 {
-"REDWOOD_MODE":"${redwood_mode}",
 "BASE_URL":"${base_url}",
 "EMAIL_ADDRESS":"${email_address}",
 "AWS_ACCESS_KEY_ID":"${user_aws_key}",
@@ -568,12 +539,46 @@ CONFIG
           read -ep $'Are you ready to launch redwood now? [Y/N] \n' launch_redwood
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
               cd redwood
-              sudo docker-compose -f base.yml -f ${redwood_mode}.yml up -d
+              admin/bin/redwood up
+              
+              sudo admin/bin/redwood install
+              echo "Installed redwood to start on boot. To undo this you can run : $ $(pwd)/redwood/admin/bin/redwood uninstall"
               cd ..
           elif [[ "${launch_redwood^^}" = 'N' ]]; then
-              echo "You can start redwood later with: $ cd $(pwd)/redwood && sudo docker-compose -f base.yml -f ${redwood_mode}.yml up -d"
+              echo "You can start redwood later with: $ sudo $(pwd)/redwood/admin/bin/redwood up"
           fi
       done
+
+      recover_metadata=-1
+      read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
+      while [[ "${recover_metadata}" = "-1" ]]; do
+          if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
+              recover_metadata=1
+          elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
+              recover_metadata=0
+          else
+              echo "bad input: ${recover_metadata_response}"
+              recover_metadata=-1
+          fi
+      done
+      if [[ ${recover_metadata} -eq 1 ]]; then
+          read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
+
+          redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
+
+          migrate_metadata=-1
+          read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_metadata_response
+          while [[ "${migrate_metadata}" = "-1" ]]; do
+              if [[ "${migrate_metadata_response^^}" =~ ^(Y|YES)$ ]]; then migrate_metadata=1
+              elif [[ "${migrate_metadata_response^^}" =~ ^(N|NO)$ ]]; then migrate_metadata=0
+              else echo "bad input: ${recover_metadata_response}" && migrate_metadata=-1
+              fi
+          done
+          if [[ ${migrate_metadata} -eq 1 ]]; then
+              # todo: select migration
+              redwood/admin/bin/redwood migrate
+          fi
+      fi
 
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"
@@ -688,7 +693,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
       # generate redwood access token
-      redwood_access_token=$(redwood/scripts/createAccessToken.sh -u indexer -s 'aws.upload aws.download')
+      redwood_access_token=$(redwood/admin/bin/redwood token create -u indexer -s 'aws.upload aws.download')
       #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
       dcc_dashboard_host='dcc_dashboard_host'

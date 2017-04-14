@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Usage: redwood recover {auth|metadata} backup.gz
+# Summary: Recover redwood data from backup
+# Help: This comand updates the local redwood instance with data from the supplied backup.
+# The backup should probably come from the backup_bucket of a previous redwood instance.
+
+function recover_auth() {
+    auth_dump=$1
+    echo "recovering auth data from backup file ${auth_dump}"
+    echo "not yet implemented"
+}
+
+function recover_metadata() {
+    metadata_dump=$1
+    echo "recovering metadata from backup file ${metadata_dump}"
+    docker cp "${metadata_dump}" redwood-metadata-db:/tmp/
+    dump_file="$(basename "${metadata_dump}")"
+    docker exec -it redwood-metadata-db bash -c "cd /tmp && tar xvf ${dump_file} && mongorestore dump"
+}
+
+case "${1^^}" in
+    A|AUTH)
+        recover_auth "$2"
+        ;;
+    M|META|METADATA)
+        recover_metadata "$2"
+        ;;
+    *)
+        echo "error: invalid service: ${1}: must be one of auth or metadata"
+        exit 1
+        ;;
+esac

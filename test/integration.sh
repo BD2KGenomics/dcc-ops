@@ -14,7 +14,7 @@ function main {
 
     [[ -d outputs ]] && sudo rm -rf outputs && INFO "deleted old outputs"
     
-    access_token=$(../redwood/scripts/createAccessToken.sh)
+    access_token=$(../redwood/admin/bin/redwood token create)
     INFO "generated testing access token: ${access_token}"
 
     redwood_endpoint=$(cat ../redwood/.env | grep 'base_url=' | sed 's/[^=]*=//')

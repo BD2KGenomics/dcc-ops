@@ -1,23 +1,13 @@
 #!/usr/bin/env bash
+# Usage: token create [-s "scope1 scope2"] [-u username] [-v]
+# Summary: Create an access token
+# Help: This command creates an access token, implicitly creating and authorizing the user for whom the token is requested.
+#
+# OPTIONS
+#  -s "scope1 scope2"    string of space-delimited scopes to granted (e.g. aws.DEV.upload aws.DEV.download)
+#  -u user@domain.com    user name to be granted (default: testuser)
+#  -v                    show verbose output
 set -e
-
-echo 'DEPRECATED: use `dcc-ops/redwood/admin/redwood token create` instead'
-
-script_name=$(basename "$0")
-
-function help {
-    cat <<EOF
-Usage: ${script_name} [-s "scope1 scope2"] [-u username] [-hv]
-
-Grant scopes and create an access token for a user
-
-OPTIONS
-  -h show this help message
-  -s string of space-delimited scopes to granted (default: 'aws.DEV.upload aws.DEV.download')
-  -u user name to be granted (default: testuser)
-  -v show verbose output
-EOF
-}
 
 scopes="aws.DEV.upload aws.DEV.download"
 user=dev@gmail.com
@@ -25,10 +15,6 @@ verbose=0
 
 while getopts ":ahm:s:u:v" opt; do
     case $opt in
-        h)
-            help
-            exit
-            ;;
         s)
             scopes="${OPTARG}"
             ;;

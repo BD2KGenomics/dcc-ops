@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Usage: sudo redwood project [command [args]] 
+# Summary: Manage redwood tracked projects
+# Help: Manage redwood tracked projects
+set -e
+
+"${_REDWOOD_ROOT}/modules/project/bin/project" "$@"

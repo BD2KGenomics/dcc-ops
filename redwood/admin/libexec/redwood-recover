@@ -23,24 +23,6 @@ function recover_metadata() {
     docker exec -it redwood-metadata-db bash -c "cd /tmp && tar xvf ${dump_file} && mongorestore dump"
 }
 
-# `compare_filename_date {auth|metadata} backupfile migrationfile` returns 1 if >, 0 if ==, -1 if <
-function compare_filename_date() {
-    service="$1"
-    backup="$2"
-    migration="$3"
-    #migrations_dir="${_REDWOOD_ROOT}/../migrations"
-    if [[ "${service}" = "auth" ]]; then
-        echo auth
-    else
-        backup_date="$(echo "${backup}" | sed -E 's/metadata-backup-([0-9]{4})([0-9]{2})([0-9]{2}).*/\1-\2-\3/g')"
-        migration_date="$(echo "${migration}" | sed -E 's/metadata-migration-([0-9-]{10}).*/\1/g')"
-        if [[ "${backup_date}" < "${migration_date}" ]]; then printf '-1'
-        elif [[ "{backup_date" = "${migration_date}" ]]; then printf '0'
-        else printf '1'
-        fi
-    fi
-}
-
 function main() {
     # parse options
     yes=-1
@@ -64,11 +46,11 @@ function main() {
     case "${1^^}" in
         A|AUTH)
             service=auth
-            #recover_auth "${backup}"
+            recover_auth "${backup}"
             ;;
         M|META|METADATA)
             service=metadata
-            #recover_metadata "${backup}"
+            recover_metadata "${backup}"
             ;;
         *)
             echo "error: invalid service: ${1}: must be one of auth or metadata"

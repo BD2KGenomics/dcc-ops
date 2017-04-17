@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Usage: redwood up [-d]
+# Summary: Start redwood
+# Help: Start redwood. This assumes dcc-ops/redwood/.env has been prepared.
+#
+# OPTIONS
+# -d dev mode; use dev.yml instead of prod.yml
+set -e
+
+dev=0
+while getopts ":d" opt; do
+    case $opt in
+        d)
+            dev=1
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+
+base_compose="${_REDWOOD_ROOT}/../base.yml"
+dev_compose="${_REDWOOD_ROOT}/../dev.yml"
+prod_compose="${_REDWOOD_ROOT}/../prod.yml"
+
+[[ ${dev} -eq 1 ]] && activated_compose="${dev_compose}" || activated_compose="${prod_compose}"
+
+cd "${_REDWOOD_ROOT}/.."
+set -x
+docker-compose -f "${base_compose}" -f "${activated_compose}" up -d

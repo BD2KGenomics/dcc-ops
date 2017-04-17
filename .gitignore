@@ -88,9 +88,11 @@ consonance/config
 consonance/youxia_config
 consonance/web.yml
 
+# redwood files
 redwood/aws.config
 redwood/.env
 redwood_launcher_config/redwood.config
+redwood/backups
 
 boardwalk/.env
 boardwalk/aws.config

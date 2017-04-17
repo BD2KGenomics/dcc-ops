@@ -1,3 +1,37 @@
 #!/usr/bin/env bash
+# Usage: redwood migrate {auth|metadata} [migration...]
+# Summary: Recover redwood data from backup
+# Help: This comand updates the auth or metadata db by running the given migration
 
-echo no migration support yet
+
+function migrate_auth() {
+    #migration="$1"
+    echo "migration not yet implemented"
+}
+
+function migrate_metadata() {
+    migration="$1"
+    docker cp "${migration}" redwood-metadata-db:/tmp
+    docker exec -it redwood-metadata-db mongo --norc --quiet dcc-metadata "/tmp/$(basename "${migration}")"
+}
+
+function main() {
+    # do migration
+    migration="${2}"
+    echo "Running migration: ${migration}"
+    case "${1^^}" in
+        A|AUTH)
+            migrate_auth "${migration}"
+            ;;
+        M|META|METADATA)
+            migrate_metadata "${migration}"
+            ;;
+        *)
+            echo "error: invalid service: ${1}: must be one of auth or metadata"
+            exit 1
+            ;;
+    esac
+    echo "Done"
+}
+
+main "$@"

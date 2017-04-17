@@ -19,6 +19,7 @@ services:
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
       - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
       - ~/dcc-metadata-indexer/logs:/app/dcc-metadata-indexer/logs
+#      - /home/ubuntu/dcc-ops/boardwalk/dcc-metadata-indexer/test.py:/app/dcc-metadata-indexer/test.py
     ports:
       - "9200"
     links:

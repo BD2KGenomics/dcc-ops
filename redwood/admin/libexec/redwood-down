@@ -10,7 +10,9 @@ base_compose="${_REDWOOD_ROOT}/../base.yml"
 dev_compose="${_REDWOOD_ROOT}/../dev.yml"
 prod_compose="${_REDWOOD_ROOT}/../prod.yml"
 
-profile=$("${_REDWOOD_ROOT}/bin/redwood" status -v | cut -f 2)
+status=$("${_REDWOOD_ROOT}/bin/redwood" status -v | cut -f 1)
+
+[[ "${status}" = "up" ]] && profile=$("${_REDWOOD_ROOT}/bin/redwood" status -v | cut -f 2) || profile="dev"
 
 if [[ "${profile}" = "dev" ]]; then activated_compose="${dev_compose}";
 elif [[ "${profile}" = "prod" ]]; then activated_compose="${prod_compose}"

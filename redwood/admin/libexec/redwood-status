@@ -1,21 +1,36 @@
 #!/usr/bin/env bash
 # Usage: redwood status [-v]
 # Summary: Report redwood's status
-# Help: Show redwood status
+# Help: Show tab-separated redwood status descriptor(s)
 #
-# Verbose mode prints the following status desciptors (tab-separated, in this order)
-#     Status: up|down
-#     Profile: dev|prod
+# Normal output: up|incomplete|down
+# Verbose output: up|incomplete|down dev|prod|unknown
+#
+# Status types:
+#   up - core redwood containers up and responding to requests
+#   incomplete - some but not all core redwood containers up or not responding to requests
+#   down - no core redwood containers up
+#
+# Profile types:
+#   dev - redwood running in dev mode (no backups, no LetsEncrypt, redwood-specific nginx serving redwood.io dev certificates)
+#   prod - redwood running in production mode (backups, LetsEncrypt, and no redwood-specific nginx)
+#   unknown - couldn't tell profile from currently running containers
+#   none - redwood is down
 #
 # OPTIONS
-# -v verbose output ({up|down} {dev|prod})
+# -v enable verbose output
 set -e
 
 # status types
 UP=up
+INCOMPLETE=incomplete
 DOWN=down
+
+# profile types
 PROD=prod
 DEV=dev
+UNKNOWN=unknown
+NONE=none
 
 # 1 if container is up, else 0
 function check_container_by_name() {
@@ -35,25 +50,41 @@ while getopts ":v" opt; do
     esac
 done
 
-[[ $(check_container_by_name redwood-storage-server) -eq 1
-    && $(check_container_by_name redwood-metadata-server) -eq 1
-    && $(check_container_by_name redwood-auth-server) -eq 1
-    && $(check_container_by_name redwood-metadata-db) -eq 1
-    && $(check_container_by_name redwood-auth-db) -eq 1
-]] && status=${UP} || status=${DOWN}
-# todo: ping redwood-storage-server 
-
-if [[ "${status}" = "${UP}" ]]; then
-    [[ $(check_container_by_name redwood-nginx) -eq 0 ]] && profile=${PROD} || profile=${DEV}
-    if [[ ${quiet} -eq 1 ]]; then
-        printf '%s\n' "${status}"
-    else
-        printf '%s\t%s\n' "${status}" "${profile}"
-    fi
+# determine status
+if [[ $(check_container_by_name redwood-storage-server) -eq 1
+        && $(check_container_by_name redwood-metadata-server) -eq 1
+        && $(check_container_by_name redwood-auth-server) -eq 1
+        && $(check_container_by_name redwood-metadata-db) -eq 1
+        && $(check_container_by_name redwood-auth-db) -eq 1
+    ]]; then
+    status=${UP}
+elif [[ $(check_container_by_name redwood-storage-server) -eq 1
+            || $(check_container_by_name redwood-metadata-server) -eq 1
+            || $(check_container_by_name redwood-auth-server) -eq 1
+            || $(check_container_by_name redwood-metadata-db) -eq 1
+            || $(check_container_by_name redwood-auth-db) -eq 1
+      ]]; then
+    status=${INCOMPLETE}
 else
-    if [[ ${quiet} -eq 1 ]]; then
-        printf '%s\n' "${status}"
-    else
-        printf '%s\n' "${status}: see docker ps"
-    fi
+    status=${DOWN}
+fi
+# todo: ping redwood-storage-server
+
+# determine profile
+if [[ $(check_container_by_name redwood-nginx) -eq 1 ]]; then
+    profile=${DEV}
+elif [[ $(check_container_by_name redwood-auth-backup) -eq 1
+            || $(check_container_by_name redwood-metadata-backup) -eq 1
+      ]]; then
+    profile=${PROD}
+elif [[ "${status}" = "${DOWN}" ]]; then
+    profile=${NONE}
+else
+    profile=${UNKNOWN}
+fi
+
+if [[ ${quiet} -eq 1 ]]; then
+    printf '%s\n' "${status}"
+else
+    printf '%s\t%s\n' "${status}" "${profile}"
 fi

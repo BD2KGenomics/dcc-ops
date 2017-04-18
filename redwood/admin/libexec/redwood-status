@@ -68,7 +68,8 @@ elif [[ $(check_container_by_name redwood-storage-server) -eq 1
 else
     status=${DOWN}
 fi
-# todo: ping redwood-storage-server
+# ping java code
+$(docker run --net redwood_internal --rm --link redwood-storage-server appropriate/curl http://redwood-storage-server:5431/download/ping >/dev/null 2>&1) || status=${INCOMPLETE}
 
 # determine profile
 if [[ $(check_container_by_name redwood-nginx) -eq 1 ]]; then

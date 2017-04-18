@@ -59,7 +59,7 @@ function main() {
     esac
 
     # prompt for migrations
-    migrations_dir="${_REDWOOD_ROOT}/../migrations"
+    migrations_dir="${_REDWOOD_ROOT}/migrations"
     if [[ "${service}" = "auth" ]]; then
         migrated_date="$(echo "${backup}" | sed -E 's/^([0-9-]{10}).*/\1/g')"
     else

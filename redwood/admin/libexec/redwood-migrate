@@ -11,8 +11,7 @@ function migrate_auth() {
 
 function migrate_metadata() {
     migration="$1"
-    docker cp "${migration}" redwood-metadata-db:/tmp
-    docker exec -it redwood-metadata-db mongo --norc --quiet dcc-metadata "/tmp/$(basename "${migration}")"
+    "${migration}"
 }
 
 function main() {

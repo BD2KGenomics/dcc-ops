@@ -3,10 +3,7 @@
 # Summary: Recover redwood data from backup
 # Help: This comand updates the local redwood instance with data from the supplied backup, then offers to run migrations.
 # The backup should probably come from the backup_bucket of a previous redwood instance.
-#
-# OPTIONS
-#   -n    non-interactive: don't run any migrations
-#   -y    non-interactive: run all migrations as recommended
+
 set -e
 
 function recover_auth() {
@@ -24,23 +21,6 @@ function recover_metadata() {
 }
 
 function main() {
-    # parse options
-    yes=-1
-    while getopts ":yn" opt; do
-        case $opt in
-            n)
-                yes=0
-                ;;
-            y)
-                yes=1
-                ;;
-            \?)
-                echo "Invalid option: -$OPTARG" >&2
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
-
     # do recovery
     backup="${2}"
     case "${1^^}" in
@@ -57,48 +37,6 @@ function main() {
             exit 1
             ;;
     esac
-
-    # prompt for migrations
-    migrations_dir="${_REDWOOD_ROOT}/migrations"
-    if [[ "${service}" = "auth" ]]; then
-        migrated_date="$(echo "${backup}" | sed -E 's/^([0-9-]{10}).*/\1/g')"
-    else
-        migrated_date="$(echo "${backup}" | sed -E 's/metadata-backup-([0-9]{4})([0-9]{2})([0-9]{2}).*/\1-\2-\3/g')"
-    fi
-    migrate=-1
-    while [[ "${migrate}" = "-1" ]]; do # suggest migrations
-        case ${yes} in
-            0) migrate_response=no ;;
-            1) migrate_response=yes ;;
-            *) read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_response ;;
-        esac
-        if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
-            for migration in "${migrations_dir}"/${service}-migration-*; do # bash glob alphabetical
-                migration_date="$(echo "${migration}" | sed -E "s/${service}-migration-([0-9-]{10}).*/\1/g")"
-                if [[ "${migrated_date}" < "${migration_date}" ]]; then # recommend this migration
-                    run_migration=-1
-                    while [[ "${run_migration}" = -1 ]]; do
-                        if [[ ${yes} -eq 1 ]]; then
-                            run_migration=yes
-                        else
-                            echo "Migration $(basename "${migration}") is recommended. Would you like to run it? [Y/N]"
-                            read -r run_migration
-                        fi
-                        if [[ "${run_migration^^}" =~ ^(Y|YES)$ ]]; then
-                            "${_REDWOOD_ROOT}/bin/redwood" migrate "${1}" "${migration}"
-                        elif [[ "${run_migration}" =~ ^(N|NO)$ ]]; then
-                            run_migration=0
-                        else
-                            run_migration=-1
-                        fi
-                    done
-                fi
-            done
-            migrate=1
-        elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
-        else echo "bad input: ${migrate_response}"
-        fi
-    done
 }
 
 main "$@"

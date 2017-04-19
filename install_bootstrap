@@ -561,9 +561,24 @@ CONFIG
               recover_metadata=-1
           fi
       done
-      if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migration
+      if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migrations
           read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
           redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
+
+          migrate=-1
+          while [[ "${migrate}" = "-1" ]]; do # suggest migrations
+              case ${yes} in
+                  0) migrate_response=no ;;
+                  1) migrate_response=yes ;;
+                  *) read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_response ;;
+              esac
+              if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
+                  redwood/admin/bin/redwood migrate metadata "${metadata_backup_file}"
+              elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
+              else echo "bad input: ${migrate_response}"
+              fi
+          done
+
       fi
 
     elif [ "${run_redwood^^}" = 'N' ] ; then

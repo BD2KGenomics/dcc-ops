@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  dcc-action:
+    build:
+      context: ../../dcc-action-service/luigi_task_executor/
+      dockerfile: Dockerfile_decider
+    image: quay.io/ucsc_cgl/action:1.0.0
+    environment:
+      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
+      REDWOOD_SERVER: "${redwood_server}"
+      ELASTIC_SEARCH_SERVER: "${elastic_search_server}"
+      ELASTIC_SEARCH_PORT: "${elastic_search_port}"
+      S3_TOUCH_FILE_BUCKET: "${s3_touch_file_bucket}"
+    restart: always
+    ports:
+      - "8082"
+#    links:
+#      - "${elastic_search_server}"
+#    networks:
+#      - esnet 

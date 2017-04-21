@@ -89,6 +89,10 @@ consonance/config
 consonance/youxia_config
 consonance/web.yml
 
+action/aws.config
+action/.env
+action_launcher_config/action.config
+
 redwood/aws.config
 redwood/.env
 redwood_launcher_config/redwood.config

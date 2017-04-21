@@ -1,0 +1,7 @@
+consonance_web_service_url={{ CONSONANCE_WEB_SERVICE_URL }}
+consonance_access_token={{ CONSONANCE_ACCESS_TOKEN }}
+redwood_server={{ REDWOOD_SERVER }}
+redwood_access_token={{ REDWOOD_ACCESS_TOKEN }}
+elastic_search_server={{ ELASTIC_SEARCH_SERVER }}
+elastic_search_port={{ ELASTIC_SEARCH_PORT }}
+s3_touch_file_bucket={{ S3_TOUCH_FILE_BUCKET }}

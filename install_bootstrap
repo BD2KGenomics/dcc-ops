@@ -152,6 +152,14 @@ else
     echo "core_public docker network already exists"
 fi
 
+# CORE COMMONS: setup elastic search network
+if [[ $(sudo docker network ls | grep esnet | wc -l) = "0" ]]; then
+    echo "creating esnet docker network"
+    sudo docker network create esnet
+else
+    echo "esnet docker network already exists"
+fi
+
 
 
 # RUN THE CONSONANCE INSTALLER
@@ -861,14 +869,14 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
       if [ -f redwood/.env ] ; then
           redwood_server=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//')
       fi
-      ask_question "What is your Redwood endpoint?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
+      ask_question "What is your Redwood endpoint?" "$STORAGE_SERVER" "Redwood Server" $redwood_server
 
       # generate redwood access token
       redwood_access_token='redwood_access_token'
 #      if [ -f redwood/scripts/createAccessToken.sh ] ; then
 #          redwood_access_token=$(redwood/scripts/createAccessToken.sh -u action -s 'aws.upload aws.download')
 #      fi
-      ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
+      ask_question "What is your Redwood Access Token?" "$STORAGE_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
       elastic_search_server='elastic_search_server'
       elastic_search_port='elastic_search_port'
@@ -881,7 +889,7 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
       ask_question "What is your Elastic Search endpoint port?" "$ELASTIC_SEARCH_PORT" "Elastic Search port" $elastic_search_port
 
       s3_touch_file_bucket='s3_touch_file_bucket'
-      ask_question "What is your AWS S3 touch file bucket?" "$S3_TOUCH_FILE_BUCKET" "S3 touch file bucket name" $s3_touch_file_bucket
+      ask_question "What is your AWS S3 touch file bucket?" "$TOUCH_FILE_DIRECTORY" "S3 touch file bucket name" $s3_touch_file_bucket
 
 
       # Now write a config for this file.
@@ -891,20 +899,20 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
 {
 "CONSONANCE_WEB_SERVICE_URL":"${consonance_web_service_url}",
 "CONSONANCE_ACCESS_TOKEN":"${consonance_access_token}",
-"REDWOOD_ACCESS_TOKEN":"${redwood_access_token}",
-"REDWOOD_SERVER":"${redwood_server}",
+"STORAGE_ACCESS_TOKEN":"${redwood_access_token}",
+"STORAGE_SERVER":"${redwood_server}",
 "ELASTIC_SEARCH_SERVER":"${elastic_search_server}",
 "ELASTIC_SEARCH_PORT":"${elastic_search_port}",
 "AWS_PROFILE":"${aws_profile}",
 "AWS_REGION":"${aws_region}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
-"S3_TOUCH_FILE_BUCKET":"${s3_touch_file_bucket}"
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}"
 }
 CONFIG
       # template out stuff
       mustache action_launcher_config/action.config action/conf/action.config.template > action/.env
-      mustache action_launcher_config/action.config action/conf/aws.config.template > action/aws.config
+      #mustache action_launcher_config/action.config action/conf/aws.config.template > action/aws.config
 
       cd action
       sudo docker-compose -f action_compose.yml up -d

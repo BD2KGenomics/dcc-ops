@@ -73,7 +73,7 @@ Redwood exposes storage, metadata, auth services. Each of these should be made s
 
 #### Create an AWS IAM Encryption Key
 * Go [here](http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and follow the instruction for making an AWS IAM Encryption key. Make sure you create it in same region where you created your VM!
-* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. _arn:aws:kms:us-east-1:862902209576:key/_ *0aaad33b-7ead-44be-a56e-3d00c8777042*
+* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. *arn:aws:kms:us-east-1:862902209576:key/* **0aaad33b-7ead-44be-a56e-3d00c8777042**
 
 Now we're ready to install Redwood.
 

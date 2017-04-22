@@ -23,7 +23,7 @@ These are related projects that are either already setup and available for use o
 * [Dockstore](http://dockstore.org): our workflow and tool sharing platform
 * [Toil](https://github.com/BD2KGenomics/toil): our workflow engine, these workflows are shared via Dockstore
 
-## Launching the Platform
+## Installing the Platform
 
 These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
 
@@ -81,7 +81,7 @@ Now we're ready to install Redwood.
 
 ### Setup for Consonance
 
-See the Consonance [README](consonance/README.md) for details.
+See the Consonance [README](consonance/README.md) for details.  Consonance assumes you have an SSH key created and uploaded to a location on your host VM.  Other than that, there are no additional pre-setup tasks.
 
 #### Consonance CLI on the Host VM
 
@@ -119,9 +119,13 @@ Please note: at this point, the dashboard only accepts login from emails with a 
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
 
+    # note, you may need to checkout the particular branch or release tag you are interested in...
     git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
-It will ask you to configure each service.
+#### Installer Question Notes
+
+The `install_bootstrap` script will ask you to configure each service interactively.
+
 * Consonance
 * Redwood
   * Install in prod mode
@@ -152,7 +156,7 @@ It will ask you to configure each service.
 
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 
-## After Installation
+## Post-Installation
 
 ### Confirm Proper Function
 

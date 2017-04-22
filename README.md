@@ -129,7 +129,7 @@ The `install_bootstrap` script will ask you to configure each service interactiv
 * Consonance
 * Redwood
   * Install in prod mode
-  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server.
+  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server elastic IP.
   * Enter your AWS Key and Secret Key when requested. Redwood will use these to sign requests for upload and download to your S3 bucket
   * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).

@@ -2,28 +2,28 @@
 
 ## About
 
-This repository contains our Docker-compose and setup bootstrap scripts used to create a deployment of the [UCSC Genomic Institute's](http://ucsc-cgl.org) Cloud Commons implementation on AWS.  The system is designed to receive genomic data, run analysis at scale on the cloud, and return analyzed results to authorized users.  It uses, supports, and drives development of several key GA4GH APIs and open source projects. In many ways it is the generalization of the [PCAWG](https://dcc.icgc.org/pcawg) cloud infrastructure developed for that project.
+This repository contains our Docker-compose and setup bootstrap scripts used to create a deployment of the [UCSC Genomic Institute's](http://ucsc-cgl.org) Computational Genomics Platform for AWS.  The system is designed to receive genomic data, run analysis at scale on the cloud, and return analyzed results to authorized users.  It uses, supports, and drives development of several key GA4GH APIs and open source projects. In many ways it is the generalization of the [PCAWG](https://dcc.icgc.org/pcawg) cloud infrastructure developed for that project and a potential reference implementation for the [NIH Commons](https://datascience.nih.gov/commons) concept.
 
 ## Components
 
 The system has components fulfilling a range of functions, all of which are open source and can be used independently or together.
 
-![Cloud Commons Arch](docs/dcc-arch.png)
+![Computational Genomics Platform architecture](docs/dcc-arch.png)
 
 These components are setup with the install process available in this repository:
 
 * [Spinnaker](spinnaker/README.md): our data submission and validation system
 * [Redwood](redwood/README.md): our cloud data storage and indexer based on the ICGC Cloud Storage system
 * [Boardwalk](boardwalk/README.md): our file browsing portal on top of Redwood
-* [Consonance](consonance/README.md): our multi-cloud orchestration system
-* [Action Service](action/README.md): a Python-based toolkit for automating analysis
+* [Consonance](consonance/README.md): our multi-cloud workflow orchestration system
+* [Action Service](action/README.md): a Python-based toolkit for automating workflow execution
 
-These are related projects that are either already setup and available for use on the web (e.g. http://dockstore.org) or are used by components above (e.g. Toil workflows from Dockstore).
+These are related projects that are either already setup and available for use on the web or are used by components above.
 
 * [Dockstore](http://dockstore.org): our workflow and tool sharing platform
 * [Toil](https://github.com/BD2KGenomics/toil): our workflow engine, these workflows are shared via Dockstore
 
-## Launching the Commons
+## Launching the Platform
 
 These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
 
@@ -96,16 +96,16 @@ You need to create a Google Oauth2 app to enable Login and token download from t
 * Go to [Google's Developer Console](https://console.developers.google.com/).
 * On the upper left side of the screen, click on the drop down button.
 * Create a project by clicking on the plus sign on the pop-up window.
-* On the next pop up window, add a name for your project. 
+* On the next pop up window, add a name for your project.
 * Once you create it, click on the "Credentials" section on the left hand side.
 * Click on the "OAuth Consent Screen". Fill out a product name and choose an email for the Google Application. Fill the rest of the entries as you see fit for your purposes, or leave them blank, as they are optional. Save it.
 * Go to the "Credentials" tab. Click on the "Create Credentials" drop down menu and choose "OAuth Client ID".
-* Choose "Web Application" from the menu. Assign it a name. 
+* Choose "Web Application" from the menu. Assign it a name.
 * Under "Authorized JavaScript origins", enter `http://<YOUR_SITE>`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
 * Under "Authorized redirect URIs", enter `http://<YOUR_SITE>/gCallback`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
-* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there. 
+* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there.
 
-Please note: at this point, the dashboard only accepts login from emails with a 'ucsc.edu' domain. In the future, it will support different email domains. 
+Please note: at this point, the dashboard only accepts login from emails with a 'ucsc.edu' domain. In the future, it will support different email domains.
 
 ### Running the Installer
 
@@ -130,15 +130,15 @@ It will ask you to configure each service.
   * On question `What is the user and group that should own the files from the metadata-indexer?`, type the `USER:GROUP` pair you want the files downloaded by the indexer to be owned by. The question will show the current `USER:GROUP` pair for the current home directory. Highly recommended to type the same value in there (e.g. `1000:1000`)
   * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
   * On question `What should the username be for the billing database?`, type the username for the billing database.
-  * On question `What should the username password be for the billing database?`, type some password for the billing database. 
+  * On question `What should the username password be for the billing database?`, type some password for the billing database.
   * On question `What is the AWS profile?`, type some random string (DEV)
   * On question `What is the AWS Access key ID?`, type some random string (DEV)
   * On question `What is the AWS secret access key?`, type some random string (DEV)
   * On question `What is the Luigi Server?`, type some random string (DEV)
   * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
   * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.
-  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database. 
-  
+  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database.
+
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
 

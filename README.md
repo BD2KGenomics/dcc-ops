@@ -39,7 +39,7 @@ Make sure you have:
 Use the AWS console or command line tool to create a host. For example:
 
 * Ubuntu Server 16.04
-* r4.large
+* r4.xlarge
 * 250GB disk
 
 We will refer to this as the host VM throughout the documentation below and it is the machine running all the Docker containers for each of the components below.

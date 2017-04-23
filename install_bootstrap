@@ -414,6 +414,7 @@ CONFIG
   sudo docker-compose -f docker-compose.yml build
   sudo docker-compose -f docker-compose.yml up -d
   ################sudo docker-compose run client
+  cd ..
 
   # TODO: need to setup the consonance command line and config on the box, so can skip the launching the client docker
 

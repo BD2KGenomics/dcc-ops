@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Usage: project delete PROJECT...
+# Summary: Delete a project
+# Help: This command deletes a project tracked by redwood.
+#
+# OPTIONS
+#   -s site where project code is stored (e.g. aws)
+set -e
+
+site=aws
+while getopts ":s:" opt; do
+    case $opt in
+        s)
+            site="${OPTARG}"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+shift "$((OPTIND - 1))"
+
+echo not yet implemented

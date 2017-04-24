@@ -23,7 +23,7 @@ These are related projects that are either already setup and available for use o
 * [Dockstore](http://dockstore.org): our workflow and tool sharing platform
 * [Toil](https://github.com/BD2KGenomics/toil): our workflow engine, these workflows are shared via Dockstore
 
-## Launching the Platform
+## Installing the Platform
 
 These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
 
@@ -39,8 +39,10 @@ Make sure you have:
 Use the AWS console or command line tool to create a host. For example:
 
 * Ubuntu Server 16.04
-* r4.large
+* r4.xlarge
 * 250GB disk
+
+We will refer to this as the host VM throughout the documentation below and it is the machine running all the Docker containers for each of the components below.
 
 You should make a note of your security group name and ID and ensure you can connect via ssh.
 
@@ -73,17 +75,23 @@ Redwood exposes storage, metadata, auth services. Each of these should be made s
 
 #### Create an AWS IAM Encryption Key
 * Go [here](http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and follow the instruction for making an AWS IAM Encryption key. Make sure you create it in same region where you created your VM!
-* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. _arn:aws:kms:us-east-1:862902209576:key/_*0aaad33b-7ead-44be-a56e-3d00c8777042*
+* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. *arn:aws:kms:us-east-1:862902209576:key/* **0aaad33b-7ead-44be-a56e-3d00c8777042**
 
 Now we're ready to install Redwood.
 
 ### Setup for Consonance
 
-You probably want to install the Consonance command line on the VM above so you can submit work.
+See the Consonance [README](consonance/README.md) for details.  Consonance assumes you have an SSH key created and uploaded to a location on your host VM.  Other than that, there are no additional pre-setup tasks.
+
+#### Consonance CLI on the Host VM
+
+You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.
 
 Download the command line from:
 
 https://github.com/Consonance/consonance/releases
+
+Follow the interactive directions for setting up this CLI.  You will need the elastic IP you setup previously (or, better yet, the "base domain" from above).
 
 ### Setup for Boardwalk
 
@@ -111,13 +119,17 @@ Please note: at this point, the dashboard only accepts login from emails with a 
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
 
+    # note, you may need to checkout the particular branch or release tag you are interested in...
     git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
-It will ask you to configure each service.
+#### Installer Question Notes
+
+The `install_bootstrap` script will ask you to configure each service interactively.
+
 * Consonance
 * Redwood
   * Install in prod mode
-  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server.
+  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server elastic IP.
   * Enter your AWS Key and Secret Key when requested. Redwood will use these to sign requests for upload and download to your S3 bucket
   * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
@@ -144,7 +156,7 @@ It will ask you to configure each service.
 
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 
-## After Installation
+## Post-Installation
 
 ### Confirm Proper Function
 

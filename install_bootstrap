@@ -414,6 +414,7 @@ CONFIG
   sudo docker-compose -f docker-compose.yml build
   sudo docker-compose -f docker-compose.yml up -d
   ################sudo docker-compose run client
+  cd ..
 
   # TODO: need to setup the consonance command line and config on the box, so can skip the launching the client docker
 
@@ -508,7 +509,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       mgmt_client_secret="$(generate_password)"
 
       # Now write a config for this file.
-      [[ -f redwood_launcher_config/redwood.config ]] || mkdir -p redwood_launcher_config
+      [[ -d "redwood_launcher_config" ]] || mkdir "redwood_launcher_config"
       # Note: You can't have ANY blank lines in .consonance/redwood.config because the python library that will eventually process it does not like blank lines and will fail.
 
       cat > redwood_launcher_config/redwood.config <<CONFIG
@@ -540,7 +541,7 @@ CONFIG
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
               cd redwood
               admin/bin/redwood up
-              
+
               sudo admin/bin/redwood install
               echo "Installed redwood to start on boot. To undo this you can run : $ $(pwd)/redwood/admin/bin/redwood uninstall"
               cd ..

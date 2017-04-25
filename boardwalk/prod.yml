@@ -19,6 +19,7 @@ services:
       - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
       - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
       - ~/dcc-metadata-indexer/logs:/app/dcc-metadata-indexer/logs
+#      - /home/ubuntu/dcc-ops/boardwalk/dcc-metadata-indexer/test.py:/app/dcc-metadata-indexer/test.py
     ports:
       - "9200"
     links:
@@ -33,7 +34,6 @@ services:
       APACHE_PATH: "${apache_path}"
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-      AWS_PROFILE: "${aws_profile}"
       LUIGI_SERVER: "${luigi_server}"
       POSTGRES_USER: "${postgres_user}"
       POSTGRES_PASSWORD: "${postgres_password}"
@@ -41,6 +41,9 @@ services:
       AWS_PROFILE: "${aws_profile}"
       AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
       AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
+      CONSONANCE_ADDRESS: "${consonance_address}"
+      CONSONANCE_TOKEN: "${consonance_token}"
+      CONSONANCE_ROOT: "place_holder"
       POSTGRES_PASSWORD: "${postgres_password}"
       POSTGRES_USER: "${postgres_user}"
       POSTGRES_DB: "${postgres_db}"
@@ -49,6 +52,8 @@ services:
       B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
     image: quay.io/ucsc_cgl/dashboard-service:1.0.0
+    volumes:
+      - ~/dcc-dashboard-service/logs:/app/log
     #build: dcc-dashboard-service
     ports:
       - "80"
@@ -171,7 +176,6 @@ services:
     networks:
       - esnet
     restart: always
-
   db:
     image: postgres:9.6-alpine
     environment:

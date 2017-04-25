@@ -48,6 +48,8 @@ Make sure you check the branches you will be doing development on within each of
 
 Once you run the installer, docker-compose will use dev.yml to set up boardwalk and its components. It will create the Docker images using the Dockerfiles located inside `dcc-dashboard, dcc-dashboard-service, and dcc-metadata-indexer/v2`. 
 
+In addition, installing boardwalk in dev mode will also install kibana under `myexample.com/kibana/` to aid in debugging all things related to elasticsearch, as well as to help in making new queries and aggregations that may be necessary. 
+
 ### Installation Questions
 * Choose a mode you want to run the installer (prod/dev). 
 * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
@@ -60,6 +62,8 @@ Once you run the installer, docker-compose will use dev.yml to set up boardwalk 
 * On question `What is the AWS profile?`, type some random string (DEV, PROD)
 * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
 * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)
+* On question `What is the Consonance Address?`, type some random string (DEV, PROD)
+* On question `What is the Consonance Token`, type some random string (DEV, PROD)
 * On question `What is the Luigi Server?`, type some random string (DEV, PROD)
 * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
 * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.

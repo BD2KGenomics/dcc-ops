@@ -146,6 +146,8 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question `What is the AWS profile?`, type some random string (DEV, PROD)
   * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
   * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)
+  * On question `What is the Consonance Address?`, type some random string (DEV, PROD)
+  * On question `What is the Consonance Token`, type some random string (DEV, PROD)
   * On question `What is the Luigi Server?`, type some random string (DEV, PROD)
   * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
   * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.

@@ -484,7 +484,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       read -rep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
       # s3 sentinel object
-      (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1
+      (sudo apt-get install -y python-pip && sudo -H pip install botocore==1.5.43 $$sudo -H pip install awscli==1.11.80) >install_pip_aws.log 2>&1
 
       mkdir -p ~/.aws
       {
@@ -577,23 +577,9 @@ CONFIG
               recover_metadata=-1
           fi
       done
-      if [[ ${recover_metadata} -eq 1 ]]; then
+      if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migration
           read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
-
           redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
-
-          migrate_metadata=-1
-          read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_metadata_response
-          while [[ "${migrate_metadata}" = "-1" ]]; do
-              if [[ "${migrate_metadata_response^^}" =~ ^(Y|YES)$ ]]; then migrate_metadata=1
-              elif [[ "${migrate_metadata_response^^}" =~ ^(N|NO)$ ]]; then migrate_metadata=0
-              else echo "bad input: ${recover_metadata_response}" && migrate_metadata=-1
-              fi
-          done
-          if [[ ${migrate_metadata} -eq 1 ]]; then
-              # todo: select migration
-              redwood/admin/bin/redwood migrate
-          fi
       fi
 
     elif [ "${run_redwood^^}" = 'N' ] ; then
@@ -774,6 +760,16 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 
       luigi_server='luigi_server'
       ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
+   
+      luigi_server="http://${luigi_server}"     
+
+      consonance_address='consonance_address'
+      ask_question "What is the Consonance Address?" "$CONSONANCE_ADDRESS" "Consonance Address" $consonance_address
+    
+      consonance_address="http://${consonance_address}"
+
+      consonance_token='consonance_token'
+      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
 
       postgres_db='postgres_db'
       ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
@@ -808,6 +804,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "BILLING_DB":"${billing_db}",
 "USER_GROUP":"${user_group}",
 "ES_SERVICE":"${es_service}",
+"CONSONANCE_ADDRESS":"${consonance_address}",
+"CONSONANCE_TOKEN":"${consonance_token}",
 "AWS_PROFILE":"${aws_profile}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",

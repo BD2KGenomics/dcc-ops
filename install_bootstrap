@@ -469,7 +469,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       read -rep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
       # s3 sentinel object
-      (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1
+      (sudo apt-get install -y python-pip && sudo -H pip install botocore==1.5.43 $$sudo -H pip install awscli==1.11.80) >install_pip_aws.log 2>&1
 
       mkdir -p ~/.aws
       {

@@ -77,7 +77,7 @@ services:
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
-      - dashboard1:/app
+#      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
     environment:

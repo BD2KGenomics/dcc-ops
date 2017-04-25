@@ -152,6 +152,14 @@ else
     echo "core_public docker network already exists"
 fi
 
+# CORE COMMONS: setup elastic search network
+if [[ $(sudo docker network ls | grep esnet | wc -l) = "0" ]]; then
+    echo "creating esnet docker network"
+    sudo docker network create esnet
+else
+    echo "esnet docker network already exists"
+fi
+
 
 
 # RUN THE CONSONANCE INSTALLER
@@ -422,6 +430,13 @@ CONFIG
     echo "You can run this script at another time to run the consonance installer"
   fi
 done
+
+
+
+
+
+
+
 
 # RUN THE REDWOOD INSTALLER
 run_redwood=''
@@ -813,6 +828,109 @@ CONFIG
    fi
 done
 
+
+# RUN THE ACTION INSTALLER
+run_action=''
+while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
+    echo "Would you like to run the action installer now? [Y/N]"
+    read run_action
+
+    if [ "${run_action^^}" = 'Y' ] ; then
+
+      #Read the config file if it exists and then show previous values...
+      if [ -f action_launcher_config/action.config ] ; then
+        source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" action_launcher_config/action.config)
+      fi
+
+
+      # Consonance - peek at consonance/config
+      consonance_access_token='consonance_access_token'
+      consonance_web_service_url='consonance_web_service_url'
+      if [ -f consonance/config ] ; then
+          consonance_access_token=$(cat consonance/config | grep 'token =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          consonance_web_service_url=$(cat consonance/config | grep 'base_path =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is the Consonance access token?" "$CONSONANCE_ACCESS_TOKEN" "Consonance access token" $consonance_access_token
+          ask_question "What is the Consonance web service URL?" "$CONSONANCE_WEB_SERVICE_URL" "Consonance web service URL" $consonance_web_service_url
+      fi
+
+      aws_region='aws_region'
+      aws_profile='aws_profile'
+      aws_access_key_id='aws_access_key_id'
+      aws_secret_access_key='aws_secret_access_key'
+      if [ -f consonance/aws.config ] ; then
+          aws_region=$(cat consonance/aws.config | grep 'region =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_access_key_id=$(cat consonance/aws.config | grep 'aws_access_key_id =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_secret_access_key=$(cat consonance/aws.config | grep 'aws_secret_access_key =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_profile="[default]"
+      else
+          ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+          ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+          ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
+          ask_question "What is the AWS region?" "$AWS_REGION" "AWS Region" $aws_region
+      fi
+
+      # redwood endpoint - peek at redwood/.env
+      redwood_server='redwood_server'
+      if [ -f redwood/.env ] ; then
+          redwood_server=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is your Redwood endpoint?" "$STORAGE_SERVER" "Redwood Server" $redwood_server
+      fi
+
+      # generate redwood access token
+      redwood_access_token='redwood_access_token'
+      if [ -f redwood/admin/bin/redwood ] ; then
+           redwood_access_token=$(redwood/admin/bin/redwood token create -u action_service -s 'aws.upload aws.download')
+      else
+          ask_question "What is your Redwood Access Token?" "$STORAGE_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
+      fi
+
+      elastic_search_server='elastic_search_server'
+      elastic_search_port='elastic_search_port'
+      # boardwalk endpoint - peek at boardwalk/.env
+      if [ -f boardwalk/.env ] ; then
+          elastic_search_server=$(cat boardwalk/.env | grep 'es_service=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          elastic_search_port='9200'
+      else
+          ask_question "What is your Elastic Search endpoint?" "$ELASTIC_SEARCH_SERVER" "Elastic Search Server" $elastic_search_server
+          ask_question "What is your Elastic Search endpoint port?" "$ELASTIC_SEARCH_PORT" "Elastic Search port" $elastic_search_port
+      fi
+
+      s3_touch_file_bucket='s3_touch_file_bucket'
+      ask_question "What is your AWS S3 touch file bucket?" "$TOUCH_FILE_DIRECTORY" "S3 touch file bucket name" $s3_touch_file_bucket
+
+
+      # Now write a config for this file.
+      [[ -f action_launcher_config/action.config ]] || mkdir -p action_launcher_config
+
+      cat > action_launcher_config/action.config <<CONFIG
+{
+"CONSONANCE_WEB_SERVICE_URL":"${consonance_web_service_url}",
+"CONSONANCE_ACCESS_TOKEN":"${consonance_access_token}",
+"STORAGE_ACCESS_TOKEN":"${redwood_access_token}",
+"STORAGE_SERVER":"${redwood_server}",
+"ELASTIC_SEARCH_SERVER":"${elastic_search_server}",
+"ELASTIC_SEARCH_PORT":"${elastic_search_port}",
+"AWS_PROFILE":"${aws_profile}",
+"AWS_REGION":"${aws_region}",
+"AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
+"AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}"
+}
+CONFIG
+      # template out stuff
+      mustache action_launcher_config/action.config action/conf/action.config.template > action/.env
+      #mustache action_launcher_config/action.config action/conf/aws.config.template > action/aws.config
+
+      cd action
+      sudo docker-compose -f action_compose.yml up -d
+      cd ..
+
+   elif [ "${run_action^^}" = 'N' ] ; then
+      echo "You can run this script at another time to run the action installer"
+   fi
+done
 
 
 # FINISHED INSTALLER

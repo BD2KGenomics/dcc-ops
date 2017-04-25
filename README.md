@@ -138,11 +138,11 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your Google Client Secret?`, put your Google Client Secret. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
-  * On question `What is your DCC Dashboard Host?`, put the domain name resolving to your Virtual Machine (e.g. `example.com`)
+  * On question `What is your DCC Dashboard Host?`, put the domain name resolving to your Virtual Machine (e.g. `example.com` your base URL mentioned above in the Redwood install)
   * On question `What is the user and group that should own the files from the metadata-indexer?`, type the `USER:GROUP` pair you want the files downloaded by the indexer to be owned by. The question will show the current `USER:GROUP` pair for the current home directory. Highly recommended to type the same value in there (e.g. `1000:1000`)
   * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
   * On question `What should the username be for the billing database?`, type the username for the billing database.
-  * On question `What should the username password be for the billing database?`, type some password for the billing database. 
+  * On question `What should the username password be for the billing database?`, type some password for the billing database.
   * On question `What is the AWS profile?`, type some random string (DEV, PROD)
   * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
   * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)

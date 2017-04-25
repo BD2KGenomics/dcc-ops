@@ -12,7 +12,7 @@ services:
       REDWOOD_ENDPOINT: "${redwood_server}"
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
+    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job"
     #command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/dcc-metadata-indexer/es-jsonls
@@ -26,7 +26,7 @@ services:
       - "${es_service}"
       - boardwalk-billing
     networks:
-      - esnet 
+      - esnet
       - billing
     restart: always
   dcc-dashboard-service:
@@ -218,11 +218,10 @@ networks:
   core_public:
     external: true
   esnet:
-    driver: bridge
+    external: true
   server:
     driver: bridge
   action:
     driver: bridge
   billing:
     driver: bridge
-

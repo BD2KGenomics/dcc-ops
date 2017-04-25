@@ -5,7 +5,7 @@ storage_access_token={{ STORAGE_ACCESS_TOKEN }}
 elastic_search_server={{ ELASTIC_SEARCH_SERVER }}
 elastic_search_port={{ ELASTIC_SEARCH_PORT }}
 touch_file_directory={{ TOUCH_FILE_DIRECTORY }}
-aws_secret_access_key={{AWS_SECRET_ACCESS_KEY}}
-aws_access_key_id={{AWS_ACCESS_KEY_ID}}
-aws_region={{AWS_REGION}}
+aws_secret_access_key={{ AWS_SECRET_ACCESS_KEY }}
+aws_access_key_id={{ AWS_ACCESS_KEY_ID }}
+aws_region={{ AWS_REGION }}
 

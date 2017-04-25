@@ -1,0 +1,141 @@
+FROM ubuntu:16.04
+
+# install Consonance services
+ENV CONSONANCE_VERSION=2.0.0-alpha.15
+
+#add user ubuntu with bash shell
+RUN useradd -ms /bin/bash ubuntu
+#allow ubuntu to have sudo privileges
+RUN usermod -aG sudo ubuntu
+
+# Update the APT cache
+RUN apt-get update \
+    && apt-get install -y \
+    python-software-properties \
+    software-properties-common \
+    cron \
+    curl \
+    git \
+    groff \
+    less \
+    python3.4 \
+    python2.7 \
+    python-pip \
+    sudo \
+    telnet \
+    wget \
+    vim \
+    && apt-get clean
+
+# grab oracle java (auto accept license)
+RUN add-apt-repository -y ppa:webupd8team/java \
+    && apt-get update \
+    && echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections \
+    && apt-get install -y oracle-java8-installer
+
+#Java should have been installed in the Dockerfile here 
+ENV JAVA_HOME="/usr/lib/jvm/java-8-oracle"
+
+#expose the port for accessing the Luigi server endpoint
+EXPOSE 8082
+
+# set up the path for the Consonance client
+WORKDIR /home/ubuntu/bin
+ENV PATH /home/ubuntu/bin:$PATH
+RUN chown ubuntu:ubuntu /home/ubuntu/bin 
+
+#RUN wget https://github.com/Consonance/consonance/releases/download/2.0.0-alpha.15/consonance -O ./consonance
+RUN wget https://github.com/Consonance/consonance/releases/download/"${CONSONANCE_VERSION}"/consonance -O ./consonance
+#allow the ubuntu user to run the Consonance client
+RUN chmod a+x consonance
+RUN chown ubuntu:ubuntu consonance
+
+
+ENV CONSONANCE_JAR_DIR=/home/ubuntu/.consonance/self-installs
+WORKDIR $CONSONANCE_JAR_DIR
+RUN chown -R ubuntu:ubuntu /home/ubuntu/.consonance
+
+RUN wget --no-verbose --no-check-certificate https://github.com/Consonance/consonance/releases/download/"${CONSONANCE_VERSION}"/consonance-client-"${CONSONANCE_VERSION}".jar -O ./consonance-client-"${CONSONANCE_VERSION}".jar
+RUN chmod a+x consonance-client-"${CONSONANCE_VERSION}".jar
+RUN chown ubuntu:ubuntu consonance-client-"${CONSONANCE_VERSION}".jar
+
+#install pip, tools
+RUN pip install --upgrade pip
+RUN pip install -U pip setuptools
+
+
+
+
+WORKDIR /tmp
+
+#install Luigi and components for recording Luigi history in case we implement task history
+COPY requirements.txt .
+RUN chown ubuntu:ubuntu requirements.txt
+#install Luigi and the SqlAlchemy toolkit for enabling Luigi task history in case we want it 
+RUN sudo pip install -r requirements.txt
+
+#get the crontab for ubuntu deciders
+COPY decider_cron.txt /tmp/deciders_crontab
+RUN chown ubuntu:ubuntu /tmp/deciders_crontab
+#install the crontab so that it runs under ubuntu
+#so the deciders are run by the ubuntu user
+RUN crontab -u ubuntu /tmp/deciders_crontab
+
+# Create the log file to be able to run tail for testing as root
+RUN touch /var/log/cron.log
+#set up log file for testing cron job under ubuntu
+RUN touch /tmp/decider_log
+RUN chmod 644 /tmp/decider_log
+RUN chown ubuntu:ubuntu /tmp/decider_log
+
+
+
+#get the crontab for ubuntu deciders
+COPY setup_decider_jobs.sh /home/ubuntu/setup_decider_jobs.sh
+RUN chmod a+x /home/ubuntu/setup_decider_jobs.sh
+RUN chown ubuntu:ubuntu /home/ubuntu/setup_decider_jobs.sh
+
+
+#setup the directory from where the Luigi decider scripts will be run
+ENV LUIGI_RUNS_PATH=/home/ubuntu/luigi_decider_runs
+WORKDIR ${LUIGI_RUNS_PATH}
+RUN chown -R ubuntu:ubuntu ${LUIGI_RUNS_PATH}
+
+#setup the virtual environment that the Luigi decider
+#crontab script uses
+RUN virtualenv luigienv
+ENV VIRTUAL_ENV_PATH=${LUIGI_RUNS_PATH}/luigienv/bin
+#make sure ubuntu owns the virtual env path
+RUN chown -R ubuntu:ubuntu ${LUIGI_RUNS_PATH}
+
+#install the Luigi pipeline decider scripts in the run directory
+COPY run_Luigi_Deciders.sh .
+RUN chown ubuntu:ubuntu run_Luigi_Deciders.sh
+RUN chmod a+x run_Luigi_Deciders.sh
+
+COPY RNA-Seq.py . 
+RUN chown ubuntu:ubuntu RNA-Seq.py
+
+
+
+
+#allow ubuntu (and all other users) to execute sudo without a password
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+#run everything from now on as ubuntu
+USER ubuntu
+
+#install AWS cli according to http://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html
+#install as user ubuntu so the cli is on ubuntu's path
+RUN curl -O https://bootstrap.pypa.io/get-pip.py
+RUN python3 get-pip.py --user
+RUN pip install awscli --upgrade --user
+ENV PATH /home/ubuntu/.local/bin:$PATH
+
+
+CMD ["/home/ubuntu/setup_decider_jobs.sh"]
+
+# Run the command on container startup in test mode
+#CMD sudo cron && sudo tail -f /tmp/decider_log
+##CMD sudo cron && sudo tail -f /var/log/cron.log
+

@@ -1,0 +1,5 @@
+boto3
+luigi==2.6.1
+sqlalchemy==1.1.9
+psycopg2==2.7.1
+virtualenv

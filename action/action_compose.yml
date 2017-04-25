@@ -3,7 +3,7 @@ version: '2'
 services:
   dcc-action:
     build:
-      context: ../../dcc-action-service/luigi_task_executor/
+      context: luigi_task_executor 
       dockerfile: Dockerfile_decider
       args:
         STORAGE_ACCESS_TOKEN: "${storage_access_token}"

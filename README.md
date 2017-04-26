@@ -91,6 +91,16 @@ Download the `consonance` command line from the Consonance releases page:
 
 https://github.com/Consonance/consonance/releases
 
+For example:
+
+```
+wget https://github.com/Consonance/consonance/releases/download/2.0.0-alpha.15/consonance
+sudo mv consonance /usr/local/bin/
+sudo chmod a+x /usr/local/bin/consonance
+# running the command will install the tool and prompt you to enter your token, please get the token after running install_bootstrap
+consonance
+```
+
 Follow the interactive directions for setting up this CLI.  You will need the elastic IP you setup previously (or, better yet, the "base domain" from above).
 
 ### Setup for Boardwalk

@@ -137,6 +137,7 @@ Once the above setup is done, clone this repository onto your server and run the
 The `install_bootstrap` script will ask you to configure each service interactively.
 
 * Consonance
+  * for the question asking "what ethernet device...?" you can find the device using the command `/sbin/ifconfig`. The device to use is the one associated with the private IP address of your AWS VM.
 * Redwood
   * Install in prod mode
   * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server elastic IP.

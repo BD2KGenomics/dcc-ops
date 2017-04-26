@@ -87,7 +87,7 @@ See the Consonance [README](consonance/README.md) for details.  Consonance assum
 
 You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.
 
-Download the command line from:
+Download the `consonance` command line from the Consonance releases page:
 
 https://github.com/Consonance/consonance/releases
 

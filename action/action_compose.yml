@@ -3,7 +3,7 @@ version: '2'
 services:
   dcc-action:
     build:
-      context: luigi_task_executor 
+      context: luigi_task_executor
       dockerfile: Dockerfile_decider
       args:
         STORAGE_ACCESS_TOKEN: "${storage_access_token}"
@@ -17,6 +17,7 @@ services:
         AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
         AWS_REGION: "${aws_region}"
     image: quay.io/ucsc_cgl/action-decider:1.0.0
+    container_name: "action-service"
     environment:
       STORAGE_ACCESS_TOKEN: "${storage_access_token}"
       STORAGE_SERVER: "${storage_server}"
@@ -31,7 +32,7 @@ services:
     restart: always
     ports:
       - "8082"
-    networks: 
+    networks:
       - esnet
 
 

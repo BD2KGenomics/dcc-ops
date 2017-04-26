@@ -87,6 +87,15 @@ See the Consonance [README](consonance/README.md) for details.  Consonance assum
 
 Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it.
 
+#### TODO:
+
+* Add info regarding what spot price, how to choose the right price,
+* Add message on the key name and key pair (ommit .pem suffix).
+* AWS region you check it by clicking on your instance and looking under prefix of the Availability Zone (i.e. us-east-1 for us-east-1d Availability Zone)
+* AWS zone, same as above but in this case the whole thing i.e. us-east-1d
+* Guide on choosing AWS instance type... make sure it matches your AMI
+* AMI, use an ubuntu 14.04 base box, you can use the official Ubuntu release.  You may need to make your own AMI with more storage! Needs to be in your region!  You may want to google to start with the official Ubuntu images for your region.
+
 #### Consonance CLI on the Host VM
 
 You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.

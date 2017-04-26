@@ -227,3 +227,5 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 
 * should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
+* "What is the AWS profile?" -> you don't need this, get rid of it
+* "What is the Luigi Server?" -> you will know this so you don't need to ask

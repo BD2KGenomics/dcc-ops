@@ -228,4 +228,9 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
 * "What is the AWS profile?" -> you don't need this, get rid of it
-* "What is the Luigi Server?" -> you will know this so you don't need to ask
+* "What is the Luigi Server?" -> you will know this so you don't need to ask... you can set this to "action-service" automatically
+* Consonance Address... should be consonance-webservice
+* Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
+* default values for Postgres DB for monitoring
+* css problem on boardwalk
+* the help page needs to be a template so the correct host names are used 

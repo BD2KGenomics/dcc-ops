@@ -24,5 +24,8 @@ done
 shift "$((OPTIND - 1))"
 
 for project in "$@"; do
-    docker exec -it redwood-auth-db psql -d dcc -U dcc_auth -c "update oauth_client_details set scope = '${site}.${project}.upload,${site}.${project}.download,' || scope where client_id='mgmt';"
+    # don't add project if already exists
+    if [[ $("${_REDWOOD_ROOT}/bin/redwood" project list | grep -c "${project}") -eq 0 ]]; then
+        docker exec -it redwood-auth-db psql -d dcc -U dcc_auth -c "update oauth_client_details set scope = '${site}.${project}.upload,${site}.${project}.download,' || scope where client_id='mgmt';"
+    fi
 done

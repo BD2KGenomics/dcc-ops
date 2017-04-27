@@ -2,28 +2,28 @@
 
 ## About
 
-This repository contains our Docker-compose and setup bootstrap scripts used to create a deployment of the [UCSC Genomic Institute's](http://ucsc-cgl.org) Cloud Commons implementation on AWS.  The system is designed to receive genomic data, run analysis at scale on the cloud, and return analyzed results to authorized users.  It uses, supports, and drives development of several key GA4GH APIs and open source projects. In many ways it is the generalization of the [PCAWG](https://dcc.icgc.org/pcawg) cloud infrastructure developed for that project.
+This repository contains our Docker-compose and setup bootstrap scripts used to create a deployment of the [UCSC Genomic Institute's](http://ucsc-cgl.org) Computational Genomics Platform for AWS.  The system is designed to receive genomic data, run analysis at scale on the cloud, and return analyzed results to authorized users.  It uses, supports, and drives development of several key GA4GH APIs and open source projects. In many ways it is the generalization of the [PCAWG](https://dcc.icgc.org/pcawg) cloud infrastructure developed for that project and a potential reference implementation for the [NIH Commons](https://datascience.nih.gov/commons) concept.
 
 ## Components
 
 The system has components fulfilling a range of functions, all of which are open source and can be used independently or together.
 
-![Cloud Commons Arch](docs/dcc-arch.png)
+![Computational Genomics Platform architecture](docs/dcc-arch.png)
 
 These components are setup with the install process available in this repository:
 
 * [Spinnaker](spinnaker/README.md): our data submission and validation system
 * [Redwood](redwood/README.md): our cloud data storage and indexer based on the ICGC Cloud Storage system
 * [Boardwalk](boardwalk/README.md): our file browsing portal on top of Redwood
-* [Consonance](consonance/README.md): our multi-cloud orchestration system
-* [Action Service](action/README.md): a Python-based toolkit for automating analysis
+* [Consonance](consonance/README.md): our multi-cloud workflow orchestration system
+* [Action Service](action/README.md): a Python-based toolkit for automating workflow execution
 
-These are related projects that are either already setup and available for use on the web (e.g. http://dockstore.org) or are used by components above (e.g. Toil workflows from Dockstore).
+These are related projects that are either already setup and available for use on the web or are used by components above.
 
 * [Dockstore](http://dockstore.org): our workflow and tool sharing platform
 * [Toil](https://github.com/BD2KGenomics/toil): our workflow engine, these workflows are shared via Dockstore
 
-## Launching the Commons
+## Installing the Platform
 
 These directions below assume you are using AWS.  We will include additional cloud instructions as `dcc-ops` matures.
 
@@ -39,8 +39,10 @@ Make sure you have:
 Use the AWS console or command line tool to create a host. For example:
 
 * Ubuntu Server 16.04
-* r4.large
+* r4.xlarge
 * 250GB disk
+
+We will refer to this as the host VM throughout the documentation below and it is the machine running all the Docker containers for each of the components below.
 
 You should make a note of your security group name and ID and ensure you can connect via ssh.
 
@@ -73,17 +75,23 @@ Redwood exposes storage, metadata, auth services. Each of these should be made s
 
 #### Create an AWS IAM Encryption Key
 * Go [here](http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and follow the instruction for making an AWS IAM Encryption key. Make sure you create it in same region where you created your VM!
-* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. _arn:aws:kms:us-east-1:862902209576:key/_*0aaad33b-7ead-44be-a56e-3d00c8777042*
+* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. *arn:aws:kms:us-east-1:862902209576:key/* **0aaad33b-7ead-44be-a56e-3d00c8777042**
 
 Now we're ready to install Redwood.
 
 ### Setup for Consonance
 
-You probably want to install the Consonance command line on the VM above so you can submit work.
+See the Consonance [README](consonance/README.md) for details.  Consonance assumes you have an SSH key created and uploaded to a location on your host VM.  Other than that, there are no additional pre-setup tasks.
+
+#### Consonance CLI on the Host VM
+
+You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.
 
 Download the command line from:
 
 https://github.com/Consonance/consonance/releases
+
+Follow the interactive directions for setting up this CLI.  You will need the elastic IP you setup previously (or, better yet, the "base domain" from above).
 
 ### Setup for Boardwalk
 
@@ -96,34 +104,38 @@ You need to create a Google Oauth2 app to enable Login and token download from t
 * Go to [Google's Developer Console](https://console.developers.google.com/).
 * On the upper left side of the screen, click on the drop down button.
 * Create a project by clicking on the plus sign on the pop-up window.
-* On the next pop up window, add a name for your project. 
+* On the next pop up window, add a name for your project.
 * Once you create it, click on the "Credentials" section on the left hand side.
 * Click on the "OAuth Consent Screen". Fill out a product name and choose an email for the Google Application. Fill the rest of the entries as you see fit for your purposes, or leave them blank, as they are optional. Save it.
 * Go to the "Credentials" tab. Click on the "Create Credentials" drop down menu and choose "OAuth Client ID".
-* Choose "Web Application" from the menu. Assign it a name. 
+* Choose "Web Application" from the menu. Assign it a name.
 * Under "Authorized JavaScript origins", enter `http://<YOUR_SITE>`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
 * Under "Authorized redirect URIs", enter `http://<YOUR_SITE>/gCallback`. Press Enter. Add a second entry, same as the first one, but use *https* instead of *http*
-* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there. 
+* Click "Create". A pop up window will appear with your Google Client ID and Google Client Secret. Save these. If you lose them, you can always go back to the Google Console, and click on your project; the information will be there.
 
-Please note: at this point, the dashboard only accepts login from emails with a 'ucsc.edu' domain. In the future, it will support different email domains. 
+Please note: at this point, the dashboard only accepts login from emails with a 'ucsc.edu' domain. In the future, it will support different email domains.
 
 ### Running the Installer
 
 Once the above setup is done, clone this repository onto your server and run the bootstrap script
 
+    # note, you may need to checkout the particular branch or release tag you are interested in...
     git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
-It will ask you to configure each service.
+#### Installer Question Notes
+
+The `install_bootstrap` script will ask you to configure each service interactively.
+
 * Consonance
 * Redwood
   * Install in prod mode
-  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server.
+  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server elastic IP.
   * Enter your AWS Key and Secret Key when requested. Redwood will use these to sign requests for upload and download to your S3 bucket
   * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
   * On question 'What is your AWS IAM KMS key ID?', put your encryption key ID (See 'Create an AWS IAM Encryption Key" above). If you don't want server-side encryption, you can leave this blank.
 * Boardwalk
-  * Install in dev mode
+  * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your Google Client Secret?`, put your Google Client Secret. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your DCC Dashboard Host?`, put the domain name resolving to your Virtual Machine (e.g. `example.com`)
@@ -131,20 +143,22 @@ It will ask you to configure each service.
   * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
   * On question `What should the username be for the billing database?`, type the username for the billing database.
   * On question `What should the username password be for the billing database?`, type some password for the billing database. 
-  * On question `What is the AWS profile?`, type some random string (DEV)
-  * On question `What is the AWS Access key ID?`, type some random string (DEV)
-  * On question `What is the AWS secret access key?`, type some random string (DEV)
-  * On question `What is the Luigi Server?`, type some random string (DEV)
+  * On question `What is the AWS profile?`, type some random string (DEV, PROD)
+  * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
+  * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)
+  * On question `What is the Consonance Address?`, type some random string (DEV, PROD)
+  * On question `What is the Consonance Token`, type some random string (DEV, PROD)
+  * On question `What is the Luigi Server?`, type some random string (DEV, PROD)
   * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
   * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.
-  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database. 
-  
+  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database.
+
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
 
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 
-## After Installation
+## Post-Installation
 
 ### Confirm Proper Function
 

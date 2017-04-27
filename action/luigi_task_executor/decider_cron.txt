@@ -1,0 +1,42 @@
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+#have cron use bash here and run the cron job using bash; in case #!/bin/bash missing in script
+SHELL=/bin/bash
+#crontab does not use the PATH from etc/environment so we have to set our 
+#own PATH so the consonance command and other tools can be found
+#in the decider scripts (this may also be done in the Dockerfile with ENV)
+PATH=/home/ubuntu/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+#run the decider cron job 'env' that will inject the needed environment variables
+#and run the decider script
+* * * * * env `cat /home/ubuntu/env_vars` /home/ubuntu/luigi_decider_runs/run_Luigi_Deciders.sh
+
+#test cron to see if it is working
+#* * * * * echo "cron job executed as $USER!" >> /tmp/decider_log 2>&1
+
+#test cron that will run cron job as $USER (not sure this works)
+#* * * * * su ubuntu -c 'echo "su cron job executed as $USER!" >> /tmp/decider_log 2>&1'
+#test cron for root
+#* * * * * echo "cron job executed!" >> /var/log/cron.log 2>&1
+# An empty line is required at the end of this file for a valid cron file.
+

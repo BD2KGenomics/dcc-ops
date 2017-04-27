@@ -59,7 +59,7 @@ if [[ $(check_container_by_name redwood-storage-server) -eq 1
     ]]; then
     status=${UP}
     # ping java code
-    $(docker run --net redwood_internal --rm --link redwood-storage-server appropriate/curl http://redwood-storage-server:5431/download/ping >/dev/null 2>&1) || status=${INCOMPLETE}
+    docker run --net redwood_internal --rm --link redwood-storage-server appropriate/curl http://redwood-storage-server:5431/download/ping >/dev/null 2>&1 || status=${INCOMPLETE}
 elif [[ $(check_container_by_name redwood-storage-server) -eq 1
             || $(check_container_by_name redwood-metadata-server) -eq 1
             || $(check_container_by_name redwood-auth-server) -eq 1

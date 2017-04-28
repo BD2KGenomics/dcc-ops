@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Usage: redwood bundle foreach yourscript
+# Summary: Run a bash script on each bundle in redwood
+# Help: Downloads each bundle's metadata.json (and optionally data too) and invokes `yourscript metadata.json data...`
+set -e
+
+echo "not yet implemented - if you want this make an issue"

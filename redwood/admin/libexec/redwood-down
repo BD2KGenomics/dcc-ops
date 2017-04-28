@@ -6,17 +6,6 @@
 # WARNING: This deletes the databases!
 set -e
 
-base_compose="${_REDWOOD_ROOT}/../base.yml"
-dev_compose="${_REDWOOD_ROOT}/../dev.yml"
-prod_compose="${_REDWOOD_ROOT}/../prod.yml"
-
-profile=$("${_REDWOOD_ROOT}/bin/redwood" status -v | cut -f 2)
-
-if [[ "${profile}" = "dev" ]]; then activated_compose="${dev_compose}";
-elif [[ "${profile}" = "prod" ]]; then activated_compose="${prod_compose}"
-else echo "error: unexpected profile: ${profile}: expected dev or prod" && exit 1
-fi
-
 cd "${_REDWOOD_ROOT}/.."
 set -x
-docker-compose -f "${base_compose}" -f "${activated_compose}" down
+docker-compose -f base.yml -f prod.yml -f dev.yml down

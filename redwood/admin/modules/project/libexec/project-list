@@ -20,4 +20,4 @@ while getopts ":s:" opt; do
 done
 shift "$((OPTIND - 1))"
 
-sudo docker exec -it redwood-auth-db psql -t -d dcc -U dcc_auth -c "select scope from oauth_client_details where client_id='mgmt';" | tr ',' "\n" | tr -d ' \t' | grep -e "^${site}" | sed "s/^${site}\.//" | sed 's/\.download$//' | sed 's/\.upload$//' | grep -v download | grep -v upload | uniq | sort
+docker exec -it redwood-auth-db psql -t -d dcc -U dcc_auth -c "select scope from oauth_client_details where client_id='mgmt';" | tr ',' "\n" | tr -d ' \t' | grep -e "^${site}" | sed "s/^${site}\.//" | sed 's/\.download$//' | sed 's/\.upload$//' | grep -v download | grep -v upload | uniq | sort

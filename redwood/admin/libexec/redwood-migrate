@@ -1,36 +1,77 @@
 #!/usr/bin/env bash
-# Usage: redwood migrate {auth|metadata} [migration...]
-# Summary: Recover redwood data from backup
-# Help: This comand updates the auth or metadata db by running the given migration
-
-
-function migrate_auth() {
-    #migration="$1"
-    echo "migration not yet implemented"
-}
-
-function migrate_metadata() {
-    migration="$1"
-    docker cp "${migration}" redwood-metadata-db:/tmp
-    docker exec -it redwood-metadata-db mongo --norc --quiet dcc-metadata "/tmp/$(basename "${migration}")"
-}
+# Usage: redwood migrate {auth|metadata} backup
+# Summary: Run auth/metadata migrations
+# Help: This comand recommends and runs auth or metadata db migrations. `backup` should be the filename of the backup that the current data was recovered from.
+#
+# Migrations are in dcc-ops/redwood/admin/migrations. Each migration should be an executable script with name matching redwood-{auth|metadata}-migration-YYYY-mm-dd...
+#
+# OPTIONS
+#   -y    non-interactive: run all migrations as recommended
 
 function main() {
-    # do migration
-    migration="${2}"
-    echo "Running migration: ${migration}"
+    # parse options
+    yes=0
+    while getopts ":y" opt; do
+        case $opt in
+            y)
+                yes=1
+                ;;
+            \?)
+                echo "error: invalid option: -$OPTARG" >&2
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+
+
+    # parse service
     case "${1^^}" in
         A|AUTH)
-            migrate_auth "${migration}"
+            service=auth
             ;;
         M|META|METADATA)
-            migrate_metadata "${migration}"
+            service=metadata
             ;;
         *)
             echo "error: invalid service: ${1}: must be one of auth or metadata"
             exit 1
             ;;
     esac
+
+    # do migrations
+    backup="${2}"
+    migrations_dir="${_REDWOOD_ROOT}/migrations"
+    if [[ "${service}" = "auth" ]]; then
+        migrated_date="$(echo "${backup}" | sed -E 's/^([0-9-]{10}).*/\1/g')"
+    else
+        migrated_date="$(echo "${backup}" | sed -E 's/metadata-backup-([0-9]{4})([0-9]{2})([0-9]{2}).*/\1-\2-\3/g')"
+    fi
+
+    for migration in "${migrations_dir}"/${service}-migration-*; do # bash glob is alphabetical
+        migration_date="$(echo "${migration}" | sed -E "s/${service}-migration-([0-9-]{10}).*/\1/g")"
+        if [[ "${migrated_date}" < "${migration_date}" ]]; then # recommend this migration
+            run_migration=-1
+            while [[ "${run_migration}" = -1 ]]; do
+                if [[ ${yes} -eq 1 ]]; then
+                    run_migration=yes
+                else
+                    echo "Migration $(basename "${migration}") is recommended. Would you like to run it? [Y/N]"
+                    read -r run_migration
+                fi
+                if [[ "${run_migration^^}" =~ ^(Y|YES)$ ]]; then
+                    bash "${migration}"
+                elif [[ "${run_migration}" =~ ^(N|NO)$ ]]; then
+                    run_migration=0
+                else
+                    run_migration=-1
+                fi
+            done
+        fi
+        # TODO update migrated_date to date of migration just run
+    done
+    migrate=1
+    # end pasted
+
     echo "Done"
 }
 

@@ -7,8 +7,9 @@ set -e
 cmd="${_REDWOOD_ROOT}/bin/redwood up"
 
 # uninstall just in case
-"${_REDWOOD_ROOT}/bin/redwood uninstall"
+"${_REDWOOD_ROOT}/bin/redwood" uninstall
 
 # install
 sed "\$i${cmd}" /etc/rc.local > /etc/rc.local.new
 mv /etc/rc.local.new /etc/rc.local
+chmod a+x /etc/rc.local

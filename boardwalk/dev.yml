@@ -60,11 +60,13 @@ services:
       - server
       - action
       - billing
+      - login
     ports:
       - "9200"
     links:
       - db
       - boardwalk-billing
+      - login-db
     restart: always
   dcc-dashboard:
     #image: quay.io/ucsc_cgl/dashboard:1.0.0
@@ -92,6 +94,9 @@ services:
     networks:
       - esnet
       - server
+      - login
+    links:
+      - login-db
     restart: always
   nginx:
     build: nginx-dev
@@ -200,7 +205,18 @@ services:
     networks:
       - action
     restart: always
-
+  login-db:
+    image: postgres:9.6-alpine
+    container_name: "login-db"
+    environment:
+      POSTGRES_PASSWORD: "${postgres_password}"
+      POSTGRES_USER: "${postgres_user}"
+      POSTGRES_DB: "${postgres_db}"
+    volumes:
+      - login_postgres:/var/lib/postgresql/data
+    networks:
+      - login
+    restart: always
   boardwalk-billing:
     image: postgres:9.6-alpine
     container_name: "boardwalk-billing"
@@ -223,6 +239,7 @@ volumes:
     driver: local
   postgres:
   billing_postgres:
+  login_postgres:
   dashboard1:
     driver: local
   boardwalk1:
@@ -235,6 +252,8 @@ networks:
   server:
     driver: bridge
   action:
+    driver: bridge
+  login:
     driver: bridge
   billing:
     driver: bridge

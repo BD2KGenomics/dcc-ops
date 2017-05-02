@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+set -e
 source $(dirname $( realpath ${BASH_SOURCE[0]} ) )/lib/b-log.sh
 
 function check_setup {
-    [[ $(sudo docker ps | tail -n +2 | wc -l) -ge 8 ]] || (echo "the required docker containers don't seem to be running" && exit 1)
+    [[ $(sudo docker ps | tail -n +2 | wc -l) -ge 7 ]] || (echo "the required docker containers don't seem to be running" && exit 1)
     # TODO count number of dashboard containers
     # TODO more rigorous checking
 }
@@ -13,7 +14,7 @@ function main {
     LOG_LEVEL_ALL
 
     [[ -d outputs ]] && sudo rm -rf outputs && INFO "deleted old outputs"
-    
+
     access_token=$(../redwood/admin/bin/redwood token create)
     INFO "generated testing access token: ${access_token}"
 
@@ -39,7 +40,7 @@ function main {
     sudo rm -rf outputs
 
     # TODO: run indexer, etc.
-    
+
     INFO "TEST SUCCESS"
 }
 

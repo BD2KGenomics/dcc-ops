@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Usage: redwood bundle redact
+# Summary: Redact a bundle
+# Help: Redact a bundle
+set -e
+
+echo "not yet implemented - if you want this make an issue"

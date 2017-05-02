@@ -35,6 +35,9 @@ services:
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
       LUIGI_SERVER: "${luigi_server}"
+      L_POSTGRES_USER: "${login_user}"
+      L_POSTGRES_PASSWORD: "${login_password}"
+      L_POSTGRES_DB: "${login_db}"
       POSTGRES_USER: "${postgres_user}"
       POSTGRES_PASSWORD: "${postgres_password}"
       POSTGRES_DB: "${postgres_db}"
@@ -48,6 +51,7 @@ services:
       B_POSTGRES_USER: "${billing_user}"
       B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
     #image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
@@ -91,6 +95,9 @@ services:
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
       DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
       DCC_ACTION_SERVICE: "${dcc_action_service}"
+      L_POSTGRES_USER: "${login_user}"
+      L_POSTGRES_PASSWORD: "${login_password}"
+      L_POSTGRES_DB: "${login_db}"
     networks:
       - esnet
       - server
@@ -209,9 +216,9 @@ services:
     image: postgres:9.6-alpine
     container_name: "login-db"
     environment:
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_DB: "${postgres_db}"
+      POSTGRES_PASSWORD: "${login_password}"
+      POSTGRES_USER: "${login_user}"
+      POSTGRES_DB: "${login_db}"
     volumes:
       - login_postgres:/var/lib/postgresql/data
     networks:

@@ -4,12 +4,16 @@ version: '2'
 services:
   postgres:
     image: postgres:9.5
+    networks:
+      - default
 
   rabbitmq:
     image: rabbitmq:3.5.6-management
     ports:
       - "15672:15672"
       - "5672:5672"
+    networks:
+      - default
 
   webservice:
     build:
@@ -24,6 +28,9 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
+      - esnet
 
   coordinator:
     build:
@@ -34,6 +41,8 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
 
   provisioner:
     build:
@@ -44,6 +53,8 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
 
   client:
     build:
@@ -61,6 +72,14 @@ services:
       - PGUSER=postgres
       - PGPASSWORD=postgres
       - PGDATABASE=postgres
+    networks:
+      - default
 
 volumes:
   log_volume:
+
+networks:
+  esnet:
+    external: true
+  default:
+    driver: bridge

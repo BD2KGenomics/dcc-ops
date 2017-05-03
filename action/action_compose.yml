@@ -16,6 +16,8 @@ services:
         AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
         AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
         AWS_REGION: "${aws_region}"
+        DOCKSTORE_SERVER_URL: "${dockstore_server_url}"
+        DOCKSTORE_TOKEN: "${dockstore_token}"
     image: quay.io/ucsc_cgl/action-decider:1.0.0
     container_name: "action-service"
     environment:
@@ -29,6 +31,8 @@ services:
       AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
       AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
       AWS_REGION: "${aws_region}"
+      DOCKSTORE_SERVER_URL: "${dockstore_server_url}"
+      DOCKSTORE_TOKEN: "${dockstore_token}"
     volumes:
       - ~/dcc-action-service/logs:/home/ubuntu/logs
     restart: always

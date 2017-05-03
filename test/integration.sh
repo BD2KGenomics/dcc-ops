@@ -24,7 +24,7 @@ function main {
     INFO "doing upload with $(pwd)/manifest.tsv"
     sudo docker run --rm -it -e ACCESS_TOKEN=${access_token} -e REDWOOD_ENDPOINT=${redwood_endpoint} \
          -v $(pwd)/manifest.tsv:/dcc/manifest.tsv -v $(pwd)/samples:/samples -v $(pwd)/outputs:/outputs \
-         quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --force-upload /dcc/manifest.tsv
+         quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --skip-submit --force-upload /dcc/manifest.tsv
 
     object_id=$(cat outputs/receipt.tsv | tail -n +3 | head -n 1 | cut -f 20)
     bundle_id=$(cat outputs/receipt.tsv | tail -n +3 | head -n 1 | cut -f 19)

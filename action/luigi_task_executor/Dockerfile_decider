@@ -115,9 +115,7 @@ RUN chmod a+x run_Luigi_Deciders.sh
 
 COPY RNA-Seq.py . 
 RUN chown ubuntu:ubuntu RNA-Seq.py
-
-
-
+RUN chmod a+x RNA-Seq.py
 
 #allow ubuntu (and all other users) to execute sudo without a password
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers

@@ -33,19 +33,14 @@ class ConsonanceTask(luigi.Task):
 
     workflow_version = luigi.Parameter(default="must be defined")
 
-#    target_tool = luigi.Parameter(default="quay.io/ucsc_cgl/rnaseq-cgl-pipeline:3.2.0-1")
     target_tool_prefix = luigi.Parameter(default="quay.io/ucsc_cgl/rnaseq-cgl-pipeline")
     
 
     target_tool_url = luigi.Parameter(default="https://dockstore.org/containers/quay.io/ucsc_cgl/rnaseq-cgl-pipeline")
     workflow_type = luigi.Parameter(default="rna_seq_quantification")
     image_descriptor = luigi.Parameter("must be defined")
+    tool_dockstore_id = luigi.Parameter("must be defined")
 
-
-    #TODO figure out how to download these from a different storage system 
-    starfilename = luigi.Parameter(default="redwood://"+self.redwood_host+"/d0117ff1-cf53-43a0-aaab-cb15809fbb49/ca79c317-e410-591f-b802-3a0be6b658b7/starIndex_hg38_no_alt.tar.gz")
-    rsemfilename = luigi.Parameter(default="redwood://"+self.redwood_host+"/d0117ff1-cf53-43a0-aaab-cb15809fbb49/b850460d-23c0-57a4-9d4b-af60726476a5/rsem_ref_hg38_no_alt.tar.gz")
-    kallistofilename = luigi.Parameter(default="redwood://"+self.redwood_host+"/d0117ff1-cf53-43a0-aaab-cb15809fbb49/c92d30f3-2731-56b1-b8e4-41d09b1bb2dc/kallisto_hg38.idx")
 
     disable_cutadapt = luigi.Parameter(default="false")
     save_bam = luigi.Parameter(default="true")
@@ -69,6 +64,19 @@ class ConsonanceTask(luigi.Task):
 
     parent_uuids = luigi.ListParameter(default=["parent_uuid"])
 
+    rsem_file_name = luigi.Parameter(default="must input rsem file name")
+    rsem_bundle_uuid = luigi.Parameter(default="uuid")
+    rsem_file_uuid = luigi.Parameter(default="bundle_uuid")
+
+    star_file_name = luigi.Parameter(default="must input star file name")
+    star_bundle_uuid = luigi.Parameter(default="uuid")
+    star_file_uuid = luigi.Parameter(default="bundle_uuid")
+
+    kallisto_file_name = luigi.Parameter(default="must input kaillisto file name")
+    kallisto_bundle_uuid = luigi.Parameter(default="uuid")
+    kallisto_file_uuid = luigi.Parameter(default="bundle_uuid")
+
+
     tmp_dir = luigi.Parameter(default='/datastore')
 
     submitter_sample_id = luigi.Parameter(default='must input submitter sample id')
@@ -76,7 +84,7 @@ class ConsonanceTask(luigi.Task):
     touch_file_path = luigi.Parameter(default='must input touch file path')
 
     #Consonance will not be called in test mode
-    test_mode = luigi.BooleanParameter(default = False)
+    test_mode = luigi.BoolParameter(default = False)
 
 
     def run(self):
@@ -88,32 +96,26 @@ class ConsonanceTask(luigi.Task):
         # parameterized JSON file so that consonance can read it.
         # Consonance cannot read a file on S3 so we have to have
         # a local copy of the JSON
-        local_json_dir = "/datastore/" + self.touch_file_path
+        local_json_dir = "/tmp/" + self.touch_file_path
         cmd = ["mkdir", "-p", local_json_dir ]
-        print(cmd)
+        cmd_str = ''.join(cmd)
+        print(cmd_str)
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError as e:
             #If we get here then the called command return code was non zero
-            print("\nERROR!!! MAKING LOCAL JSON DIR : " + cmd + " FAILED !!!", file=sys.stderr)
+            print("\nERROR!!! MAKING LOCAL JSON DIR : " + cmd_str + " FAILED !!!", file=sys.stderr)
             print("\nReturn code:" + str(e.returncode), file=sys.stderr)
             return_code = e.returncode
             sys.exit(return_code)
         except Exception as e:
-            print("\nERROR!!! MAKING LOCAL JSON DIR : " + cmd + " THREW AN EXCEPTION !!!", file=sys.stderr)
+            print("\nERROR!!! MAKING LOCAL JSON DIR : " + cmd_str + " THREW AN EXCEPTION !!!", file=sys.stderr)
             print("\nException information:" + str(e), file=sys.stderr)
             #if we get here the called command threw an exception other than just
             #returning a non zero return code, so just set the return code to 1
             return_code = 1
             sys.exit(return_code)
 
-
-
-#        cmd = '''mkdir -p /datastore/%s''' % (self.touch_file_path)
-#        print(cmd)
-#        result = subprocess.call(cmd, shell=True)
-#        if result != 0:
-#            print("PROBLEMS MAKING LOCAL JSON DIR")
 
         #convert the meta data to a python data structure
         meta_data = json.loads(self.meta_data_json)
@@ -189,26 +191,26 @@ class ConsonanceTask(luigi.Task):
 "rsem":
   {
     "class": "File",
-    "path": "%s"
+    "path": "redwood://%s/%s/%s/%s"
   },
-            ''' %  (self.rsemfilename)
+            ''' %  (self.redwood_host, self.rsem_bundle_uuid, self.rsem_file_uuid, self.rsem_file_name)
 
         json_str += '''
 "star":
   {
     "class": "File",
-    "path": "%s"
+    "path": "redwood://%s/%s/%s/%s"
   },
-            ''' % (self.starfilename)
+            ''' % (self.redwood_host, self.star_bundle_uuid, self.star_file_uuid, self.star_file_name)
 
 
         json_str += '''
 "kallisto":
   {
     "class": "File",
-    "path": "%s"
+    "path": "redwood://%s/%s/%s/%s"
   },
-            ''' % (self.kallistofilename)
+            ''' % (self.redwood_host, self.kallisto_bundle_uuid, self.kallisto_file_uuid, self.kallisto_file_name)
 
         json_str += '''
 "save-wiggle": %s,
@@ -340,25 +342,25 @@ class ConsonanceTask(luigi.Task):
         p_local.close()
 
         # execute consonance run, parse the job UUID
-#        cmd = ["consonance", "run", "--image-descriptor", self.image_descriptor, "--flavour", "c4.8xlarge", "--run-descriptor", self.save_dockstore_json().path]
-        cmd = ["consonance", "run", "--image-descriptor", self.image_descriptor, "--flavour", "c4.8xlarge", "--run-descriptor", self.save_dockstore_json_local().path]
-
+#        cmd = ["consonance", "run", "--image-descriptor", self.image_descriptor, "--flavour", "c4.8xlarge", "--run-descriptor", self.save_dockstore_json_local().path]
+        cmd = ["consonance", "run",  "--tool-dockstore-id", self.tool_dockstore_id, "--flavour", "c4.8xlarge", "--run-descriptor", self.save_dockstore_json_local().path]
+        cmd_str = ''.join(cmd)
         if self.test_mode == False:
             print("** SUBMITTING TO CONSONANCE **")
-            print("executing:"+ ' '.join(cmd))
+            print("executing:"+ cmd_str)
             print("** WAITING FOR CONSONANCE **")
 
             try:
                 consonance_output_json = subprocess.check_output(cmd)
             except subprocess.CalledProcessError as e:
                 #If we get here then the called command return code was non zero
-                print("\nERROR!!! CONSONANCE CALL: " + cmd + " FAILED !!!", file=sys.stderr)
+                print("\nERROR!!! CONSONANCE CALL: " + cmd_str + " FAILED !!!", file=sys.stderr)
                 print("\nReturn code:" + str(e.returncode), file=sys.stderr)
 
                 return_code = e.returncode
                 sys.exit(return_code)
             except Exception as e:
-                print("\nERROR!!! CONSONANCE CALL: " + cmd + " THREW AN EXCEPTION !!!", file=sys.stderr)
+                print("\nERROR!!! CONSONANCE CALL: " + cmd_str + " THREW AN EXCEPTION !!!", file=sys.stderr)
                 print("\nException information:" + str(e), file=sys.stderr)
                 #if we get here the called command threw an exception other than just
                 #returning a non zero return code, so just set the return code to 1
@@ -374,7 +376,7 @@ class ConsonanceTask(luigi.Task):
             else:
                 print("ERROR: COULD NOT FIND CONSONANCE JOB UUID IN CONSONANCE OUTPUT!", file=sys.stderr)
         else:
-            print("TEST MODE: Consonance command would be:"+ ' '.join(cmd))
+            print("TEST MODE: Consonance command would be:"+ cmd_str)
             meta_data["consonance_job_uuid"] = 'no consonance id in test mode'
 
         #remove the local parameterized JSON file that
@@ -416,7 +418,7 @@ class ConsonanceTask(luigi.Task):
         #luigi.LocalTarget('%s/consonance-jobs/RNASeq_3_1_x_Coordinator/fastq_gz/%s/dockstore_tool.json' % (self.tmp_dir, task_uuid))
         #return S3Target('s3://cgl-core-analysis-run-touch-files/consonance-jobs/RNASeq_3_1_x_Coordinator/%s/dockstore_tool.json' % ( task_uuid))
         #return S3Target('%s/%s_dockstore_tool.json' % (self.touch_file_path, self.submitter_sample_id ))
-        return luigi.LocalTarget('/datastore/%s/%s_dockstore_tool.json' % (self.touch_file_path, self.submitter_sample_id ))
+        return luigi.LocalTarget('/tmp/%s/%s_dockstore_tool.json' % (self.touch_file_path, self.submitter_sample_id ))
 
     def save_dockstore_json(self):
         #task_uuid = self.get_task_uuid()
@@ -436,7 +438,8 @@ class RNASeqCoordinator(luigi.Task):
     es_index_port = luigi.Parameter(default='9200')
     redwood_token = luigi.Parameter("must_be_defined")
     redwood_host = luigi.Parameter(default='storage.ucsc-cgl.org')
-    image_descriptor = luigi.Parameter("must be defined") 
+    image_descriptor = luigi.Parameter("must be defined")
+    tool_dockstore_id = luigi.Parameter("must be defined")
     dockstore_tool_running_dockstore_tool = luigi.Parameter(default="quay.io/ucsc_cgl/dockstore-tool-runner:1.0.8")
     tmp_dir = luigi.Parameter(default='/datastore')
     max_jobs = luigi.Parameter(default='1')
@@ -447,14 +450,13 @@ class RNASeqCoordinator(luigi.Task):
     touch_file_bucket = luigi.Parameter(default="must be input") 
 
     #Consonance will not be called in test mode
-    test_mode = luigi.BooleanParameter(default = False)
+    test_mode = luigi.BoolParameter(default = False)
 
 
     def requires(self):
         print("\n\n\n\n** COORDINATOR REQUIRES **")
 
         # now query the metadata service so I have the mapping of bundle_uuid & file names -> file_uuid
-#        print(str("https://"+self.redwood_host+":8444/entities?page=0"))
         print(str("metadata."+self.redwood_host+"/entities?page=0"))
 
 #hack to get around none self signed certificates
@@ -462,25 +464,20 @@ class RNASeqCoordinator(luigi.Task):
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
 
-#        json_str = urlopen(str("https://"+self.redwood_host+":8444/entities?page=0"), context=ctx).read()
-        json_str = urlopen(str("metadata."+self.redwood_host+"/entities?page=0"), context=ctx).read()
- 
-##        json_str = urlopen(str("https://"+self.redwood_host+":8444/entities?page=0")).read()
+        json_str = urlopen(str("https://metadata."+self.redwood_host+"/entities?page=0"), context=ctx).read()
+
         metadata_struct = json.loads(json_str)
         print("** METADATA TOTAL PAGES: "+str(metadata_struct["totalPages"]))
         for i in range(0, metadata_struct["totalPages"]):
             print("** CURRENT METADATA TOTAL PAGES: "+str(i))
-            json_str = urlopen(str("metadata."+self.redwood_host+"/entities?page="+str(i)), context=ctx).read()
-#            json_str = urlopen(str("https://"+self.redwood_host+":8444/entities?page="+str(i)), context=ctx).read()
-##            json_str = urlopen(str("https://"+self.redwood_host+":8444/entities?page="+str(i))).read()
+            json_str = urlopen(str("https://metadata."+self.redwood_host+"/entities?page="+str(i)), context=ctx).read()
             metadata_struct = json.loads(json_str)
             for file_hash in metadata_struct["content"]:
                 self.bundle_uuid_filename_to_file_uuid[file_hash["gnosId"]+"_"+file_hash["fileName"]] = file_hash["id"]
 
         # now query elasticsearch
-        es = Elasticsearch([{'host': self.es_index_host, 'port': self.es_index_port}])
-        # see jqueryflag_alignment_qc
-        # curl -XPOST http://localhost:9200/analysis_index/_search?pretty -d @jqueryflag_alignment_qc
+        print("setting up elastic search Elasticsearch([\"http:\/\/"+self.es_index_host+":"+self.es_index_port+"]") 
+        es = Elasticsearch(['http://'+self.es_index_host+":"+self.es_index_port])
         res = es.search(index="analysis_index", body={"query" : {"bool" : {"should" : [{"term" : { "flags.normal_rna_seq_cgl_workflow_3_0_x" : "false"}},{"term" : {"flags.tumor_rna_seq_cgl_workflow_3_0_x" : "false" }}],"minimum_should_match" : 1 }}}, size=5000)
 
         listOfJobs = []
@@ -490,26 +487,39 @@ class RNASeqCoordinator(luigi.Task):
             print("\n\n\nDonor uuid:%(donor_uuid)s Center Name:%(center_name)s Program:%(program)s Project:%(project)s" % hit["_source"])
             print("Got %d specimens:" % len(hit["_source"]["specimen"]))
             
-#            if hit["_source"]["program"] != "SU2C" or hit["_source"]["project"] != "WCDT":
-#                continue
-#            if hit["_source"]["program"] != "Treehouse":
-#                continue
-            if hit["_source"]["program"] == "PROTECT_NBL":
+            #DEBUGGING ONLY!!!!
+            if(hit["_source"]["program"] != "RNA-Seq-CHR6-TEST"):
                 continue
 
-#            if hit["_source"]["project"] != "QC":
-#                continue
+            disable_cutadapt = 'false'
+            if(hit["_source"]["project"] == "CHR6"):
+                rsem_json = urlopen(str("https://metadata."+self.redwood_host+"/entities?fileName=rsem_ref_chr6.tar.gz"), context=ctx).read()
+                star_json = urlopen(str("https://metadata."+self.redwood_host+"/entities?fileName=starIndex_chr6.tar.gz"), context=ctx).read()
+                disable_cutadapt = 'true'
+                print("project is:CHR6")
+            else:
+                rsem_json = urlopen(str("https://metadata."+self.redwood_host+"/entities?fileName=rsem_ref_hg38_no_alt.tar.gz"), context=ctx).read()
+                star_json = urlopen(str("https://metadata."+self.redwood_host+"/entities?fileName=starIndex_hg38_no_alt.tar.gz"), context=ctx).read()
 
-#            if "D_rnaseqTest_hcb" not in hit["_source"]["submitter_donor_id"]:
-#                continue
+            kallisto_json = urlopen(str("https://metadata."+self.redwood_host+"/entities?fileName=kallisto_hg38.idx"), context=ctx).read()
 
+            kallisto_data = json.loads(kallisto_json)
+            print(str(kallisto_data))
+            kallisto_bundle_uuid = kallisto_data["content"][0]["gnosId"]
+            kallisto_file_uuid = kallisto_data["content"][0]["id"]
+            kallisto_file_name = kallisto_data["content"][0]["fileName"]
 
-#            if(hit["_source"]["center_name"] == 'EGAD00001002680' or 
-#               hit["_source"]["center_name"] == 'EGAD00001000356' or
-#               hit["_source"]["center_name"] == 'EGAD00001001666' or
-#               hit["_source"]["center_name"] == 'phs0000709.v1.p1'):
-#                 continue
+            rsem_data = json.loads(rsem_json)
+            print(str(rsem_data))
+            rsem_bundle_uuid = rsem_data["content"][0]["gnosId"]
+            rsem_file_uuid = rsem_data["content"][0]["id"]
+            rsem_file_name = rsem_data["content"][0]["fileName"]
 
+            star_data = json.loads(star_json)
+            print(str(star_data))
+            star_bundle_uuid = star_data["content"][0]["gnosId"]
+            star_file_uuid = star_data["content"][0]["id"]
+            star_file_name = star_data["content"][0]["fileName"]
 
             for specimen in hit["_source"]["specimen"]:
                print("Next sample of %d samples:" % len(specimen["samples"]))
@@ -576,15 +586,9 @@ class RNASeqCoordinator(luigi.Task):
                                    re.match("^Primary tumour - |^Recurrent tumour - |^Metastatic tumour - |^Cell line -", specimen["submitter_specimen_type"]) and \
                                    re.match("^RNA-Seq$", specimen["submitter_experimental_design"])))) ):
 
-                            
-#                            touch_file_path = os.path.join(self.touch_file_path_prefix, hit["_source"]["center_name"] + "_" + hit["_source"]["program"] \
-#                                                                    + "_" + hit["_source"]["project"] + "_" + hit["_source"]["submitter_donor_id"] \
-#                                                                    + "_" + specimen["submitter_specimen_id"])
 
-#                           touch_file_path_prefix = os.path.join("s3:/", "cgl-core-analysis-run-touch-files", "consonance-jobs", "RNASeq_3_1_x_Coordinator", "3_1_3")
                             workflow_version_dir = self.workflow_version.replace('.', '_') 
-#                            touch_file_path_prefix = "cgl-core-analysis-run-touch-files/consonance-jobs/RNASeq_Coordinator/" + workflow_version_dir
-                            touch_file_path_prefix = "self.touch_file_bucket/consonance-jobs/RNASeq_Coordinator/" + workflow_version_dir
+                            touch_file_path_prefix = self.touch_file_bucket+"/consonance-jobs/RNASeq_Coordinator/" + workflow_version_dir
                             touch_file_path = touch_file_path_prefix+"/"+hit["_source"]["center_name"]+"_"+hit["_source"]["program"] \
                                                                     +"_"+hit["_source"]["project"]+"_"+hit["_source"]["submitter_donor_id"] \
                                                                     +"_"+specimen["submitter_specimen_id"]
@@ -713,14 +717,20 @@ class RNASeqCoordinator(luigi.Task):
                                     print("total of {} files in this {} job; job {} of {}".format(str(len(paired_files) + (len(tar_files) + len(single_files))), 
                                                                                              hit["_source"]["program"], str(len(listOfJobs)+1), str(self.max_jobs)))
                                     listOfJobs.append(ConsonanceTask(redwood_host=self.redwood_host, redwood_token=self.redwood_token, \
-                                         es_index_host=self.es_index_host, es_index_port=es.index_port, \
-                                         image_descriptor=self.image_descriptor, dockstore_tool_running_dockstore_tool=self.dockstore_tool_running_dockstore_tool, \
+                                         image_descriptor=self.image_descriptor, tool_dockstore_id=self.tool_dockstore_id, \
+                                         dockstore_tool_running_dockstore_tool=self.dockstore_tool_running_dockstore_tool, \
                                          parent_uuids = parent_uuids.keys(), \
+
+                                         rsem_file_name = rsem_file_name, rsem_bundle_uuid = rsem_bundle_uuid, rsem_file_uuid = rsem_file_uuid, \
+                                         star_file_name = star_file_name, star_bundle_uuid = star_bundle_uuid, star_file_uuid = star_file_uuid, \
+                                         kallisto_file_name = kallisto_file_name, kallisto_bundle_uuid = kallisto_bundle_uuid, kallisto_file_uuid = kallisto_file_uuid, \
+                                         disable_cutadapt = disable_cutadapt, \
                                          single_filenames=single_files, single_file_uuids = single_file_uuids, single_bundle_uuids = single_bundle_uuids, \
                                          paired_filenames=paired_files, paired_file_uuids = paired_file_uuids, paired_bundle_uuids = paired_bundle_uuids, \
                                          tar_filenames=tar_files, tar_file_uuids = tar_file_uuids, tar_bundle_uuids = tar_bundle_uuids, \
                                          tmp_dir=self.tmp_dir, submitter_sample_id = submitter_sample_id, meta_data_json = meta_data_json, \
-                                         touch_file_path = touch_file_path, workflow_version = self.workflow_version, test_mode=self.test_mode))
+                                         touch_file_path = touch_file_path, workflow_version = self.workflow_version, test_mode = self.test_mode))
+
         print("total of {} jobs; max jobs allowed is {}\n\n".format(str(len(listOfJobs)), self.max_jobs))
 
         # these jobs are yielded to
@@ -743,7 +753,7 @@ class RNASeqCoordinator(luigi.Task):
         ts_str = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
         #return luigi.LocalTarget('%s/consonance-jobs/RNASeq_3_1_x_Coordinator/RNASeqTask-%s.txt' % (self.tmp_dir, ts_str))
         workflow_version_dir = self.workflow_version.replace('.', '_') 
-        return S3Target('s3://cgl-core-analysis-run-touch-files/consonance-jobs/RNASeq_Coordinator/{}/RNASeqTask-{}.txt'.format(workflow_version_dir, ts_str))
+        return S3Target('s3://'+self.touch_file_bucket+'/consonance-jobs/RNASeq_Coordinator/{}/RNASeqTask-{}.txt'.format(workflow_version_dir, ts_str))
 
     def fileToUUID(self, input, bundle_uuid):
         return self.bundle_uuid_filename_to_file_uuid[bundle_uuid+"_"+input]

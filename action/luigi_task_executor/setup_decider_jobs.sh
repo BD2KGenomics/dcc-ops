@@ -14,8 +14,13 @@ set -o errexit
 : ${AWS_REGION:=aws_region}
 
 mkdir -p /home/ubuntu/.aws
-aws_str=$'[default]\naws_secret_access_key = '"${AWS_SECRET_ACCESS_KEY}"$'\naws_access_key_id = '"${AWS_ACCESS_KEY_ID}"$'\nregion = '"${AWS_REGION}"
+aws_str=$'[default]\nregion = '"${AWS_REGION}"
 echo "$aws_str" > /home/ubuntu/.aws/config
+
+mkdir -p /home/ubuntu/.aws
+aws_str=$'[default]\naws_secret_access_key = '"${AWS_SECRET_ACCESS_KEY}"$'\naws_access_key_id = '"${AWS_ACCESS_KEY_ID}"
+echo "$aws_str" > /home/ubuntu/.aws/credentials
+
 
 #set variables to default values if they are not already set
 #http://stackoverflow.com/questions/2013547/assigning-default-values-to-shell-variables-with-a-single-command-in-bash

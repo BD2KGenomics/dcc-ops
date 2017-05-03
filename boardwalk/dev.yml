@@ -255,7 +255,7 @@ networks:
   core_public:
     external: true
   esnet:
-    driver: bridge
+    external: true
   server:
     driver: bridge
   action:

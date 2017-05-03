@@ -15,6 +15,7 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
   redwood-auth-db:
     container_name: redwood-auth-db
     image: postgres:9.6.2
@@ -29,6 +30,7 @@ services:
       - MGMT_CLIENT_SECRET=${mgmt_client_secret}
     networks:
       - internal
+    restart: always
   redwood-metadata-server:
     container_name: redwood-metadata-server
     environment:
@@ -42,11 +44,13 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
   redwood-metadata-db:
     container_name: redwood-metadata-db
     image: mongo:3.4.2
     networks:
       - internal
+    restart: always
   redwood-storage-server:
     container_name: redwood-storage-server
     volumes:
@@ -67,6 +71,7 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
 
 networks:
   core_public:

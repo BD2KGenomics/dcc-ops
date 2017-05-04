@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# Usage: sudo redwood uninstall
-# Summary: Unschedule redwood from starting on reboot
-# Help: Remove `redwood up` from /etc/rc.local. Probably requires sudo.
-set -e
-
-sed '/redwood up/d' /etc/rc.local > /etc/rc.local.new
-mv /etc/rc.local.new /etc/rc.local

@@ -1,3 +1,5 @@
+dockstore_server_url={{ DOCKSTORE_SERVER_URL }}
+dockstore_token={{ DOCKSTORE_TOKEN }}
 consonance_web_service_url={{ CONSONANCE_WEB_SERVICE_URL }}
 consonance_access_token={{ CONSONANCE_ACCESS_TOKEN }}
 storage_server={{ STORAGE_SERVER }}

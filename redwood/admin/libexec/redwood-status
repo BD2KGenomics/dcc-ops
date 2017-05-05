@@ -18,6 +18,7 @@
 #   none - redwood is down
 #
 # OPTIONS
+# -p ping redwood storage server endpoint
 # -v enable verbose output
 set -e
 
@@ -38,9 +39,13 @@ function check_container_by_name() {
     docker ps | awk 'NF>1{print $NF}' | grep -ce "^${name}$"
 }
 
+ping=0
 quiet=1
-while getopts ":v" opt; do
+while getopts ":vp" opt; do
     case $opt in
+        p)
+            ping=1
+            ;;
         v)
             quiet=0
             ;;
@@ -58,8 +63,9 @@ if [[ $(check_container_by_name redwood-storage-server) -eq 1
         && $(check_container_by_name redwood-auth-db) -eq 1
     ]]; then
     status=${UP}
-    # ping java code
-    docker run --net redwood_internal --rm --link redwood-storage-server appropriate/curl http://redwood-storage-server:5431/download/ping >/dev/null 2>&1 || status=${INCOMPLETE}
+    if [[ $ping -eq 1 ]]; then # ping java code
+        docker run --net redwood_internal --rm --link redwood-storage-server appropriate/curl http://redwood-storage-server:5431/download/ping >/dev/null 2>&1 || status=${INCOMPLETE}
+    fi
 elif [[ $(check_container_by_name redwood-storage-server) -eq 1
             || $(check_container_by_name redwood-metadata-server) -eq 1
             || $(check_container_by_name redwood-auth-server) -eq 1

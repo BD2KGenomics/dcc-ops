@@ -63,4 +63,4 @@ RUN wget --no-verbose https://raw.githubusercontent.com/CancerCollaboratory/dock
 
 ENV PATH="/home/ubuntu/bin:${PATH}"
 
-CMD ["dockerize", "-wait", "tcp://webservice:8080", "-timeout", "60s", "/home/ubuntu/init_client.sh"]
+CMD ["dockerize", "-wait", "tcp://consonance-webservice:8080", "-timeout", "60s", "/home/ubuntu/init_client.sh"]

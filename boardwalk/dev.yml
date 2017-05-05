@@ -35,6 +35,7 @@ services:
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
       LUIGI_SERVER: "${luigi_server}"
+      LUIGI_PORT: "${luigi_port}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"

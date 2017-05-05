@@ -784,6 +784,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
 
       luigi_server="http://${luigi_server}"
+      luigi_port='8082'
 
       consonance_address='consonance_address'
       ask_question "What is the Consonance Address?" "$CONSONANCE_ADDRESS" "Consonance Address" $consonance_address
@@ -832,6 +833,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
 "LUIGI_SERVER":"${luigi_server}",
+"LUIGI_PORT":"${luigi_port}",
 "POSTGRES_USER":"${postgres_user}",
 "POSTGRES_PASSWORD":"${postgres_password}",
 "POSTGRES_DB":"${postgres_db}"

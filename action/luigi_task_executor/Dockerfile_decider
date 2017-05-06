@@ -50,7 +50,6 @@ RUN wget https://github.com/Consonance/consonance/releases/download/"${CONSONANC
 RUN chmod a+x consonance
 RUN chown ubuntu:ubuntu consonance
 
-
 ENV CONSONANCE_JAR_DIR=/home/ubuntu/.consonance/self-installs
 WORKDIR $CONSONANCE_JAR_DIR
 RUN chown -R ubuntu:ubuntu /home/ubuntu/.consonance

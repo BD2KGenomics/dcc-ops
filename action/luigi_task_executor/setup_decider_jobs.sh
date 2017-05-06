@@ -42,6 +42,15 @@ echo "$consonance_str" > /home/ubuntu/.consonance/config
 env_str=$'STORAGE_SERVER='"${STORAGE_SERVER}"$'\nSTORAGE_ACCESS_TOKEN='"${STORAGE_ACCESS_TOKEN}"$'\nELASTIC_SEARCH_SERVER='"${ELASTIC_SEARCH_SERVER}"$'\nELASTIC_SEARCH_PORT='"${ELASTIC_SEARCH_PORT}"$'\nTOUCH_FILE_DIRECTORY='"${TOUCH_FILE_DIRECTORY}"$'\nAWS_REGION='"${AWS_REGION}"
 echo "$env_str" > /home/ubuntu/env_vars
 
+#set variables to default values if they are not already set
+#http://stackoverflow.com/questions/2013547/assigning-default-values-to-shell-variables-with-a-single-command-in-bash
+: ${DOCKSTORE_SERVER_URL:=dockstore_server_url}
+: ${DOCKSTORE_TOKEN:=dockstore_token}
+#set up Consonance credentials so the deciders can call Consonance to launch the instances
+mkdir -p /home/ubuntu/.dockstore
+dockstore_str=$'token:'"${DOCKSTORE_TOKEN}"$'\nserver-url:'"${DOCKSTORE_SERVER_URL}"
+echo "$dockstore_str" > /home/ubuntu/.dockstore/config
+
 
 #start the Luigi daemon in the background
 #so the action service that monitors tasks

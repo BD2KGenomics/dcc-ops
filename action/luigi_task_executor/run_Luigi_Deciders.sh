@@ -14,6 +14,7 @@ set -o errexit
 : ${ELASTIC_SEARCH_SERVER:=elastic_search_server}
 : ${ELASTIC_SEARCH_PORT:=elastic_search_port}
 : ${TOUCH_FILE_DIRECTORY:=touch_file_directory}
+: ${AWS_REGION:=aws_region}
 
 #crontab does not use the PATH from etc/environment so we have to set our 
 #own PATH so the consonance command and other tools can be found
@@ -45,10 +46,6 @@ set +o nounset
 source "${VIRTUAL_ENV_PATH}"/activate
 set -o nounset
 
-#echo "REDWOOD_ACCESS_TOKEN= contents of ${LUIGI_RUNS_PATH}/redwood_access_token.txt" >> ${LOG_FILE_PATH}/cron_decider_log.txt
-#get the storage system access token from the file that holds it
-#REDWOOD_ACCESS_TOKEN=$(<"${LUIGI_RUNS_PATH}"/redwood_access_token.txt)
-
 
 #start up the Luigi scheduler daemon in case it is not already running
 #so we can monitor job status
@@ -60,10 +57,12 @@ sudo luigid --background
 echo "Running Luigi RNA-Seq decider" >> ${LOG_FILE_PATH}/cron_decider_log.txt
 
 # run the decider
+#use the '--test-mode' switch to skip running Consonance
 #This will be the new run commmand:
-PYTHONPATH="${DECIDER_SOURCE_PATH}" luigi --module RNA-Seq RNASeqCoordinator --dockstore-tool-running-dockstore-tool "quay.io/ucsc_cgl/dockstore-tool-runner:1.0.8" --workflow-version "3.2.1-1" --touch-file-bucket ${TOUCH_FILE_DIRECTORY} --redwood-host ${STORAGE_SERVER} --redwood-token ${STORAGE_ACCESS_TOKEN} --es-index-host ${ELASTIC_SEARCH_SERVER} --es-index-port ${ELASTIC_SEARCH_PORT}  --tmp-dir /datastore --max-jobs 4 --test-mode > "${LOG_FILE_PATH}"/cron_log_RNA-Seq_decider_stdout.txt 2> "${LOG_FILE_PATH}"/cron_log_RNA-Seq_decider_stderr.txt
+PYTHONPATH="${DECIDER_SOURCE_PATH}" luigi --module RNA-Seq RNASeqCoordinator --dockstore-tool-running-dockstore-tool "quay.io/ucsc_cgl/dockstore-tool-runner:1.0.10" --workflow-version "3.2.1-1" --touch-file-bucket ${TOUCH_FILE_DIRECTORY} --redwood-host ${STORAGE_SERVER} --redwood-token ${STORAGE_ACCESS_TOKEN} --es-index-host ${ELASTIC_SEARCH_SERVER} --es-index-port ${ELASTIC_SEARCH_PORT} --vm-region ${AWS_REGION} --tmp-dir /datastore --max-jobs 2  > "${LOG_FILE_PATH}"/cron_log_RNA-Seq_decider_stdout.txt 2> "${LOG_FILE_PATH}"/cron_log_RNA-Seq_decider_stderr.txt
 
 #These are log file messages used for testing: 
+'''
 echo -e "\n\n"
 echo "${now} DEBUG!! run of luigi decider!!!" >> ${LOG_FILE_PATH}/logfile.txt
 echo "executing consonance --version test" >> ${LOG_FILE_PATH}/logfile.txt
@@ -82,7 +81,7 @@ java -version >> ${LOG_FILE_PATH}/logfile.txt 2>&1
 
 echo "executing aws test" >> ${LOG_FILE_PATH}/logfile.txt
 aws   >> ${LOG_FILE_PATH}/logfile.txt 2>&1
-
+'''
 
 
 

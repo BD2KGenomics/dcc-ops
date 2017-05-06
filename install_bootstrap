@@ -568,7 +568,7 @@ CONFIG
               cd redwood
               sudo admin/bin/redwood up
 
-              sudo admin/bin/redwood install
+              #sudo admin/bin/redwood install
               echo "Installed redwood to start on boot. To undo this you can run : $ sudo $(pwd)/redwood/admin/bin/redwood uninstall"
               cd ..
           elif [[ "${launch_redwood^^}" = 'N' ]]; then

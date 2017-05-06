@@ -152,12 +152,12 @@ The `install_bootstrap` script will ask you to configure each service interactiv
 * Consonance
   * For the question asking "what ethernet device...?" you can find the device using the command `/sbin/ifconfig`. The device to use is the one associated with the private IP address of your AWS VM.
   * For the question "What cloud environment are you working in?", use _AWS_ for the moment.
-  * For the question "What is the path to the pem key file you will use to authenticate in this environment?", please input the path to your pem key you loaded into the VM from the _Consonance Setup_ section. Use an absolute path. 
+  * For the question "What is the path to the pem key file you will use to authenticate in this environment?", please input the path to your pem key you loaded into the VM from the _Consonance Setup_ section. Use an absolute path.
   * For the question "What is the name of this key?", type the name of the key that from the question above. Make sure you ommit the suffix (e.g. if the key was _mykey.pem_, you would enter _mykey_).
   * For question "What is your Security Group?", type the name of the security group that was configured for your VM (On the AWS console, you can find it by clicking on your instance. Then under _Description_, look at _Security groups_).
   * For question "What is your AWS max spot price?", choose the maximum spot price you are willing to pay per instance per hour for instances spawn by consonance.
   * For question "What is your AWS region (e.g. us-east-1 for Virginia)?", type the region for your instance. You can check the code for the region you are using [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#ecr_region).
-  * For question "What is your AWS zone within the selected region (e.g. us-east-1c for the us-east-1 region)?", you can check your AWS zone by clicking on your instance, and then under _Description_, look for _Availability zone_. 
+  * For question "What is your AWS zone within the selected region (e.g. us-east-1c for the us-east-1 region)?", you can check your AWS zone by clicking on your instance, and then under _Description_, look for _Availability zone_.
   * For question "What is your AWS instance type (e.g. m1.xlarge)?", type the type of instance you want consonance to spawn up. You can check the types of instances [here](http://www.ec2instances.info/) (use the entry under the _API Name_ column).
   * For question "What is your AWS image ..." use the _AMI ID_ created during the _Consonance Setup_ section.
 * Redwood
@@ -176,15 +176,15 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question `How should the database for billing should be called?`, type the name to be assigned to the billing database.
   * On question `What should the username be for the billing database?`, type the username for the billing database.
   * On question `What should the username password be for the billing database?`, type some password for the billing database.
-  * On question `What is the AWS profile?`, type some random string (DEV, PROD)
-  * On question `What is the AWS Access key ID?`, type some random string (DEV, PROD)
-  * On question `What is the AWS secret access key?`, type some random string (DEV, PROD)
-  * On question `What is the Consonance Address?`, type some random string (DEV, PROD)
-  * On question `What is the Consonance Token`, type some random string (DEV, PROD)
-  * On question `What is the Luigi Server?`, type some random string (DEV, PROD)
-  * On question `What is the Postgres Database name for the action service?`, type the name to be assigned to the action service database.
-  * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database.
-  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database.
+  * On question `What is the AWS profile?`, your AWS username
+  * On question `What is the AWS Access key ID?`, your AWS key used for Redwood etc
+  * On question `What is the AWS secret access key?`, your AWS secret key used for Redwood etc
+  * On question `What is the Consonance Address?`, should be "consonance-webservice:8080"
+  * On question `What is the Consonance Token`, default dev token is "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+  * On question `What is the Luigi Server?`, should be "action-service"
+  * On question `What is the Postgres Database name for the action service?`, should be "monitor"
+  * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database. e.g. "monitor"
+  * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database.  e.g. "monitor"
 
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
@@ -192,6 +192,20 @@ The `install_bootstrap` script will ask you to configure each service interactiv
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 
 ## Post-Installation
+
+### TODO
+
+Here are things we need to explain how to do post install:
+
+* first of all, how to go to the website and confirm things are working e.g. https://ops-dev.ucsc-cgl.org or whatever the domain name is
+* how to associate a token with a user email so token download works
+    * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
+* user log in via google, retrieve token
+* upload reference data for RNASeq-CGL
+* upload sample fastq data
+* trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html
+* monitor running of Consonance logs and worker nodes to see running data
+* download RNASeq-CGL analysis results from the portal
 
 ### Confirm Proper Function
 
@@ -241,4 +255,4 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * Consonance Address... should be consonance-webservice
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
 * default values for Postgres DB for monitoring
-* the help page needs to be a template so the correct host names are used 
+* the help page needs to be a template so the correct host names are used

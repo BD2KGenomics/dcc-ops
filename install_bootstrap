@@ -565,14 +565,18 @@ CONFIG
       while [[ "${launch_redwood}" = "" ]]; do
           read -ep $'Are you ready to launch redwood now? [Y/N] \n' launch_redwood
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
-              # remove old redwood data volumes if they exist
+              cd redwood
+
+              # remove old redwood instance and data volumes if they exist
+              echo "Removing old redwood containers, volumes, etc. if they exist"
+              sudo admin/bin/redwood down
               redwood_data_volumes=$(sudo docker volume ls | grep 'redwood_redwood-.*-data' | awk '{print $2}')
               if [[ ! -z ${redwood_data_volumes} ]]; then
                   sudo docker volume rm ${redwood_data_volumes}
               fi
 
               # start redwood
-              cd redwood
+              echo "Starting redwood"
               sudo admin/bin/redwood up
 
               sudo admin/bin/redwood install

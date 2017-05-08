@@ -567,7 +567,7 @@ CONFIG
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
               # remove old redwood data volumes if they exist
               redwood_data_volumes=$(sudo docker volume ls | grep 'redwood_redwood-.*-data' | awk '{print $2}')
-              if [[ -z ${redwood_data_volumes} ]]; then
+              if [[ ! -z ${redwood_data_volumes} ]]; then
                   sudo docker volume rm ${redwood_data_volumes}
               fi
 

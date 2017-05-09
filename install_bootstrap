@@ -951,6 +951,8 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
       s3_touch_file_bucket='s3_touch_file_bucket'
       ask_question "What is your AWS S3 touch file bucket?" "$TOUCH_FILE_DIRECTORY" "S3 touch file bucket name" $s3_touch_file_bucket
 
+      dockstore_token='0'
+      dockstore_server_url='https://dockstore.org:8443'
 
       # Now write a config for this file.
       [[ -f action_launcher_config/action.config ]] || mkdir -p action_launcher_config
@@ -967,7 +969,9 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
 "AWS_REGION":"${aws_region}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
-"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}"
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}",
+"DOCKSTORE_SERVER_URL":"${dockstore_server_url}",
+"DOCKSTORE_TOKEN:"${dockstore_token}"
 }
 CONFIG
       # template out stuff

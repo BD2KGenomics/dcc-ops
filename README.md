@@ -185,10 +185,21 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question `What is the Postgres Database name for the action service?`, should be "monitor"
   * On question `What is the Postgres Database user for the action service?`, type the username to be assigned to the the action service database. e.g. "monitor"
   * On question `What is the Postgres Database password for the action service?`, type the password to be assigned to the action service database.  e.g. "monitor"
-
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
-
+* Action
+  * On the question `What is the Consonance access token?` enter your Consonance access token
+  * On the question `What is the AWS Access key ID?`, your AWS key used for storage system
+  * On the question `What is the AWS secret access key?`, your AWS secret key used for the storage system
+  * On the question `What is the AWS profile?`, your AWS username
+  * On the question `What is the AWS region?`, your AWS region
+  * On the question `What is your Redwood endpoint?`, enter the endpoint for the storage system, e.g. `myurl.com`. Referred to as `base URL` above
+  * On the question `What is your Redwood Access Token?`, enter your storage system access token
+  * On the question `What is your Elastic Search endpoint?`, enter your Elastic Search endpoint, e.g. `elasticsearch1`
+  * On the question `What is your Elastic Search endpoint port?`, enter the port number, e.g. `9200`
+  * On the question `What is your AWS S3 touch file bucket?`, enter the name of the AWS bucket where touch files will be written
+  
+  
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
 
 ## Post-Installation
@@ -201,11 +212,10 @@ Here are things we need to explain how to do post install:
 * how to associate a token with a user email so token download works
     * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
 * user log in via google, retrieve token
-* upload reference data for RNASeq-CGL, the original reference data is:
-    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/ca79c317-e410-591f-b802-3a0be6b658b7/starIndex_hg38_no_alt.tar.gz
-    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/b850460d-23c0-57a4-9d4b-af60726476a5/rsem_ref_hg38_no_alt.tar.gz
-    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/c92d30f3-2731-56b1-b8e4-41d09b1bb2dc/kallisto_hg38.idx
-    * these will need to go to a public place, and we should give both download/upload manifests
+* Get the reference data used by the RNASeq-CGL pipeline:
+*    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 
+* Test data inputs for the RNASeq-CGL pipeline are locate here: https://github.com/UCSC-Treehouse/pipelines/tree/master/samples 
+* upload reference data for RNASeq-CGL to the storage system
     * see `test/rnaseq-cgl-refdata`
     * e.g. `sudo docker run --rm -it -e ACCESS_TOKEN=`cat token.txt` -e REDWOOD_ENDPOINT=ops-dev.ucsc-cgl.org -v $(pwd)/outputs:/outputs -v `pwd`:/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --force-upload --skip-submit  /dcc/data/manifest.tsv`
 * update the decider manually to point to these new reference URLs (via exec into the Docker container)

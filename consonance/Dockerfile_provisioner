@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y \
     python-software-properties \
+    python-pip \
     software-properties-common \
     git \
     telnet \
@@ -13,8 +14,14 @@ RUN apt-get update \
 
 RUN apt-get install software-properties-common \
     && apt-add-repository ppa:ansible/ansible \
-    && apt-get update \
-    && apt-get install -y ansible
+    && apt-get update \ 
+    && apt-get install -y libffi-dev python-dev libssl-dev
+#    && apt-get install -y ansible=2.2.1.0-1
+
+#Install PIP and then ansible.
+#Doing this because the latest version was setting ANSIBLE_SSH_CONTROL_PATH to None, so ssh.py was failing.
+RUN pip install ansible==2.2.1.0
+    
 
 # grab oracle java (auto accept licence)
 RUN add-apt-repository -y ppa:webupd8team/java \
@@ -63,4 +70,4 @@ RUN rm -f /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
 
 # TODO: 1) update the above to have my AWS creds in it and 2) create the admin user in postgres db
 # Waiting for postgres and rabbitmq services
-CMD ["dockerize", "-wait", "tcp://webservice:8080", "-timeout", "60s", "./init_provisioner.sh"]
+CMD ["dockerize", "-wait", "tcp://consonance-webservice:8080", "-timeout", "60s", "./init_provisioner.sh"]

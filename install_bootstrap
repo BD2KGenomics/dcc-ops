@@ -734,8 +734,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       redwood_access_token=$(sudo redwood/admin/bin/redwood token create -u indexer -s 'aws.upload aws.download')
       #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
-      dcc_dashboard_host='dcc_dashboard_host'
-      ask_question "What is your DCC Dashboard Host?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+      #dcc_dashboard_host='dcc_dashboard_host'
+      #ask_question "What is your DCC Dashboard Host (base URL)?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+      dcc_dashboard_host=$redwood_server
 
 #      dcc_dashboard_port='dcc_dashboard_port'
 #      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port
@@ -765,8 +766,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #      dcc_letsencrypt_email='dcc_letsencrypt_email'
 #      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
 
-      user_group='user_group'
-      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
+      #user_group='user_group'
+      #ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
+      user_group=$(stat -c '%u:%g' $HOME)
 
 #      es_service='es_service'
 #      ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
@@ -774,47 +776,66 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #      database_url='database_url'
 #      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
 
+      #billing_db='billing_db'
+      #ask_question "How should the database for billing should be called?" "$BILLING_DB" "Billing Database" $billing_db
       billing_db='billing_db'
-      ask_question "How should the database for billing should be called?" "$BILLING_DB" "Billing Database" $billing_db
 
+      #billing_user='billing_user'
+      #ask_question "What should the username be for the billing database?" "$BILLING_USER" "Billing User" $billing_user
       billing_user='billing_user'
-      ask_question "What should the username be for the billing database?" "$BILLING_USER" "Billing User" $billing_user
 
-      billing_password='billing_password'
-      ask_question "What should the username password be for the billing database?" "$BILLING_PASSWORD" "Billing User Password" $billing_password
+      #billing_password='billing_password'
+      #ask_question "What should the username password be for the billing database?" "$BILLING_PASSWORD" "Billing User Password" $billing_password
+      echo "generating billing_db postgresql (postgres) password"
+      billing_password="$(generate_password)"
 
       database_url="postgresql://${billing_user}:${billing_password}@boardwalk-billing:5432/${billing_db}"
 
       aws_profile='aws_profile'
       ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
+      #aws_profile=$(cat redwood/.env | grep 'email=' | sed 's/[^=]*=//')
 
-      aws_access_key_id='aws_access_key_id'
-      ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+      #aws_access_key_id='aws_access_key_id'
+      #ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+      aws_access_key_id=$(cat redwood/.env | grep 'access_key=' | sed 's/[^=]*=//')   
+ 
+      #aws_secret_access_key='aws_secret_access_key'
+      #ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+      aws_secret_access_key=$(cat redwood/.env | grep 'secret_key=' | sed 's/[^=]*=//')
 
-      aws_secret_access_key='aws_secret_access_key'
-      ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+      #luigi_server='luigi_server'
+      #ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
 
-      luigi_server='luigi_server'
-      ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
-   
-      luigi_server="http://${luigi_server}"     
+      luigi_server="http://action-service"
+      luigi_port='8082'
 
-      consonance_address='consonance_address'
-      ask_question "What is the Consonance Address?" "$CONSONANCE_ADDRESS" "Consonance Address" $consonance_address
-    
-      consonance_address="http://${consonance_address}"
+      #consonance_address='consonance_address'
+      #ask_question "What is the Consonance Address?" "$CONSONANCE_ADDRESS" "Consonance Address" $consonance_address
 
-      consonance_token='consonance_token'
-      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
+      consonance_address="http://consonance-webservice:8080"
 
-      postgres_db='postgres_db'
-      ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
+#      consonance_token='consonance_token'
+#      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
+      consonance_token=$(cat consonance/config | grep 'token =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
-      postgres_user='postgres_user'
-      ask_question "What is the Postgres Database user for the action service?" "$POSTGRES_USER" "Postgres Database User Action Service" $postgres_user
+      #postgres_db='postgres_db'
+      #ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
+      postgres_db='monitor'      
 
-      postgres_password='postgres_password'
-      ask_question "What is the Postgres Database password for the action service?" "$POSTGRES_PASSWORD" "Postgres Database Password Action Service" $postgres_password
+      #postgres_user='postgres_user'
+      #ask_question "What is the Postgres Database user for the action service?" "$POSTGRES_USER" "Postgres Database User Action Service" $postgres_user
+      postgres_user='monitor'
+
+      #postgres_password='postgres_password'
+      #ask_question "What is the Postgres Database password for the action service?" "$POSTGRES_PASSWORD" "Postgres Database Password Action Service" $postgres_password
+      echo "generating monitor postgresql (postgres) password"
+      postgres_password="$(generate_password)"
+      
+      #Setting up the database vars for login 
+      login_user='login-user'
+      login_db='login-db'
+      echo "generating monitor postgresql (postgres) password"
+      login_password="$(generate_password)"      
 
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
@@ -846,9 +867,13 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
 "LUIGI_SERVER":"${luigi_server}",
+"LUIGI_PORT":"${luigi_port}",
 "POSTGRES_USER":"${postgres_user}",
 "POSTGRES_PASSWORD":"${postgres_password}",
-"POSTGRES_DB":"${postgres_db}"
+"POSTGRES_DB":"${postgres_db}",
+"LOGIN_POSTGRES_USER":"${login_user}",
+"LOGIN_POSTGRES_DB":"${login_db}",
+"LOGIN_POSTGRES_PASSWORD":"${login_password}"
 }
 CONFIG
       # template out stuff
@@ -936,6 +961,8 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
       s3_touch_file_bucket='s3_touch_file_bucket'
       ask_question "What is your AWS S3 touch file bucket?" "$TOUCH_FILE_DIRECTORY" "S3 touch file bucket name" $s3_touch_file_bucket
 
+      dockstore_token='0'
+      dockstore_server_url='https://dockstore.org:8443'
 
       # Now write a config for this file.
       [[ -f action_launcher_config/action.config ]] || mkdir -p action_launcher_config
@@ -952,7 +979,9 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
 "AWS_REGION":"${aws_region}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
-"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}"
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}",
+"DOCKSTORE_SERVER_URL":"${dockstore_server_url}",
+"DOCKSTORE_TOKEN":"${dockstore_token}"
 }
 CONFIG
       # template out stuff

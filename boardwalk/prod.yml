@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:2.0.1
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.2
     #build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"
@@ -35,6 +35,10 @@ services:
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
       LUIGI_SERVER: "${luigi_server}"
+      LUIGI_PORT: "${luigi_port}"
+      L_POSTGRES_USER: "${login_user}"
+      L_POSTGRES_PASSWORD: "${login_password}"
+      L_POSTGRES_DB: "${login_db}"
       POSTGRES_USER: "${postgres_user}"
       POSTGRES_PASSWORD: "${postgres_password}"
       POSTGRES_DB: "${postgres_db}"
@@ -44,14 +48,12 @@ services:
       CONSONANCE_ADDRESS: "${consonance_address}"
       CONSONANCE_TOKEN: "${consonance_token}"
       CONSONANCE_ROOT: "place_holder"
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_DB: "${postgres_db}"
       B_POSTGRES_PASSWORD: "${billing_password}"
       B_POSTGRES_USER: "${billing_user}"
       B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
-    image: quay.io/ucsc_cgl/dashboard-service:1.0.1
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
+    image: quay.io/ucsc_cgl/dashboard-service:1.0.2
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
     #build: dcc-dashboard-service
@@ -63,21 +65,23 @@ services:
       - server
       - action
       - billing
+      - login
     ports:
       - "9200"
     links:
       - db
       - boardwalk-billing
+      - login-db
     restart: always
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:1.0.1
+    image: quay.io/ucsc_cgl/dashboard:1.0.2
     #build: dcc-dashboard
     ports:
       - "80"
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
-      - dashboard1:/app
+#      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
     environment:
@@ -92,9 +96,15 @@ services:
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
       DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
       DCC_ACTION_SERVICE: "${dcc_action_service}"
+      L_POSTGRES_USER: "${login_user}"
+      L_POSTGRES_PASSWORD: "${login_password}"
+      L_POSTGRES_DB: "${login_db}"
     networks:
       - esnet
       - server
+      - login
+    links:
+      - login-db
     restart: always
   nginx:
     build: nginx-image
@@ -128,6 +138,7 @@ services:
       - "3000"
     volumes:
       - boardwalk1:/usr/src/app
+    restart: always
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
     container_name: "${es_service}"
@@ -187,7 +198,18 @@ services:
     networks:
       - action
     restart: always
-
+  login-db:
+    image: postgres:9.6-alpine
+    container_name: "login-db"
+    environment:
+      POSTGRES_PASSWORD: "${login_password}"
+      POSTGRES_USER: "${login_user}"
+      POSTGRES_DB: "${login_db}"
+    volumes:
+      - login_postgres:/var/lib/postgresql/data
+    networks:
+      - login
+    restart: always
   boardwalk-billing:
     image: postgres:9.6-alpine
     container_name: "boardwalk-billing"
@@ -210,6 +232,7 @@ volumes:
     driver: local
   postgres:
   billing_postgres:
+  login_postgres:
   dashboard1:
     driver: local
   boardwalk1:
@@ -218,10 +241,12 @@ networks:
   core_public:
     external: true
   esnet:
-    driver: bridge
+    external: true
   server:
     driver: bridge
   action:
+    driver: bridge
+  login:
     driver: bridge
   billing:
     driver: bridge

@@ -4,17 +4,22 @@ version: '2'
 services:
   postgres:
     image: postgres:9.5
+    networks:
+      - default
 
   rabbitmq:
     image: rabbitmq:3.5.6-management
     ports:
       - "15672:15672"
-      - "5672:5672" 
-  
-  webservice: 
+      - "5672:5672"
+    networks:
+      - default
+
+  webservice:
     build:
       context: .
       dockerfile: Dockerfile_webservice
+    container_name: "consonance-webservice"
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -23,6 +28,9 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
+      - esnet
 
   coordinator:
     build:
@@ -33,6 +41,8 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
 
   provisioner:
     build:
@@ -43,13 +53,15 @@ services:
       - rabbitmq
     volumes:
       - log_volume:/consonance_logs
+    networks:
+      - default
 
   client:
     build:
       context: .
       dockerfile: Dockerfile_client
     links:
-      - webservice 
+      - webservice
       - postgres
       - coordinator
       - provisioner
@@ -60,6 +72,14 @@ services:
       - PGUSER=postgres
       - PGPASSWORD=postgres
       - PGDATABASE=postgres
-    
+    networks:
+      - default
+
 volumes:
-  log_volume: 
+  log_volume:
+
+networks:
+  esnet:
+    external: true
+  default:
+    driver: bridge

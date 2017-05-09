@@ -22,7 +22,10 @@ aws_profile={{ AWS_PROFILE }}
 aws_access_key_id={{ AWS_ACCESS_KEY_ID }}
 aws_secret_access_key={{ AWS_SECRET_ACCESS_KEY }}
 luigi_server={{ LUIGI_SERVER }}
+luigi_port={{ LUIGI_PORT }}
 postgres_db={{ POSTGRES_DB }}
 postgres_user={{ POSTGRES_USER }}
 postgres_password={{ POSTGRES_PASSWORD }}
-
+login_user={{ LOGIN_POSTGRES_USER }}
+login_db={{ LOGIN_POSTGRES_DB }}
+login_password={{ LOGIN_POSTGRES_PASSWORD }}

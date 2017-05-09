@@ -805,8 +805,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 
       consonance_address="http://consonance-webservice:8080"
 
-      consonance_token='consonance_token'
-      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
+#      consonance_token='consonance_token'
+#      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
+      consonance_token=$(cat consonance/config | grep 'token =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
       #postgres_db='postgres_db'
       #ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db

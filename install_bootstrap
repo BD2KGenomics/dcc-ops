@@ -947,8 +947,8 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
 "AWS_REGION":"${aws_region}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
-"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}"
-"DOCKSTORE_SERVER_URL":"${dockstore_server_url}"
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}",
+"DOCKSTORE_SERVER_URL":"${dockstore_server_url}",
 "DOCKSTORE_TOKEN:"${dockstore_token}"
 }
 CONFIG

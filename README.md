@@ -53,7 +53,6 @@ Make sure you do the following:
 * assign an Elastic IP (a static IP address) to your instance
 * open inbound ports on your security group
     * 80 <- world
-    * 8080 <- world
     * 22 <- world
     * 443 <- world
     * all TCP <- the elastic IP of the VM (Make sure you add /32 to the Elastic IP)
@@ -89,12 +88,12 @@ Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the sa
 
 #### TODO:
 
-* Add info regarding what spot price, how to choose the right price,
-* Add message on the key name and key pair (ommit .pem suffix).
-* AWS region you check it by clicking on your instance and looking under prefix of the Availability Zone (i.e. us-east-1 for us-east-1d Availability Zone)
-* AWS zone, same as above but in this case the whole thing i.e. us-east-1d
-* Guide on choosing AWS instance type... make sure it matches your AMI
+* Guide on choosing AWS instance type... make sure it matches your AMI.
 * AMI, use an ubuntu 14.04 base box, you can use the official Ubuntu release.  You may need to make your own AMI with more storage! Needs to be in your region!  You may want to google to start with the official Ubuntu images for your region.
+
+#### Creating an AMI for Worker Node
+
+Follow the instructions [here](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html) to create an AMI for the worker node. Use an ubuntu 14.04 base box. You can use the official Ubuntu release. You may need to make your own AMI with more storage. Make sure you make it in the same region where your VM and S3 buckets are located.
 
 #### Consonance CLI on the Host VM
 
@@ -155,10 +154,10 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * For the question "What is the path to the pem key file you will use to authenticate in this environment?", please input the path to your pem key you loaded into the VM from the _Consonance Setup_ section. Use an absolute path.
   * For the question "What is the name of this key?", type the name of the key that from the question above. Make sure you ommit the suffix (e.g. if the key was _mykey.pem_, you would enter _mykey_).
   * For question "What is your Security Group?", type the name of the security group that was configured for your VM (On the AWS console, you can find it by clicking on your instance. Then under _Description_, look at _Security groups_).
-  * For question "What is your AWS max spot price?", choose the maximum spot price you are willing to pay per instance per hour for instances spawn by consonance.
+  * For question "What is your AWS max spot price?", choose the maximum spot price you are willing to pay per instance per hour for instances spawn by consonance. For more information, see [here](https://aws.amazon.com/ec2/spot/pricing/).
   * For question "What is your AWS region (e.g. us-east-1 for Virginia)?", type the region for your instance. You can check the code for the region you are using [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#ecr_region).
   * For question "What is your AWS zone within the selected region (e.g. us-east-1c for the us-east-1 region)?", you can check your AWS zone by clicking on your instance, and then under _Description_, look for _Availability zone_.
-  * For question "What is your AWS instance type (e.g. m1.xlarge)?", type the type of instance you want consonance to spawn up. You can check the types of instances [here](http://www.ec2instances.info/) (use the entry under the _API Name_ column).
+  * For question "What is your AWS instance type (e.g. m1.xlarge)?", type the type of instance you want consonance to spawn up. You can check the types of instances [here](http://www.ec2instances.info/) (use the entry under the _API Name_ column). For now, only use `c4.8xlarge`. Support for more instances will come in the future.  
   * For question "What is your AWS image ..." use the _AMI ID_ created during the _Consonance Setup_ section.
 * Redwood
   * Install in prod mode

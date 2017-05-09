@@ -196,7 +196,10 @@ Here are things we need to explain how to do post install:
 
 * first of all, how to go to the website and confirm things are working e.g. https://ops-dev.ucsc-cgl.org or whatever the domain name is
 * how to associate a token with a user email so token download works
-    * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
+    * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`, this give access to all programs.
+    * you can also assign program scopes as well, for example
+        * `sudo redwood/admin/bin/redwood project create PROJECT`
+        * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.PROJECT.upload aws.PROJECT.download'`
 * user log in via google, retrieve token
 * Get the reference data used by the RNASeq-CGL pipeline:
 *    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 

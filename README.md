@@ -219,6 +219,29 @@ Here are things we need to explain how to do post install:
 
 To test that everything installed successfully, you can run `cd test && ./integration.sh`. This will do an upload and download with core-client and check the results.
 
+#### Run Consonance 
+
+Make sure you have the consonance CLI installed.
+
+Make a `run.json`
+
+```
+{
+  "input_file": {
+        "class": "File",
+        "path": "https://raw.githubusercontent.com/briandoconnor/dockstore-tool-md5sum/master/md5sum.input"
+    }
+}
+```
+
+    consonance run --tool-dockstore-id quay.io/briandoconnor/dockstore-tool-md5sum:1.0.3 --flavour r3.8xlarge --run-descriptor run.json
+    # and it produces this
+    "job_uuid" : "66a67327-ccd3-4af0-a5c8-688fb52da778"
+    
+    # you can check the status
+    consonance status --job_uuid 66a67327-ccd3-4af0-a5c8-688fb52da778
+
+
 ### Upload and Download
 
 End users should be directed to use the [quay.io/ucsc_cgl/core-client](https://quay.io/repository/ucsc_cgl/core-client)
@@ -244,7 +267,6 @@ sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_
             -v $(pwd):/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha \
             redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
 ```
-
 
 ### Troubleshooting
 

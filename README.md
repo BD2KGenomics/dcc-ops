@@ -201,7 +201,16 @@ Here are things we need to explain how to do post install:
 * how to associate a token with a user email so token download works
     * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
 * user log in via google, retrieve token
-* upload reference data for RNASeq-CGL
+* upload reference data for RNASeq-CGL, the original reference data is:
+    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/ca79c317-e410-591f-b802-3a0be6b658b7/starIndex_hg38_no_alt.tar.gz
+    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/b850460d-23c0-57a4-9d4b-af60726476a5/rsem_ref_hg38_no_alt.tar.gz
+    * redwood://storage.ucsc-cgl.org/d0117ff1-cf53-43a0-aaab-cb15809fbb49/c92d30f3-2731-56b1-b8e4-41d09b1bb2dc/kallisto_hg38.idx
+    * these will need to go to a public place, and we should give both download/upload manifests
+    * see `test/rnaseq-cgl-refdata`
+    * e.g. `sudo docker run --rm -it -e ACCESS_TOKEN=`cat token.txt` -e REDWOOD_ENDPOINT=ops-dev.ucsc-cgl.org -v $(pwd)/outputs:/outputs -v `pwd`:/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --force-upload --skip-submit  /dcc/data/manifest.tsv`
+* update the decider manually to point to these new reference URLs (via exec into the Docker container)
+* get sample fastq data
+    * ...
 * upload sample fastq data
 * trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html
 * monitor running of Consonance logs and worker nodes to see running data

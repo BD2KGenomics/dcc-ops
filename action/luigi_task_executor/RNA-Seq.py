@@ -29,7 +29,7 @@ import boto
 class ConsonanceTask(luigi.Task):
     redwood_host = luigi.Parameter("storage.ucsc-cgl.org")
     redwood_token = luigi.Parameter("must_be_defined")
-    dockstore_tool_running_dockstore_tool = luigi.Parameter(default="quay.io/ucsc_cgl/dockstore-tool-runner:1.0.10")
+    dockstore_tool_running_dockstore_tool = luigi.Parameter(default="quay.io/ucsc_cgl/dockstore-tool-runner:1.0.12")
 
     workflow_version = luigi.Parameter(default="must be defined")
 
@@ -317,6 +317,7 @@ class ConsonanceTask(luigi.Task):
         target_tool= self.target_tool_prefix + ":" + self.workflow_version
 
         dockstore_json_str = '''{
+            "program_name": "%s",
             "json_encoded": "%s",
             "docker_uri": "%s",
             "dockstore_url": "%s",
@@ -331,7 +332,7 @@ class ConsonanceTask(luigi.Task):
             "vm_instance_cores": 36,
             "vm_instance_mem_gb": 60,
             "output_metadata_json": "/tmp/final_metadata.json"
-        }''' % (base64_json_str, target_tool, self.target_tool_url, self.redwood_token, self.redwood_host, parent_uuids, self.workflow_type, self.tmp_dir, self.vm_region )
+        }''' % (meta_data["program"].replace(' ','_'), base64_json_str, target_tool, self.target_tool_url, self.redwood_token, self.redwood_host, parent_uuids, self.workflow_type, self.tmp_dir, self.vm_region )
 
         print(dockstore_json_str, file=p)
         p.close()
@@ -439,7 +440,7 @@ class RNASeqCoordinator(luigi.Task):
     redwood_token = luigi.Parameter("must_be_defined")
     redwood_host = luigi.Parameter(default='storage.ucsc-cgl.org')
     image_descriptor = luigi.Parameter("must be defined")
-    dockstore_tool_running_dockstore_tool = luigi.Parameter(default="quay.io/ucsc_cgl/dockstore-tool-runner:1.0.10")
+    dockstore_tool_running_dockstore_tool = luigi.Parameter(default="quay.io/ucsc_cgl/dockstore-tool-runner:1.0.12")
     tmp_dir = luigi.Parameter(default='/datastore')
     max_jobs = luigi.Parameter(default='1')
     bundle_uuid_filename_to_file_uuid = {}

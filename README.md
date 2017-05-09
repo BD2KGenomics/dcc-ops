@@ -214,6 +214,7 @@ Here are things we need to explain how to do post install:
 * user log in via google, retrieve token
 * Get the reference data used by the RNASeq-CGL pipeline:
 *    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 
+* Test data inputs for the RNASeq-CGL pipeline are locate here: https://github.com/UCSC-Treehouse/pipelines/tree/master/samples 
 * upload reference data for RNASeq-CGL to the storage system
     * see `test/rnaseq-cgl-refdata`
     * e.g. `sudo docker run --rm -it -e ACCESS_TOKEN=`cat token.txt` -e REDWOOD_ENDPOINT=ops-dev.ucsc-cgl.org -v $(pwd)/outputs:/outputs -v `pwd`:/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --force-upload --skip-submit  /dcc/data/manifest.tsv`

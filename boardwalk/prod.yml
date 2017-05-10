@@ -91,6 +91,7 @@ services:
       REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
       REDWOOD_SERVER: "auth.${redwood_server}"
       REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
+      REDWOOD_HOST: "${redwood_server}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"

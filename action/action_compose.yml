@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dcc-action:
-    image: quay.io/ucsc_cgl/action-service:1.0.1
+    image: quay.io/ucsc_cgl/action-service:1.0.2
     container_name: "action-service"
     environment:
       STORAGE_ACCESS_TOKEN: "${storage_access_token}"

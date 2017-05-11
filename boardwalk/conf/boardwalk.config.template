@@ -29,3 +29,5 @@ postgres_password={{ POSTGRES_PASSWORD }}
 login_user={{ LOGIN_POSTGRES_USER }}
 login_db={{ LOGIN_POSTGRES_DB }}
 login_password={{ LOGIN_POSTGRES_PASSWORD }}
+secret_key={{ SECRET_KEY }}
+core_client_version={{ DCC_CORE_CLIENT_VERSION }}

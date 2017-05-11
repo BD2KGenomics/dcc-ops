@@ -836,7 +836,10 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       login_db='login-db'
       echo "generating monitor postgresql (postgres) password"
       login_password="$(generate_password)"      
-
+      echo "generating SECRET_KEY for login"
+      secret_key="$(generate_password)"
+   
+      core_client_version='1.1.0-alpha'
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
 
@@ -873,7 +876,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "POSTGRES_DB":"${postgres_db}",
 "LOGIN_POSTGRES_USER":"${login_user}",
 "LOGIN_POSTGRES_DB":"${login_db}",
-"LOGIN_POSTGRES_PASSWORD":"${login_password}"
+"LOGIN_POSTGRES_PASSWORD":"${login_password}",
+"SECRET_KEY":"${secret_key}",
+"DCC_CORE_CLIENT_VERSION":"${core_client_version}"
 }
 CONFIG
       # template out stuff

@@ -87,6 +87,7 @@ consonance/bag_params.json
 consonance/config
 consonance/youxia_config
 consonance/web.yml
+consonance/boto.config
 
 # redwood files
 action/aws.config

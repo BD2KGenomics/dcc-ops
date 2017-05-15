@@ -421,6 +421,7 @@ CONFIG
   mustache commons_launcher_config/consonance.config consonance/config.template  > consonance/config
   mustache commons_launcher_config/consonance.config consonance/youxia_config.template  > consonance/youxia_config
   mustache commons_launcher_config/consonance.config consonance/web.yml.template  > consonance/web.yml
+  mustache commons_launcher_config/consonance.config consonance/boto.config.template > consonance/boto.config
   cat ${user_pem_path} > consonance/key.pem
 
   cd consonance

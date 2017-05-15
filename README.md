@@ -211,7 +211,7 @@ Here are things we need to explain how to do post install:
 * get sample fastq data
     * ...
 * upload sample fastq data
-* trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html
+* trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html, `sudo docker exec -it boardwalk_dcc-metadata-indexer_1 bash -c "/app/dcc-metadata-indexer/cron.sh"`
 * monitor running of Consonance logs and worker nodes to see running data
 * download RNASeq-CGL analysis results from the portal
 

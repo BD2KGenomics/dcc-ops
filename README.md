@@ -84,7 +84,7 @@ See the Consonance [README](consonance/README.md) for details.  Consonance assum
 
 #### Adding private SSH key to your VM
 
-Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it.
+Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it. Then do `chmod 400 ~/.ssh/<your_key>.pem` so your key is not publicly viewable.
 
 #### TODO:
 

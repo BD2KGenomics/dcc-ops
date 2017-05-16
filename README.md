@@ -46,6 +46,8 @@ We will refer to this as the host VM throughout the documentation below and it i
 
 You should make a note of your security group name and ID and ensure you can connect via ssh.
 
+**NOTE:** We have had problems when uploading big files to Virginia (~25GB). If possible, set up your AWS anywhere else but Virginia.
+
 ### AWS Tasks
 
 Make sure you do the following:

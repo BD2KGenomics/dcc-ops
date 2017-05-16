@@ -1,0 +1,3 @@
+#Cronjob to execute Walt's script
+*/20 * * * * root python /refresh_worker_instances.py
+

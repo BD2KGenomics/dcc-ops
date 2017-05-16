@@ -87,6 +87,7 @@ consonance/bag_params.json
 consonance/config
 consonance/youxia_config
 consonance/web.yml
+consonance/boto.config
 
 # redwood files
 action/aws.config
@@ -113,6 +114,10 @@ install_python.log
 install_wget_curl.log
 redwood/manifest.tsv
 youxia_config
+
+#Reference folder
+reference/samples/
+reference/outputs/
 
 # vagrant
 .vagrant

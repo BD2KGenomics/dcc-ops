@@ -68,8 +68,8 @@ Redwood exposes storage, metadata, auth services. Each of these should be made s
 * Have the subdomains 'auth', 'metadata', and 'storage' point to the same Elastic IP ('auth.example.com', 'metadata.example.com', and 'storage.example.com' and 'example.com' all resolve to the same Elastic IP)
 
 #### Make your S3 Bucket
-* On the AWS console, go to S3 and create a bucket.
-* Assign it a name. Keep note of the name given to it.
+* On the AWS console, go to S3 and create 3 buckets: one for redwood-storage, one for redwood-backups, and one for the action service.
+* Assign them a unique name. Keep note of the name given to each of them.
 * Get the S3 endpoint. It dependent on your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) for the list.
 
 #### Create an AWS IAM Encryption Key

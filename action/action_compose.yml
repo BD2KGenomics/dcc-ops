@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  dcc-action:
+    image: quay.io/ucsc_cgl/action-service:1.0.4
+    container_name: "action-service"
+    environment:
+      STORAGE_ACCESS_TOKEN: "${storage_access_token}"
+      STORAGE_SERVER: "${storage_server}"
+      ELASTIC_SEARCH_SERVER: "${elastic_search_server}"
+      ELASTIC_SEARCH_PORT: "${elastic_search_port}"
+      TOUCH_FILE_DIRECTORY: "${touch_file_directory}"
+      CONSONANCE_WEB_SERVICE_URL: "${consonance_web_service_url}"
+      CONSONANCE_ACCESS_TOKEN: "${consonance_access_token}"
+      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
+      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+      AWS_REGION: "${aws_region}"
+      DOCKSTORE_SERVER_URL: "${dockstore_server_url}"
+      DOCKSTORE_TOKEN: "${dockstore_token}"
+    volumes:
+      - ~/dcc-action-service/logs:/home/ubuntu/logs
+    restart: always
+    ports:
+      - "8082"
+    networks:
+      - esnet
+
+networks:
+  esnet:
+    external: true

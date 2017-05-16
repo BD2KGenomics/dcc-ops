@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Usage: redwood down
+# Summary: Stop redwood
+# Help: Stop redwood. No need to specify dev vs. prod.
+#
+# WARNING: This deletes the databases!
+set -e
+
+cd "${_REDWOOD_ROOT}/.."
+set -x
+docker-compose -f base.yml -f prod.yml -f dev.yml down

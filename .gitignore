@@ -19,7 +19,6 @@ buildNumber.properties
 ### Eclipse template
 
 .metadata
-bin/
 tmp/
 *.tmp
 *.bak
@@ -87,13 +86,24 @@ consonance/key.pem
 consonance/bag_params.json
 consonance/config
 consonance/youxia_config
+consonance/web.yml
+consonance/boto.config
+
+# redwood files
+action/aws.config
+action/.env
+action_launcher_config/action.config
 
 redwood/aws.config
 redwood/.env
 redwood_launcher_config/redwood.config
+redwood/backups
 
 boardwalk/.env
 boardwalk/aws.config
+boardwalk/dcc-dashboard-service/
+boardwalk/dcc-dashboard/
+boardwalk/dcc-metadata-indexer/
 boardwalk_launcher_config/boardwalk.config
 
 aws.config
@@ -105,10 +115,18 @@ install_wget_curl.log
 redwood/manifest.tsv
 youxia_config
 
+#Reference folder
+reference/samples/
+reference/outputs/
+
 # vagrant
 .vagrant
 ubuntu-xenial-16.04-cloudimg-console.log
 
+# certificates
+common/certs
+
 # log files
 install_compose.log
 install_docker.log
+install_pip_aws.log

@@ -26,6 +26,10 @@ In `dcc-ops/consonance`:
     docker-compose -f docker-compose.yml up -d
     docker-compose -f docker-compose.yml down
 
+## Logs
+
+Look in `/var/lib/docker/volumes/consonance_log_volume/_data/` for logs from each of the daemons. 
+
 ## Developing
 
 The following files are created from templates by the install script:
@@ -55,7 +59,8 @@ NOTE: We make the simplfying assumption that the ip address at eth0 of the launc
 
 Take a look at `/consonance_logs` for daemon and webservice logs in any container
 
-When developing on the Dockerfile, since there is no way to inherit or inject environment variables, replace the Consonance version with:
+When developing on the Dockerfile, since there is no way to inherit or inject environment variables, replace the Consonance version using this sed command:
 
-    sed -i 's/2.0-alpha.9/2.0-alpha.10/g' {} \;
-
+    # make sure you run this in just the consonance directory so it doesn't affect .git files
+    cd consonance
+    find ./ -type f -exec sed -i '' 's/2.0.0-alpha.14/2.0.0-alpha.15/g' {} \;

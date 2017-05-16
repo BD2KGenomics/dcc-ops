@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Usage: redwood bundle [command [args]] 
+# Summary: Manage redwood bundles
+# Help: Manage redwood bundles
+set -e
+
+"${_REDWOOD_ROOT}/modules/bundle/bin/bundle" "$@"

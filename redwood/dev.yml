@@ -14,6 +14,7 @@ services:
       - /usr/share/nginx/html
     networks:
       - internal
+    restart: always
   dockergen:
     image: jwilder/docker-gen:0.7.3
     container_name: redwood-config-gen
@@ -25,6 +26,7 @@ services:
       - ./conf/nginx.dev.tmpl:/etc/docker-gen/templates/nginx.tmpl
     networks:
       - internal
+    restart: always
   redwood-auth-server:
     image: quay.io/ucsc_cgl/redwood-auth-server:r4.3.5-SNAPSHOT
     ports:

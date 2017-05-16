@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Usage: project list [-s site]
+# Summary: List projects
+# Help: This command lists the projects tracked by redwood and managed by the mgmt client.
+#
+# OPTIONS
+#   -s limit results to this redwood site (default: aws)
+set -e
+
+site=aws
+while getopts ":s:" opt; do
+    case $opt in
+        s)
+            site="${OPTARG}"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+shift "$((OPTIND - 1))"
+
+docker exec -it redwood-auth-db psql -t -d dcc -U dcc_auth -c "select scope from oauth_client_details where client_id='mgmt';" | tr ',' "\n" | tr -d ' \t' | grep -e "^${site}" | sed "s/^${site}\.//" | sed 's/\.download$//' | sed 's/\.upload$//' | grep -v download | grep -v upload | uniq | sort

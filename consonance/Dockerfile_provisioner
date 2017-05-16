@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y \
     python-software-properties \
+    python-pip \
     software-properties-common \
     git \
     telnet \
@@ -13,8 +14,14 @@ RUN apt-get update \
 
 RUN apt-get install software-properties-common \
     && apt-add-repository ppa:ansible/ansible \
-    && apt-get update \
-    && apt-get install -y ansible
+    && apt-get update \ 
+    && apt-get install -y libffi-dev python-dev libssl-dev
+#    && apt-get install -y ansible=2.2.1.0-1
+
+#Install PIP and then ansible.
+#Doing this because the latest version was setting ANSIBLE_SSH_CONTROL_PATH to None, so ssh.py was failing.
+RUN pip install ansible==2.2.1.0
+    
 
 # grab oracle java (auto accept licence)
 RUN add-apt-repository -y ppa:webupd8team/java \
@@ -23,9 +30,10 @@ RUN add-apt-repository -y ppa:webupd8team/java \
     && apt-get install -y oracle-java8-installer
 
 # install Consonance services
-ENV consonance_version=2.0-alpha.10
+ENV consonance_version=2.0.0-alpha.15
 
-RUN wget --no-verbose https://www.dropbox.com/s/giy9ayxlvpoohiz/consonance-arch-2.0-alpha.11-SNAPSHOT.jar
+RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
+# https://www.dropbox.com/s/giy9ayxlvpoohiz/consonance-arch-2.0-alpha.11-SNAPSHOT.jar
 # https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/io/consonance/consonance-arch/${consonance_version}/consonance-arch-${consonance_version}.jar
 
 # install dockerize
@@ -60,6 +68,15 @@ COPY example_tags.json /container-host-bag/example_tags.json
 COPY ssh.py /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
 RUN rm -f /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
 
+# Setting up cronjob for refreshing worker's instance
+COPY boto.config /root/.boto
+RUN pip install paramiko==2.1.2
+RUN pip install boto==2.38.0
+ADD refresh_worker_instances.py .
+ADD crontab /etc/cron.d/refresher-cron
+RUN chmod a+x refresh_worker_instances.py
+RUN chmod 0644 /etc/cron.d/refresher-cron
+#RUN cron -f -L 15 && echo "Cron Job set"
 # TODO: 1) update the above to have my AWS creds in it and 2) create the admin user in postgres db
 # Waiting for postgres and rabbitmq services
-CMD ["dockerize", "-wait", "tcp://webservice:8080", "-timeout", "60s", "./init_provisioner.sh"]
+CMD ["dockerize", "-wait", "tcp://consonance-webservice:8080", "-timeout", "60s", "./init_provisioner.sh"]

@@ -10,6 +10,11 @@
 set -e
 CONSONANCE_LAUNCHER_VERSION=feature/consonance_cleanup
 
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root" 1>&2
+    exit 1
+fi
+
 cat <<MSG
 UCSC CLOUD COMMONS INSTALLATION BOOTSTRAPPER
 -----------------------------------------------------------------------------
@@ -150,6 +155,14 @@ if [[ $(sudo docker network ls | grep core_public | wc -l) = "0" ]]; then
     sudo docker network create core_public
 else
     echo "core_public docker network already exists"
+fi
+
+# CORE COMMONS: setup elastic search network
+if [[ $(sudo docker network ls | grep esnet | wc -l) = "0" ]]; then
+    echo "creating esnet docker network"
+    sudo docker network create esnet
+else
+    echo "esnet docker network already exists"
 fi
 
 
@@ -367,6 +380,7 @@ while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}
 {
 "ETH_DEV":"${eth_dev}",
 "LAUNCHER_IP_ADDRESS":"`ifconfig ${eth_dev} | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`",
+"PUBLIC_LAUNCHER_IP_ADDRESS":"`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
 "AWS_ACCESS_KEY_ID":"${user_aws_key}",
 "AWS_SECRET_ACCESS_KEY":"${user_aws_secret_key}",
 "AWS_MAX_SPOT_PRICE":"${aws_max_spot_price}",
@@ -406,12 +420,15 @@ CONFIG
   mustache commons_launcher_config/consonance.config consonance/bag_params.json.template  > consonance/bag_params.json
   mustache commons_launcher_config/consonance.config consonance/config.template  > consonance/config
   mustache commons_launcher_config/consonance.config consonance/youxia_config.template  > consonance/youxia_config
+  mustache commons_launcher_config/consonance.config consonance/web.yml.template  > consonance/web.yml
+  mustache commons_launcher_config/consonance.config consonance/boto.config.template > consonance/boto.config
   cat ${user_pem_path} > consonance/key.pem
 
   cd consonance
   sudo docker-compose -f docker-compose.yml build
   sudo docker-compose -f docker-compose.yml up -d
   ################sudo docker-compose run client
+  cd ..
 
   # TODO: need to setup the consonance command line and config on the box, so can skip the launching the client docker
 
@@ -420,6 +437,13 @@ CONFIG
   fi
 done
 
+
+
+
+
+
+
+
 # RUN THE REDWOOD INSTALLER
 run_redwood=''
 while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
@@ -427,52 +451,26 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
     read run_redwood
 
     if [ "${run_redwood^^}" = 'Y' ] ; then
-        
+
       #Read the config file if it exists and then show previous values...
       if [ -f redwood_launcher_config/redwood.config ] ; then
         source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" redwood_launcher_config/redwood.config)
       fi
 
-      redwood_mode=""
-      while [[ "${redwood_mode}" = "" ]]; do
-          if [ -z ${REDWOOD_MODE} ]; then
-              read -ep $'Do you want to run redwood in dev mode or prod? [dev/prod] Default value: \n' -i 'prod' redwood_mode
-          else
-              read -ep $'Do you want to run redwood in dev mode or prod? [dev/prod] \n' -i "$REDWOOD_MODE" redwood_mode
-          fi
-          if [[ "${redwood_mode^^}" =~ ^(D|DEV|DEVELOP|DEVELOPMENT)$ ]]; then
-              redwood_mode=dev
-          elif [[ "${redwood_mode^^}" =~ ^(P|PROD|PRODUCTION)$ ]]; then
-              redwood_mode=prod
-          else
-              echo "bad input: ${redwood_mode}" >&2
-              redwood_mode=""
-          fi
-      done
-      
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          base_url=''
-          if [ ! -z $BASE_URL ] ; then
-              read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
-          else
-              read -ep $'What is the name of the base URL? \n' base_url
-          fi
+      base_url=''
+      if [ ! -z $BASE_URL ] ; then
+          read -ep $'What is the name of the base URL?  Previous value: \n' -i "$BASE_URL" base_url
       else
-          base_url='redwood.io'
+          read -ep $'What is the name of the base URL? \n' base_url
       fi
 
       # this should move to the COMMON section
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          email_address=''
-          if [ ! -z $EMAIL_ADDRESS ] ; then
-              read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
-          else
-              read -ep $'What is the email address for notification? \n' email_address
-          fi
+      email_address=''
+      if [ ! -z $EMAIL_ADDRESS ] ; then
+          read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
       else
-          email_address=place@hold.er
+          read -ep $'What is the email address for notification? \n' email_address
       fi
-
       user_aws_key='user_aws_key'
       ask_question "What is your AWS Key?" "$AWS_ACCESS_KEY_ID" "AWS Key name" $user_aws_key
 
@@ -482,26 +480,30 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       s3_bucket='s3_bucket'
       ask_question "What is your AWS S3 bucket?" "$S3_BUCKET" "S3 bucket name" $s3_bucket
 
-      if [[ ${redwood_mode} = 'prod' ]]; then
-          s3_bucket_backup='s3_bucket_backup'
-          ask_question "What is your AWS S3 backup bucket?" "$S3_BUCKET_BACKUP" "S3 bucket backup name" $s3_bucket_backup
-      else
-          s3_bucket_backup=${s3_bucket}
-      fi
+      s3_bucket_backup='s3_bucket_backup'
+      ask_question "What is your AWS S3 backup bucket?" "$S3_BUCKET_BACKUP" "S3 bucket backup name" $s3_bucket_backup
 
       s3_endpoint='s3_endpoint'
       ask_question "What is your AWS S3 endpoint?" "$S3_ENDPOINT" "S3 endpoint" $s3_endpoint
 
       # KMS key
-      read -ep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
+      read -rep $'What is your AWS IAM Encryption Key ID? (leave blank for no SSE) Previous value: \n' -i "${KMS_KEY}" kms_key
 
-      # s3 sentinel object
-      (sudo apt-get install -y python-pip && sudo -H pip install awscli) >install_pip_aws.log 2>&1
-      
+      # install aws cli if not already installed
+      which aws || (
+          echo "installing aws cli"
+          sudo apt-get install -y python-pip;
+          sudo -H pip install botocore==1.5.43;
+          sudo -H pip install awscli==1.11.80
+      ) >install_pip_aws.log 2>&1
+
       mkdir -p ~/.aws
-      echo '[redwood_install]' >>~/.aws/credentials
-      echo "aws_access_key_id=${user_aws_key}" >>~/.aws/credentials
-      echo "aws_secret_access_key=${user_aws_secret_key}" >>~/.aws/credentials
+      {
+          echo ''
+          echo '[redwood_install]'
+          echo "aws_access_key_id=${user_aws_key}"
+          echo "aws_secret_access_key=${user_aws_secret_key}"
+      } >> ~/.aws/credentials
 
       echo "creating sentinel object for s3 connectivity verification"
       echo "this sentinel file is used for verifying s3 connectivity" >/tmp/heliograph
@@ -534,12 +536,11 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
       mgmt_client_secret="$(generate_password)"
 
       # Now write a config for this file.
-      [[ -f redwood_launcher_config/redwood.config ]] || mkdir -p redwood_launcher_config
+      [[ -d "redwood_launcher_config" ]] || mkdir "redwood_launcher_config"
       # Note: You can't have ANY blank lines in .consonance/redwood.config because the python library that will eventually process it does not like blank lines and will fail.
 
       cat > redwood_launcher_config/redwood.config <<CONFIG
 {
-"REDWOOD_MODE":"${redwood_mode}",
 "BASE_URL":"${base_url}",
 "EMAIL_ADDRESS":"${email_address}",
 "AWS_ACCESS_KEY_ID":"${user_aws_key}",
@@ -566,13 +567,58 @@ CONFIG
           read -ep $'Are you ready to launch redwood now? [Y/N] \n' launch_redwood
           if [[ "${launch_redwood^^}" = 'Y' ]]; then
               cd redwood
-              sudo docker-compose -f base.yml -f ${redwood_mode}.yml up -d
+
+              # remove old redwood instance and data volumes if they exist
+              echo "Removing old redwood containers, volumes, etc. if they exist"
+              sudo admin/bin/redwood down
+              redwood_data_volumes=$(sudo docker volume ls | grep 'redwood_redwood-.*-data' | awk '{print $2}')
+              if [[ ! -z ${redwood_data_volumes} ]]; then
+                  sudo docker volume rm ${redwood_data_volumes}
+              fi
+
+              # start redwood
+              echo "Starting redwood"
+              sudo admin/bin/redwood up
+
               cd ..
           elif [[ "${launch_redwood^^}" = 'N' ]]; then
-              echo "You can start redwood later with: $ cd $(pwd)/redwood && sudo docker-compose -f base.yml -f ${redwood_mode}.yml up -d"
+              echo "You can start redwood later with: $ $(pwd)/redwood/admin/bin/redwood up"
           fi
       done
-          
+
+      recover_metadata=-1
+      read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
+      while [[ "${recover_metadata}" = "-1" ]]; do
+          if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
+              recover_metadata=1
+          elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
+              recover_metadata=0
+          else
+              echo "bad input: ${recover_metadata_response}"
+              recover_metadata=-1
+          fi
+      done
+      if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migrations
+          read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
+          sudo redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
+
+          migrate=-1
+          while [[ "${migrate}" = "-1" ]]; do # suggest migrations
+              case ${yes} in
+                  0) migrate_response=no ;;
+                  1) migrate_response=yes ;;
+                  *) read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_response ;;
+              esac
+              if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
+                  migrate=1
+                  sudo redwood/admin/bin/redwood migrate metadata "${metadata_backup_file}"
+              elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
+              else echo "bad input: ${migrate_response}"
+              fi
+          done
+
+      fi
+
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"
     fi
@@ -581,7 +627,7 @@ done
 # CORE COMMON: bring up the primary nginx gateway server
 run_common=''
 while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' ]] ; do
-    read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]' run_common
+    read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]\n' run_common
 done
 
 if [[ "${run_common^^}" = 'Y' ]]; then
@@ -669,7 +715,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
       # redwood auth-server admin user - most probably always 'admin'
-      # EDIT: The login function requires the mgmt user. admin wouldn't work. 
+      # EDIT: The login function requires the mgmt user. admin wouldn't work.
       redwood_admin='mgmt'
       #ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
 
@@ -686,11 +732,12 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
       # generate redwood access token
-      redwood_access_token=$(redwood/scripts/createAccessToken.sh -u indexer -s 'aws.upload aws.download')
+      redwood_access_token=$(sudo redwood/admin/bin/redwood token create -u indexer -s 'aws.upload aws.download')
       #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
-      dcc_dashboard_host='dcc_dashboard_host'
-      ask_question "What is your DCC Dashboard Host?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+      #dcc_dashboard_host='dcc_dashboard_host'
+      #ask_question "What is your DCC Dashboard Host (base URL)?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+      dcc_dashboard_host=$redwood_server
 
 #      dcc_dashboard_port='dcc_dashboard_port'
 #      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port
@@ -720,8 +767,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #      dcc_letsencrypt_email='dcc_letsencrypt_email'
 #      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
 
-      user_group='user_group'
-      ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
+      #user_group='user_group'
+      #ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
+      user_group=$(stat -c '%u:%g' $HOME)
 
 #      es_service='es_service'
 #      ask_question "What will be the name for the elasticsearch service?" "$ES_SERVICE" "DCC Lets Encrypt tags" $es_service
@@ -729,38 +777,70 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #      database_url='database_url'
 #      ask_question "What is the database url to store invoicing?" "$DATABASE_URL" "DCC Invoicing Database URL" $database_url
 
+      #billing_db='billing_db'
+      #ask_question "How should the database for billing should be called?" "$BILLING_DB" "Billing Database" $billing_db
       billing_db='billing_db'
-      ask_question "How should the database for billing should be called?" "$BILLING_DB" "Billing Database" $billing_db
 
+      #billing_user='billing_user'
+      #ask_question "What should the username be for the billing database?" "$BILLING_USER" "Billing User" $billing_user
       billing_user='billing_user'
-      ask_question "What should the username be for the billing database?" "$BILLING_USER" "Billing User" $billing_user
 
-      billing_password='billing_password'
-      ask_question "What should the username password be for the billing database?" "$BILLING_PASSWORD" "Billing User Password" $billing_password
+      #billing_password='billing_password'
+      #ask_question "What should the username password be for the billing database?" "$BILLING_PASSWORD" "Billing User Password" $billing_password
+      echo "generating billing_db postgresql (postgres) password"
+      billing_password="$(generate_password)"
 
       database_url="postgresql://${billing_user}:${billing_password}@boardwalk-billing:5432/${billing_db}"
 
       aws_profile='aws_profile'
       ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
+      #aws_profile=$(cat redwood/.env | grep 'email=' | sed 's/[^=]*=//')
 
-      aws_access_key_id='aws_access_key_id'
-      ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+      #aws_access_key_id='aws_access_key_id'
+      #ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+      aws_access_key_id=$(cat redwood/.env | grep 'access_key=' | sed 's/[^=]*=//')   
+ 
+      #aws_secret_access_key='aws_secret_access_key'
+      #ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+      aws_secret_access_key=$(cat redwood/.env | grep 'secret_key=' | sed 's/[^=]*=//')
 
-      aws_secret_access_key='aws_secret_access_key'
-      ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+      #luigi_server='luigi_server'
+      #ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
 
-      luigi_server='luigi_server'
-      ask_question "What is the Luigi Server?" "$LUIGI_SERVER" "Luigi Server" $luigi_server
+      luigi_server="http://action-service"
+      luigi_port='8082'
 
-      postgres_db='postgres_db'
-      ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
+      #consonance_address='consonance_address'
+      #ask_question "What is the Consonance Address?" "$CONSONANCE_ADDRESS" "Consonance Address" $consonance_address
 
-      postgres_user='postgres_user'
-      ask_question "What is the Postgres Database user for the action service?" "$POSTGRES_USER" "Postgres Database User Action Service" $postgres_user
+      consonance_address="http://consonance-webservice:8080"
 
-      postgres_password='postgres_password'
-      ask_question "What is the Postgres Database password for the action service?" "$POSTGRES_PASSWORD" "Postgres Database Password Action Service" $postgres_password
+#      consonance_token='consonance_token'
+#      ask_question "What is the Consonance Token?" "$CONSONANCE_TOKEN" "Consonance Token" $consonance_token
+      consonance_token=$(cat consonance/config | grep 'token =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
+      #postgres_db='postgres_db'
+      #ask_question "What is the Postgres Database name for the action service?" "$POSTGRES_DB" "Postgres Database Action Service" $postgres_db
+      postgres_db='monitor'      
+
+      #postgres_user='postgres_user'
+      #ask_question "What is the Postgres Database user for the action service?" "$POSTGRES_USER" "Postgres Database User Action Service" $postgres_user
+      postgres_user='monitor'
+
+      #postgres_password='postgres_password'
+      #ask_question "What is the Postgres Database password for the action service?" "$POSTGRES_PASSWORD" "Postgres Database Password Action Service" $postgres_password
+      echo "generating monitor postgresql (postgres) password"
+      postgres_password="$(generate_password)"
+      
+      #Setting up the database vars for login 
+      login_user='login-user'
+      login_db='login-db'
+      echo "generating monitor postgresql (postgres) password"
+      login_password="$(generate_password)"      
+      echo "generating SECRET_KEY for login"
+      secret_key="$(generate_password)"
+   
+      core_client_version='1.1.0-alpha'
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
 
@@ -785,13 +865,21 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "BILLING_DB":"${billing_db}",
 "USER_GROUP":"${user_group}",
 "ES_SERVICE":"${es_service}",
+"CONSONANCE_ADDRESS":"${consonance_address}",
+"CONSONANCE_TOKEN":"${consonance_token}",
 "AWS_PROFILE":"${aws_profile}",
 "AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
 "AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
 "LUIGI_SERVER":"${luigi_server}",
+"LUIGI_PORT":"${luigi_port}",
 "POSTGRES_USER":"${postgres_user}",
 "POSTGRES_PASSWORD":"${postgres_password}",
-"POSTGRES_DB":"${postgres_db}"
+"POSTGRES_DB":"${postgres_db}",
+"LOGIN_POSTGRES_USER":"${login_user}",
+"LOGIN_POSTGRES_DB":"${login_db}",
+"LOGIN_POSTGRES_PASSWORD":"${login_password}",
+"SECRET_KEY":"${secret_key}",
+"DCC_CORE_CLIENT_VERSION":"${core_client_version}"
 }
 CONFIG
       # template out stuff
@@ -801,12 +889,119 @@ CONFIG
       cd boardwalk
       sudo docker-compose -f ${boardwalk_mode}.yml up -d
       cd ..
-      
+
    elif [ "${run_boardwalk^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the boardwalk installer"
    fi
 done
 
+
+# RUN THE ACTION INSTALLER
+run_action=''
+while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
+    echo "Would you like to run the action installer now? [Y/N]"
+    read run_action
+
+    if [ "${run_action^^}" = 'Y' ] ; then
+
+      #Read the config file if it exists and then show previous values...
+      if [ -f action_launcher_config/action.config ] ; then
+        source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" action_launcher_config/action.config)
+      fi
+
+
+      # Consonance - peek at consonance/config
+      consonance_access_token='consonance_access_token'
+      consonance_web_service_url='consonance_web_service_url'
+      if [ -f consonance/config ] ; then
+          consonance_access_token=$(cat consonance/config | grep 'token =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          consonance_web_service_url=$(cat consonance/config | grep 'base_path =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is the Consonance access token?" "$CONSONANCE_ACCESS_TOKEN" "Consonance access token" $consonance_access_token
+          ask_question "What is the Consonance web service URL?" "$CONSONANCE_WEB_SERVICE_URL" "Consonance web service URL" $consonance_web_service_url
+      fi
+
+      aws_region='aws_region'
+      aws_profile='aws_profile'
+      aws_access_key_id='aws_access_key_id'
+      aws_secret_access_key='aws_secret_access_key'
+      if [ -f consonance/aws.config ] ; then
+          aws_region=$(cat consonance/aws.config | grep 'region =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_access_key_id=$(cat consonance/aws.config | grep 'aws_access_key_id =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_secret_access_key=$(cat consonance/aws.config | grep 'aws_secret_access_key =' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          aws_profile="[default]"
+      else
+          ask_question "What is the AWS Access key ID?" "$AWS_ACCESS_KEY_ID" "AWS Access key ID" $aws_access_key_id
+          ask_question "What is the AWS secret access key?" "$AWS_SECRET_ACCESS_KEY" "AWS Secret Access Key" $aws_secret_access_key
+          ask_question "What is the AWS profile?" "$AWS_PROFILE" "AWS Profile" $aws_profile
+          ask_question "What is the AWS region?" "$AWS_REGION" "AWS Region" $aws_region
+      fi
+
+      # redwood endpoint - peek at redwood/.env
+      redwood_server='redwood_server'
+      if [ -f redwood/.env ] ; then
+          redwood_server=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is your Redwood endpoint?" "$STORAGE_SERVER" "Redwood Server" $redwood_server
+      fi
+
+      # generate redwood access token
+      redwood_access_token='redwood_access_token'
+      if [ -f redwood/admin/bin/redwood ] ; then
+           redwood_access_token=$(sudo redwood/admin/bin/redwood token create -u action_service -s 'aws.upload aws.download')
+      else
+          ask_question "What is your Redwood Access Token?" "$STORAGE_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
+      fi
+
+      elastic_search_server='elastic_search_server'
+      elastic_search_port='elastic_search_port'
+      # boardwalk endpoint - peek at boardwalk/.env
+      if [ -f boardwalk/.env ] ; then
+          elastic_search_server=$(cat boardwalk/.env | grep 'es_service=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          elastic_search_port='9200'
+      else
+          ask_question "What is your Elastic Search endpoint?" "$ELASTIC_SEARCH_SERVER" "Elastic Search Server" $elastic_search_server
+          ask_question "What is your Elastic Search endpoint port?" "$ELASTIC_SEARCH_PORT" "Elastic Search port" $elastic_search_port
+      fi
+
+      s3_touch_file_bucket='s3_touch_file_bucket'
+      ask_question "What is your AWS S3 touch file bucket?" "$TOUCH_FILE_DIRECTORY" "S3 touch file bucket name" $s3_touch_file_bucket
+
+      dockstore_token='0'
+      dockstore_server_url='https://dockstore.org:8443'
+
+      # Now write a config for this file.
+      [[ -f action_launcher_config/action.config ]] || mkdir -p action_launcher_config
+
+      cat > action_launcher_config/action.config <<CONFIG
+{
+"CONSONANCE_WEB_SERVICE_URL":"${consonance_web_service_url}",
+"CONSONANCE_ACCESS_TOKEN":"${consonance_access_token}",
+"STORAGE_ACCESS_TOKEN":"${redwood_access_token}",
+"STORAGE_SERVER":"${redwood_server}",
+"ELASTIC_SEARCH_SERVER":"${elastic_search_server}",
+"ELASTIC_SEARCH_PORT":"${elastic_search_port}",
+"AWS_PROFILE":"${aws_profile}",
+"AWS_REGION":"${aws_region}",
+"AWS_ACCESS_KEY_ID":"${aws_access_key_id}",
+"AWS_SECRET_ACCESS_KEY":"${aws_secret_access_key}",
+"TOUCH_FILE_DIRECTORY":"${s3_touch_file_bucket}",
+"DOCKSTORE_SERVER_URL":"${dockstore_server_url}",
+"DOCKSTORE_TOKEN":"${dockstore_token}"
+}
+CONFIG
+      # template out stuff
+      mustache action_launcher_config/action.config action/conf/action.config.template > action/.env
+      #mustache action_launcher_config/action.config action/conf/aws.config.template > action/aws.config
+
+      cd action
+      sudo docker-compose -f action_compose.yml up -d
+      cd ..
+
+   elif [ "${run_action^^}" = 'N' ] ; then
+      echo "You can run this script at another time to run the action installer"
+   fi
+done
 
 
 # FINISHED INSTALLER

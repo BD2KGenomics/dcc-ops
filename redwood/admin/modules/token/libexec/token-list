@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Usage: token create [-s "scope1 scope2"] [-u username] [-v]
+# Summary: List access tokens
+# Help: This command lists access tokens, either by username or globally
+#
+# OPTIONS
+#  -u user   show tokens for user
+set -e
+
+user=''
+while getopts ":u:" opt; do
+    case $opt in
+        u)
+            user="${OPTARG}"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+shift "$((OPTIND - 1))"
+
+if [[ -z ${user} ]]; then
+    docker exec -it redwood-auth-server bash -c 'curl http://localhost:8443/token-digests -u mgmt:${MGMT_CLIENT_SECRET}'
+else
+    cmd=$(printf 'curl "http://localhost:8443/users/%s/tokens" -u mgmt:${MGMT_CLIENT_SECRET}' "${user}")
+    docker exec -it redwood-auth-server bash -c "${cmd}"
+fi
+#curl -k -XDELETE https://localhost:8443/tokens/<token> -u <client_id>:<password>

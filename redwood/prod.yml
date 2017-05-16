@@ -29,6 +29,7 @@ services:
     - MONGO_HOST=redwood-metadata-db
     depends_on:
     - redwood-metadata-db
+    restart: always
   redwood-auth-backup:
     container_name: redwood-auth-backup
     image: schickling/postgres-backup-s3
@@ -44,3 +45,4 @@ services:
     - SCHEDULE="@daily"
     depends_on:
     - redwood-auth-db
+    restart: always

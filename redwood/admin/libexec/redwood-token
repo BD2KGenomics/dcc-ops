@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Usage: sudo redwood token [command [args]] 
+# Summary: Manage redwood access tokens
+# Help: Manage redwood access tokens
+set -e
+
+"${_REDWOOD_ROOT}/modules/token/bin/token" "$@"

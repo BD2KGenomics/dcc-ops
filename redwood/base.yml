@@ -15,12 +15,14 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
   redwood-auth-db:
     container_name: redwood-auth-db
     image: postgres:9.6.2
     volumes:
       - ./conf/auth-1-bootstrap-postgresql.sh:/docker-entrypoint-initdb.d/dcc-auth-db.sh
       - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
+      - redwood-auth-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${auth_db_postgres_password}
       - AUTH_DB_PASSWORD=${auth_db_dcc_password}
@@ -29,6 +31,7 @@ services:
       - MGMT_CLIENT_SECRET=${mgmt_client_secret}
     networks:
       - internal
+    restart: always
   redwood-metadata-server:
     container_name: redwood-metadata-server
     environment:
@@ -42,11 +45,15 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
   redwood-metadata-db:
     container_name: redwood-metadata-db
     image: mongo:3.4.2
+    volumes:
+      - redwood-metadata-data:/data/db
     networks:
       - internal
+    restart: always
   redwood-storage-server:
     container_name: redwood-storage-server
     volumes:
@@ -67,6 +74,11 @@ services:
     networks:
       - core_public
       - internal
+    restart: always
+
+volumes:
+  redwood-auth-data:
+  redwood-metadata-data:
 
 networks:
   core_public:

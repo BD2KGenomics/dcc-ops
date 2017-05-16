@@ -10,14 +10,17 @@ Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3
 ## Deploy to Production
 You can use the `install_bootstrap` script one directory up to automatically run the setup.
 
-After that, Redwood will already be up and running. You can control the system with `docker-compose` (from the _dcc-ops/redwood_ directory)
-- `docker-compose -f base.yml -f prod.yml up -d`
-- `docker-compose -f base.yml -f prod.yml down`
+After that, Redwood will already be up and running. You can control the system with the redwood client (in _dcc-ops/redwood/admin/bin/redwood_)
+- `redwood up`
+- `redwood down`
+  - This deletes data!
 
-To confirm proper function: generate an accessToken with `scripts/createAccessToken.sh` then do a test upload/download from the server:
+It will be useful to add _dcc-ops/redwood/admin/bin_ to your PATH.
+
+To confirm proper function: generate an accessToken with `admin/bin/redwood token create` then do a test upload/download from the server:
 ```
 docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
-    -e ACCESS_TOKEN=<your_access_token> -e REDWOOD_ENDPOINT=redwood.io \
+    -e ACCESS_TOKEN=$(redwood token create) -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload data/someFile
 <note the object id outputted>
@@ -31,13 +34,12 @@ Redwood tracks projects and bundles (collections of files). Users are granted ac
 
 All projects tracked by redwood must be known to the auth-server. To register a new project:
 ```
-scripts/registerProject.sh PROJECT
-# see scripts/registerProject.sh -h for more
+admin/bin/redwood project create PROJECT
 ```
 
 Authorization is controlled by which scopes a user's access token is granted. To create an access token for a user with certain scopes:
 ```
-scripts/createAccessToken.sh -m <mgmt_client_password> -s "aws.PROJECT1.upload aws.PROJECT1.download aws.PROJECT2.download" -u "user@ucsc.edu"
+admin/bin/redwood token create -s "aws.PROJECT1.upload aws.PROJECT1.download aws.PROJECT2.download" -u "user@ucsc.edu"
 # see scripts/createAccessToken.sh -h for more
 ```
 
@@ -81,15 +83,17 @@ metadata_db_password=password
 ### Development
 You can use the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images as is or edit the server source and rebuild the images.
 
-From _dcc-ops/redwood_, run the system:
+It will be helpful to add _dcc-ops/redwood/admin/bin_ to your PATH.
+
+Run the system:
 ```
-docker-compose -f base.yml -f dev.yml up
+redwood up -d
 ```
 
-In another terminal, test the system (this has to be done from the dcc-ops/redwood directory unless you create your accessToken separately):
+In another terminal, test the system:
 ```
 docker run --rm -it --net=redwood_internal --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
-    -e ACCESS_TOKEN=$(scripts/createAccessToken.sh) -e REDWOOD_ENDPOINT=redwood.io \
+    -e ACCESS_TOKEN=$(redwood token create) -e REDWOOD_ENDPOINT=redwood.io \
     quay.io/ucsc_cgl/redwood-client:dev bash
 $ upload -p DEV data/someFile
 <note the object id outputted>

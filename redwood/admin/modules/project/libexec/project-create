@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Usage: project create project...
+# Summary: Create a new project
+# Help: This command creates a new project tracked by redwood. It will be managed by the mgmt client.
+#
+# OPTIONS
+#   -s site where project code is to be used (e.g. aws)
+set -e
+
+project=DEV
+site=aws
+verbose=0
+
+while getopts ":s:" opt; do
+    case $opt in
+        s)
+            site="${OPTARG}"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+shift "$((OPTIND - 1))"
+
+for project in "$@"; do
+    # don't add project if already exists
+    if [[ $("${_REDWOOD_ROOT}/bin/redwood" project list | grep -c "${project}") -eq 0 ]]; then
+        docker exec -it redwood-auth-db psql -d dcc -U dcc_auth -c "update oauth_client_details set scope = '${site}.${project}.upload,${site}.${project}.download,' || scope where client_id='mgmt';"
+    fi
+done

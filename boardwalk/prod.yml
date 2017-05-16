@@ -75,7 +75,7 @@ services:
       - login-db
     restart: always
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:1.0.3
+    image: quay.io/ucsc_cgl/dashboard:1.0.4
     #build: dcc-dashboard
     ports:
       - "80"

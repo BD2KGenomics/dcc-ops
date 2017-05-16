@@ -268,6 +268,18 @@ sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_
             redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
 ```
 
+### Running RNA-Seq Analysis on Sample Data
+
+To do RNA-Seq Analysis, you must first upload reference files to Redwood. You can obtain the reference files by running from within dcc-ops:
+
+```
+reference/download_reference.sh
+```
+
+This will download the files under `reference/samples`. You can then use the core client to do a spinnaker upload as described previously and use the _manifest.tsv_ within the `reference` folder. 
+
+Once you have successfully uploaded the reference files, you can start submitting fastq files to redwood to run analysis on them. See the help section on the file browser for more information on the template. Use `RNA-Seq` or `scRNA-Seq` when filling out the *Submitter Experimental Design* column on your manifest.
+
 ### Troubleshooting
 
 If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics/dcc-ops/issues/new) or [contact a human](https://github.com/BD2KGenomics/dcc-ops/graphs/contributors).
@@ -281,8 +293,4 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
 * "What is the AWS profile?" -> you don't need this, get rid of it
-* "What is the Luigi Server?" -> you will know this so you don't need to ask... you can set this to "action-service" automatically
-* Consonance Address... should be consonance-webservice
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
-* default values for Postgres DB for monitoring
-* the help page needs to be a template so the correct host names are used

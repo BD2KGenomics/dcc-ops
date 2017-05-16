@@ -1,0 +1,4 @@
+Program	Project	Center Name	Submitter Donor ID	Donor UUID	Submitter Specimen ID	Specimen UUID	Submitter Specimen Type	Submitter Experimental Design	Submitter Sample ID	Sample UUID	Analysis Type	Workflow Name	Workflow Version	File Type	File Path
+TEST	TEST	UCSC	S234567		S234567a		Primary tumour - solid tissue	RNA-Seq	S123472b1		sequence_upload	Sequence Uploader	1.0.0	tar.gz	/samples/starIndex_hg38_no_alt.tar.gz
+TEST	TEST	UCSC	S678901		S678901a		Primary tumour - solid tissue	RNA-Seq	S123472b1		sequence_upload	Sequence Uploader	1.0.0	idx	/samples/kallisto_hg38.idx
+TEST	TEST	UCSC	S012345		S012345a		Primary tumour - solid tissue	RNA-Seq	S123472b1		sequence_upload	Sequence Uploader	1.0.0	tar.gz	/samples/rsem_ref_hg38_no_alt.tar.gz

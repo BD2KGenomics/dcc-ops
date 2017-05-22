@@ -35,7 +35,7 @@ shift "$((OPTIND - 1))"
 [[ $(docker ps | grep -c redwood) -gt 0 ]] || (echo 'Can''t see redwood docker containers--maybe you need to be root?' && exit)
 
 # get credentials from container env
-cmd=$(printf 'curl -XPUT "http://localhost:8543/admin/scopes/%s" -u admin:${AUTH_ADMIN_PASSWORD} -d"%s"' "${user}" "${scopes}")
+cmd=$(printf 'curl -XPUT "http://localhost:8543/admin/scopes/%s" -u admin:${AUTH_SERVER_ADMIN_PASSWORD} -d"%s"' "${user}" "${scopes}")
 docker exec -it redwood-auth-server bash -c "${cmd}"
 
 # get credentials from container env

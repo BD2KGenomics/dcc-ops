@@ -53,6 +53,7 @@ services:
       B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
+      SECRET_KEY: "${secret_key}"
     #image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
@@ -91,6 +92,7 @@ services:
       REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
       REDWOOD_SERVER: "auth.${redwood_server}"
       REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
+      REDWOOD_HOST: "${redwood_server}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
@@ -99,6 +101,8 @@ services:
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
+      SECRET_KEY: "${secret_key}"
+      DCC_CORE_CLIENT_VERSION: "${core_client_version}"
     networks:
       - esnet
       - server

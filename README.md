@@ -46,6 +46,8 @@ We will refer to this as the host VM throughout the documentation below and it i
 
 You should make a note of your security group name and ID and ensure you can connect via ssh.
 
+**NOTE:** We have had problems when uploading big files to Virginia (~25GB). If possible, set up your AWS anywhere else but Virginia.
+
 ### AWS Tasks
 
 Make sure you do the following:
@@ -68,8 +70,8 @@ Redwood exposes storage, metadata, auth services. Each of these should be made s
 * Have the subdomains 'auth', 'metadata', and 'storage' point to the same Elastic IP ('auth.example.com', 'metadata.example.com', and 'storage.example.com' and 'example.com' all resolve to the same Elastic IP)
 
 #### Make your S3 Bucket
-* On the AWS console, go to S3 and create a bucket.
-* Assign it a name. Keep note of the name given to it.
+* On the AWS console, go to S3 and create 3 buckets: one for redwood-storage, one for redwood-backups, and one for the action service.
+* Assign them a unique name. Keep note of the name given to each of them.
 * Get the S3 endpoint. It dependent on your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) for the list.
 
 #### Create an AWS IAM Encryption Key
@@ -84,7 +86,7 @@ See the Consonance [README](consonance/README.md) for details.  Consonance assum
 
 #### Adding private SSH key to your VM
 
-Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it.
+Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it. Then do `chmod 400 ~/.ssh/<your_key>.pem` so your key is not publicly viewable.
 
 #### TODO:
 
@@ -196,7 +198,10 @@ Here are things we need to explain how to do post install:
 
 * first of all, how to go to the website and confirm things are working e.g. https://ops-dev.ucsc-cgl.org or whatever the domain name is
 * how to associate a token with a user email so token download works
-    * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
+    * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`, this give access to all programs.
+    * you can also assign program scopes as well, for example
+        * `sudo redwood/cli/bin/redwood project create PROJECT`
+        * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.PROJECT.upload aws.PROJECT.download'`
 * user log in via google, retrieve token
 * Get the reference data used by the RNASeq-CGL pipeline:
 *    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 
@@ -208,13 +213,36 @@ Here are things we need to explain how to do post install:
 * get sample fastq data
     * ...
 * upload sample fastq data
-* trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html
+* trigger indexing so you can immediately see fastq data in the file browser e.g. https://ops-dev.ucsc-cgl.org/file_browser.html, `sudo docker exec -it boardwalk_dcc-metadata-indexer_1 bash -c "/app/dcc-metadata-indexer/cron.sh"`
 * monitor running of Consonance logs and worker nodes to see running data
 * download RNASeq-CGL analysis results from the portal
 
 ### Confirm Proper Function
 
 To test that everything installed successfully, you can run `cd test && ./integration.sh`. This will do an upload and download with core-client and check the results.
+
+#### Run Consonance 
+
+Make sure you have the consonance CLI installed.
+
+Make a `run.json`
+
+```
+{
+  "input_file": {
+        "class": "File",
+        "path": "https://raw.githubusercontent.com/briandoconnor/dockstore-tool-md5sum/master/md5sum.input"
+    }
+}
+```
+
+    consonance run --tool-dockstore-id quay.io/briandoconnor/dockstore-tool-md5sum:1.0.3 --flavour r3.8xlarge --run-descriptor run.json
+    # and it produces this
+    "job_uuid" : "66a67327-ccd3-4af0-a5c8-688fb52da778"
+    
+    # you can check the status
+    consonance status --job_uuid 66a67327-ccd3-4af0-a5c8-688fb52da778
+
 
 ### Upload and Download
 
@@ -242,6 +270,17 @@ sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_
             redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
 ```
 
+### Running RNA-Seq Analysis on Sample Data
+
+To do RNA-Seq Analysis, you must first upload reference files to Redwood. You can obtain the reference files by running from within dcc-ops:
+
+```
+reference/download_reference.sh
+```
+
+This will download the files under `reference/samples`. You can then use the core client to do a spinnaker upload as described previously and use the _manifest.tsv_ within the `reference` folder. 
+
+Once you have successfully uploaded the reference files, you can start submitting fastq files to redwood to run analysis on them. See the help section on the file browser for more information on the template. Use `RNA-Seq` or `scRNA-Seq` when filling out the *Submitter Experimental Design* column on your manifest.
 
 ### Troubleshooting
 
@@ -256,8 +295,4 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
 * "What is the AWS profile?" -> you don't need this, get rid of it
-* "What is the Luigi Server?" -> you will know this so you don't need to ask... you can set this to "action-service" automatically
-* Consonance Address... should be consonance-webservice
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
-* default values for Postgres DB for monitoring
-* the help page needs to be a template so the correct host names are used

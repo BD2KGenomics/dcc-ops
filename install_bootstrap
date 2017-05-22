@@ -631,46 +631,46 @@ CONFIG
               # start redwood
               echo "Starting redwood"
               sudo admin/bin/redwood up
-
               cd ..
+
+              # optionally recover backup and run migrations
+              recover_metadata=-1
+              read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
+              while [[ "${recover_metadata}" = "-1" ]]; do
+                  if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
+                      recover_metadata=1
+                  elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
+                      recover_metadata=0
+                  else
+                      echo "bad input: ${recover_metadata_response}"
+                      recover_metadata=-1
+                  fi
+              done
+              if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migrations
+                  read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
+                  sudo redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
+
+                  migrate=-1
+                  while [[ "${migrate}" = "-1" ]]; do # suggest migrations
+                      case ${yes} in
+                          0) migrate_response=no ;;
+                          1) migrate_response=yes ;;
+                          *) read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_response ;;
+                      esac
+                      if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
+                          migrate=1
+                          sudo redwood/admin/bin/redwood migrate metadata "${metadata_backup_file}"
+                      elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
+                      else echo "bad input: ${migrate_response}"
+                      fi
+                  done
+
+              fi
+
           elif [[ "${launch_redwood^^}" = 'N' ]]; then
               echo "You can start redwood later with: $ $(pwd)/redwood/admin/bin/redwood up"
           fi
       done
-
-      # TODO: don't ask this if didn't start redwood
-      recover_metadata=-1
-      read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
-      while [[ "${recover_metadata}" = "-1" ]]; do
-          if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
-              recover_metadata=1
-          elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
-              recover_metadata=0
-          else
-              echo "bad input: ${recover_metadata_response}"
-              recover_metadata=-1
-          fi
-      done
-      if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migrations
-          read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
-          sudo redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
-
-          migrate=-1
-          while [[ "${migrate}" = "-1" ]]; do # suggest migrations
-              case ${yes} in
-                  0) migrate_response=no ;;
-                  1) migrate_response=yes ;;
-                  *) read -rep $'Do you want to perform any migrations? [Y\N]\n' migrate_response ;;
-              esac
-              if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
-                  migrate=1
-                  sudo redwood/admin/bin/redwood migrate metadata "${metadata_backup_file}"
-              elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
-              else echo "bad input: ${migrate_response}"
-              fi
-          done
-
-      fi
 
     elif [ "${run_redwood^^}" = 'N' ] ; then
       echo "You can run this script at another time to run the redwood installer"

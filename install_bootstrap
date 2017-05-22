@@ -622,7 +622,7 @@ CONFIG
 
               # remove old redwood instance and data volumes if they exist
               echo "Removing old redwood containers, volumes, etc. if they exist"
-              sudo admin/bin/redwood down
+              sudo cli/bin/redwood down
               redwood_data_volumes=$(sudo docker volume ls | grep 'redwood_redwood-.*-data' | awk '{print $2}')
               if [[ ! -z ${redwood_data_volumes} ]]; then
                   sudo docker volume rm ${redwood_data_volumes}
@@ -630,7 +630,7 @@ CONFIG
 
               # start redwood
               echo "Starting redwood"
-              sudo admin/bin/redwood up
+              sudo cli/bin/redwood up
               cd ..
 
               # optionally recover backup and run migrations
@@ -648,7 +648,7 @@ CONFIG
               done
               if [[ ${recover_metadata} -eq 1 ]]; then # run recovery and (optionally) migrations
                   read -ep $'Enter the path to your metdata-backup (.tar.gz) file.\n' metadata_backup_file
-                  sudo redwood/admin/bin/redwood recover metadata "${metadata_backup_file}"
+                  sudo redwood/cli/bin/redwood recover metadata "${metadata_backup_file}"
 
                   migrate=-1
                   while [[ "${migrate}" = "-1" ]]; do # suggest migrations
@@ -659,7 +659,7 @@ CONFIG
                       esac
                       if [[ "${migrate_response^^}" =~ ^(Y|YES)$ ]]; then
                           migrate=1
-                          sudo redwood/admin/bin/redwood migrate metadata "${metadata_backup_file}"
+                          sudo redwood/cli/bin/redwood migrate metadata "${metadata_backup_file}"
                       elif [[ "${migrate_response^^}" =~ ^(N|NO)$ ]]; then migrate=0
                       else echo "bad input: ${migrate_response}"
                       fi
@@ -668,7 +668,7 @@ CONFIG
               fi
 
           elif [[ "${launch_redwood^^}" = 'N' ]]; then
-              echo "You can start redwood later with: $ $(pwd)/redwood/admin/bin/redwood up"
+              echo "You can start redwood later with: $ $(pwd)/redwood/cli/bin/redwood up"
           fi
       done
 
@@ -785,7 +785,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
 
       # generate redwood access token
-      redwood_access_token=$(sudo redwood/admin/bin/redwood token create -u indexer -s 'aws.upload aws.download')
+      redwood_access_token=$(sudo redwood/cli/bin/redwood token create -u indexer -s 'aws.upload aws.download')
       #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
 
       #dcc_dashboard_host='dcc_dashboard_host'
@@ -995,8 +995,8 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
 
       # generate redwood access token
       redwood_access_token='redwood_access_token'
-      if [ -f redwood/admin/bin/redwood ] ; then
-           redwood_access_token=$(sudo redwood/admin/bin/redwood token create -u action_service -s 'aws.upload aws.download')
+      if [ -f redwood/cli/bin/redwood ] ; then
+           redwood_access_token=$(sudo redwood/cli/bin/redwood token create -u action_service -s 'aws.upload aws.download')
       else
           ask_question "What is your Redwood Access Token?" "$STORAGE_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
       fi

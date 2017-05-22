@@ -196,7 +196,7 @@ Here are things we need to explain how to do post install:
 
 * first of all, how to go to the website and confirm things are working e.g. https://ops-dev.ucsc-cgl.org or whatever the domain name is
 * how to associate a token with a user email so token download works
-    * `sudo redwood/admin/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
+    * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`
 * user log in via google, retrieve token
 * Get the reference data used by the RNASeq-CGL pipeline:
 *    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 
@@ -224,7 +224,7 @@ The `test/integration.sh` file also demonstrates normal core-client usage.
 
 Here is a sample command you can run from the `test` folder to do an upload:
 
-**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/admin/bin/redwood token create -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. End users should only be given project-specific scopes like _aws.PROJECT.upload_.
+**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/cli/bin/redwood token create -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. End users should only be given project-specific scopes like _aws.PROJECT.upload_.
 
 ```
 sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \

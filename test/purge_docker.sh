@@ -11,4 +11,4 @@ docker volume rm $(docker volume ls -f dangling=true -q)
 
 sudo rm -r /root/dcc-dashboard-service
 sudo rm -r /root/dcc-metadata-indexer
-sudo rm -r /root/dcc-actions-service
+sudo rm -r /root/dcc-action-service

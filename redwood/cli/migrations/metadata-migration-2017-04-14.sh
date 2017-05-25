@@ -86,6 +86,7 @@ EOF
 echo "running mongodb migration script ${tmpfile}"
 docker cp "${tmpfile}" redwood-metadata-db:"${tmpfile}"
 docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
+# TODO: this will fail for redwood with external databases
 
 echo done!
 echo '`echo "DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:\"UNRESOLVED\"})" | docker exec -it redwood-metadata-db mongo dcc-metadata` to see unresolved bundles. You still need to resolve these bundle programs manually.'

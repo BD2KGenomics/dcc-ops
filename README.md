@@ -121,6 +121,10 @@ Follow the interactive directions for setting up this CLI.  You will need the el
 
 Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
 
+#### Changing the maximum virtual memory in your VM
+
+ElasticSearch requires that you set `vm.max_map_count` to at least _262144_. The bootstrap installer will take care of this. However, the changes are not permanent, and if you restart your VM, `vm.max_map_count` will change to its default. To make this change permanent, edit the file `/etc/sysctl.conf` on your VM and add/edit this line: `vm.max_map_count=262144`. This will make the change permanent even in the case the VM is restarted.
+
 #### Create a Google Oauth2 app
 
 You need to create a Google Oauth2 app to enable Login and token download from the dashboard. If you don't want to enable this on the dashboard during installation, simply enter a random string when asked for the *Google Client ID* and the *Google Client Secret*. You can consult [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project) under "Creating A Google Project" if you want to read more details. Here is a summary of what you need to do:

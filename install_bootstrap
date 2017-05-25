@@ -667,15 +667,15 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
     read run_boardwalk
 
     if [ "${run_boardwalk^^}" = 'Y' ] ; then
-      #echo "Carlos needs to dockerize"
       #Per ES specifications to run their docker image on production:
       #Set vm.max_map_count to 262144
       #Set the default elasticsearch1 service name
       es_service=elasticsearch1
       dcc_dashboard_protocol=https
       dcc_dashboard_port=8080
+      echo "Setting max VM for ElasticSearch"
       sudo sysctl -w vm.max_map_count=262144
-      #USER_GROUP=$(stat -c '%u:%g' $HOME)
+      sudo echo "vm.max_map_count=262144" >> /etc/sysctl.conf
 
       if [ -f boardwalk_launcher_config/boardwalk.config ] ; then
         	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" boardwalk_launcher_config/boardwalk.config)
@@ -888,8 +888,8 @@ CONFIG
 
       cd boardwalk
       #Bringing stuff down in case there are some cached containers
-      echo "Bringing down any Boardwalk existing container"
-      sudo docker-compose -f ${boardwalk_mode}.yml down -v
+      echo "Bringing down any existing Boardwalk container"
+      sudo docker-compose -f ${boardwalk_mode}.yml down
       echo "Creating Boardwalk associated containers"
       sudo docker-compose -f ${boardwalk_mode}.yml up -d
       cd ..

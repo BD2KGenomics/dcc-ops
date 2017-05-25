@@ -887,6 +887,10 @@ CONFIG
       mustache boardwalk_launcher_config/boardwalk.config boardwalk/conf/aws.config.template > boardwalk/aws.config
 
       cd boardwalk
+      #Bringing stuff down in case there are some cached containers
+      echo "Bringing down any Boardwalk existing container"
+      sudo docker-compose -f ${boardwalk_mode}.yml down -v
+      echo "Creating Boardwalk associated containers"
       sudo docker-compose -f ${boardwalk_mode}.yml up -d
       cd ..
 

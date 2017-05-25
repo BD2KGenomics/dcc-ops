@@ -6,6 +6,7 @@ services:
     image: postgres:9.5
     networks:
       - default
+    restart: always
 
   rabbitmq:
     image: rabbitmq:3.5.6-management
@@ -14,6 +15,7 @@ services:
       - "5672:5672"
     networks:
       - default
+    restart: always
 
   webservice:
     build:
@@ -31,6 +33,7 @@ services:
     networks:
       - default
       - esnet
+    restart: always
 
   coordinator:
     build:
@@ -43,6 +46,7 @@ services:
       - log_volume:/consonance_logs
     networks:
       - default
+    restart: always
 
   provisioner:
     build:
@@ -55,6 +59,7 @@ services:
       - log_volume:/consonance_logs
     networks:
       - default
+    restart: always
 
   client:
     build:
@@ -74,6 +79,7 @@ services:
       - PGDATABASE=postgres
     networks:
       - default
+    restart: always
 
 volumes:
   log_volume:

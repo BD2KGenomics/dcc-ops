@@ -10,6 +10,7 @@ services:
       - AUTH_DB_USERNAME=${auth_db_username}
       - AUTH_DB_PASSWORD=${auth_db_password}
       - AUTH_SERVER_ADMIN_PASSWORD=${auth_server_admin_password}
+      - AUTH_ADMIN_PASSWORD=${auth_server_admin_password} # TODO: remove upon next auth-server release
       - MGMT_CLIENT_SECRET=${mgmt_client_secret}
       - VIRTUAL_HOST=auth.${base_url}
       - VIRTUAL_PORT=8443

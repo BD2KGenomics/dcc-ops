@@ -168,6 +168,7 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
   * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
   * On question 'What is your AWS IAM KMS key ID?', put your encryption key ID (See 'Create an AWS IAM Encryption Key" above). If you don't want server-side encryption, you can leave this blank.
+  * On question 'Would you like to use external redwood databases?', enter 'N'.
 * Boardwalk
   * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)

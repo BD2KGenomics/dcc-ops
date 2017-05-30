@@ -3,7 +3,7 @@
 # Summary: Run auth/metadata migrations
 # Help: This comand recommends and runs auth or metadata db migrations. `backup` should be the filename of the backup that the current data was recovered from.
 #
-# Migrations are in dcc-ops/redwood/admin/migrations. Each migration should be an executable script with name matching redwood-{auth|metadata}-migration-YYYY-mm-dd...
+# Migrations are in dcc-ops/redwood/cli/migrations. Each migration should be an executable script with name matching redwood-{auth|metadata}-migration-YYYY-mm-dd...
 #
 # OPTIONS
 #   -y    non-interactive: run all migrations as recommended

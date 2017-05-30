@@ -10,14 +10,14 @@ Redwood uses the ICGC Storage System to save and track data bundles in Amazon S3
 ## Deploy to Production
 You can use the `install_bootstrap` script one directory up to automatically run the setup.
 
-After that, Redwood will already be up and running. You can control the system with the redwood client (in _dcc-ops/redwood/admin/bin/redwood_)
+After that, Redwood will already be up and running. You can control the system with the redwood client (in _dcc-ops/redwood/cli/bin/redwood_)
 - `redwood up`
 - `redwood down`
   - This deletes data!
 
-It will be useful to add _dcc-ops/redwood/admin/bin_ to your PATH.
+It will be useful to add _dcc-ops/redwood/cli/bin_ to your PATH.
 
-To confirm proper function: generate an accessToken with `admin/bin/redwood token create` then do a test upload/download from the server:
+To confirm proper function: generate an accessToken with `cli/bin/redwood token create` then do a test upload/download from the server:
 ```
 docker run --rm -it --net=redwood_default --link redwood-nginx:storage.redwood.io --link redwood-nginx:metadata.redwood.io \
     -e ACCESS_TOKEN=$(redwood token create) -e REDWOOD_ENDPOINT=redwood.io \
@@ -34,12 +34,12 @@ Redwood tracks projects and bundles (collections of files). Users are granted ac
 
 All projects tracked by redwood must be known to the auth-server. To register a new project:
 ```
-admin/bin/redwood project create PROJECT
+cli/bin/redwood project create PROJECT
 ```
 
 Authorization is controlled by which scopes a user's access token is granted. To create an access token for a user with certain scopes:
 ```
-admin/bin/redwood token create -s "aws.PROJECT1.upload aws.PROJECT1.download aws.PROJECT2.download" -u "user@ucsc.edu"
+cli/bin/redwood token create -s "aws.PROJECT1.upload aws.PROJECT1.download aws.PROJECT2.download" -u "user@ucsc.edu"
 # see scripts/createAccessToken.sh -h for more
 ```
 
@@ -83,7 +83,7 @@ metadata_db_password=password
 ### Development
 You can use the `quay.io/ucsc_cgl/redwood-storage-server`, `quay.io/ucsc_cgl/redwood-metadata-server`, and `quay.io/ucsc_cgl/redwood-auth-server` docker images as is or edit the server source and rebuild the images.
 
-It will be helpful to add _dcc-ops/redwood/admin/bin_ to your PATH.
+It will be helpful to add _dcc-ops/redwood/cli/bin_ to your PATH.
 
 Run the system:
 ```

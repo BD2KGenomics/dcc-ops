@@ -1,57 +1,39 @@
 version: '2'
 
+# Base redwood server definitions
 services:
   redwood-auth-server:
     container_name: redwood-auth-server
     environment:
-      - AUTH_DB_PASSWORD=${auth_db_dcc_password}
-      - AUTH_ADMIN_PASSWORD=${auth_admin_password}
+      - AUTH_DB_HOST=${auth_db_host}
+      - AUTH_DB=${auth_db}
+      - AUTH_DB_USERNAME=${auth_db_username}
+      - AUTH_DB_PASSWORD=${auth_db_password}
+      - AUTH_SERVER_ADMIN_PASSWORD=${auth_server_admin_password}
+      - AUTH_ADMIN_PASSWORD=${auth_server_admin_password} # TODO: remove upon next auth-server release
       - MGMT_CLIENT_SECRET=${mgmt_client_secret}
       - VIRTUAL_HOST=auth.${base_url}
       - VIRTUAL_PORT=8443
       - HTTPS_METHOD=nohttp
-    depends_on:
-      - redwood-auth-db
     networks:
       - core_public
-      - internal
-    restart: always
-  redwood-auth-db:
-    container_name: redwood-auth-db
-    image: postgres:9.6.2
-    volumes:
-      - ./conf/auth-1-bootstrap-postgresql.sh:/docker-entrypoint-initdb.d/dcc-auth-db.sh
-      - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
-      - redwood-auth-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=${auth_db_postgres_password}
-      - AUTH_DB_PASSWORD=${auth_db_dcc_password}
-      - METADATA_CLIENT_SECRET=${metadata_client_secret}
-      - STORAGE_CLIENT_SECRET=${storage_client_secret}
-      - MGMT_CLIENT_SECRET=${mgmt_client_secret}
-    networks:
       - internal
     restart: always
   redwood-metadata-server:
     container_name: redwood-metadata-server
     environment:
+      - METADATA_DB_HOST=${metadata_db_host}
+      - METADATA_DB=${metadata_db}
+      - METADATA_DB_USERNAME=${metadata_db_username}
+      - METADATA_DB_PASSWORD=${metadata_db_password}
       - METADATA_CLIENT_SECRET=${metadata_client_secret}
       - VIRTUAL_HOST=metadata.${base_url}
       - VIRTUAL_PORT=8444
       - HTTPS_METHOD=nohttp
     depends_on:
-      - redwood-metadata-db
       - redwood-auth-server
     networks:
       - core_public
-      - internal
-    restart: always
-  redwood-metadata-db:
-    container_name: redwood-metadata-db
-    image: mongo:3.4.2
-    volumes:
-      - redwood-metadata-data:/data/db
-    networks:
       - internal
     restart: always
   redwood-storage-server:
@@ -76,11 +58,9 @@ services:
       - internal
     restart: always
 
-volumes:
-  redwood-auth-data:
-  redwood-metadata-data:
-
 networks:
+  # publicly-accessible containers belong on core_public
   core_public:
     external: true
+  # otherwise containers should default to internal
   internal:

@@ -18,11 +18,21 @@ s3_endpoint={{ S3_ENDPOINT }}
 # AWS IAM Encryption Key id for server-side encryption of S3 data
 kms_key={{ KMS_KEY }}
 
-# passwords
-auth_db_postgres_password={{ AUTH_DB_POSTGRES_PASSWORD }}
-auth_db_dcc_password={{ AUTH_DB_DCC_PASSWORD }}
+# database connection info
+auth_db_host={{ AUTH_DB_HOST }}
+auth_db={{ AUTH_DB }}
+auth_db_username={{ AUTH_DB_USERNAME }}
+auth_db_password={{ AUTH_DB_PASSWORD }}
+
+metadata_db_host={{ METADATA_DB_HOST }}
+metadata_db={{ METADATA_DB }}
+metadata_db_username={{ METADATA_DB_USERNAME }}
 metadata_db_password={{ METADATA_DB_PASSWORD }}
-auth_admin_password={{ AUTH_ADMIN_PASSWORD }}
+
+auth_db_admin_password={{ AUTH_DB_ADMIN_PASSWORD }}
+metadata_db_admin_password={{ METADATA_DB_ADMIN_PASSWORD }}
+
+auth_server_admin_password={{ AUTH_SERVER_ADMIN_PASSWORD }}
 metadata_client_secret={{ METADATA_CLIENT_SECRET }}
 storage_client_secret={{ STORAGE_CLIENT_SECRET }}
 mgmt_client_secret={{ MGMT_CLIENT_SECRET }}

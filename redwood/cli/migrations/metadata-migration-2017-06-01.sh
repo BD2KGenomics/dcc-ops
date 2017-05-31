@@ -2,7 +2,7 @@
 set -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-mapping="${dir}/helper/mapping.csv"
+mappings="${dir}/helper/mapping-2017-05-17.csv ${dir}/helper/mapping-manual.csv"
 
 # create projects
 if [[ -z ${_REDWOOD_ROOT} ]]; then
@@ -14,13 +14,16 @@ fi
 
 function mapping_for() {
     program="$1"
-    printf '["'; cat "${mapping}" | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
+    printf '["'; cat ${mappings} | sort | uniq | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
 }
 
 # json arrays of bundle_ids
 treehouse_bundles="$(mapping_for Treehouse)"
 wcdt_bundles="$(mapping_for SU2C)"
 protect_bundles="$(mapping_for PROTECT_NBL)"
+quake_bundles="$(mapping_for "Quake Brain scRNA-Seq")"
+test_bundles="$(mapping_for "TEST")"
+dev_bundles="$(mapping_for "DEV")"
 
 # write migration.js
 tmpfile="/tmp/migration`date +%Y-%m-%d_%H-%M-%S`.js"
@@ -79,6 +82,48 @@ db.Entity.bulkWrite([
               }
           }
       }
+    },
+    { updateMany:
+      {
+          "filter": {
+              gnosId: {
+                  \$in: ${quake_bundles}
+              }
+          },
+          "update": {
+              \$set: {
+                  projectCode:"Quake_Brain_scRNA-Seq"
+              }
+          }
+      }
+    },
+    { updateMany:
+      {
+          "filter": {
+              gnosId: {
+                  \$in: ${test_bundles}
+              }
+          },
+          "update": {
+              \$set: {
+                  projectCode:"TEST"
+              }
+          }
+      }
+    },
+    { updateMany:
+      {
+          "filter": {
+              gnosId: {
+                  \$in: ${dev_bundles}
+              }
+          },
+          "update": {
+              \$set: {
+                  projectCode:"DEV"
+              }
+          }
+      }
     }
 ])
 EOF
@@ -89,4 +134,4 @@ docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
 # TODO: this will fail for redwood with external databases
 
 echo done!
-echo '`echo "DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:\"UNRESOLVED\"})" | docker exec -i redwood-metadata-db mongo dcc-metadata` to see unresolved bundles. You still need to resolve these bundle programs manually.'
+echo '`docker exec redwood-metadata-db mongo dcc-metadata --eval ''DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:"UNRESOLVED"})''` to see unresolved bundles. You still need to resolve these bundle programs manually.'

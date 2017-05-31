@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Usage: redwood bundle delete [-m] bundleid...
+# Summary: Delete a bundle
+# Help: Delete a bundle
+#
+# Options:
+#   -m, --metadata-only    only delete metadata entries, not s3 data
+#
+# Tip: redwood bundle list | jq -s '.[] | select(.gnosId=="somebundleid")'
+set -e
+source "${_REDWOOD_ROOT}/libexec/lib.sh"
+
+function main() {
+    # parse options
+    metadata_only=0
+    while :; do
+        case $1 in
+            -m|--metadata-only)       # Takes an option argument, ensuring it has been specified.
+                metadata_only=1
+                ;;
+            -?*)
+                printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+                ;;
+            *)               # Default case: If no more options then break out of the loop.
+                break
+        esac
+        shift
+    done
+    # delete bundles
+    for bundle_id in "$@"; do
+        # TODO: won't work on external database
+        docker exec redwood-metadata-db mongo dcc-metadata --quiet --eval "db.Entity.remove({gnosId: \"${bundle_id}\"})"
+        if [[ $metadata_only -eq 0 ]]; then
+            docker run -e AWS_ACCESS_KEY_ID="$(peek_env access_key)" -e AWS_SECRET_ACCESS_KEY="$(peek_env secret_key)" garland/aws-cli-docker aws s3 rm "s3://$(peek_env s3_bucket)/data/${bundle_id}"
+            docker run -e AWS_ACCESS_KEY_ID="$(peek_env access_key)" -e AWS_SECRET_ACCESS_KEY="$(peek_env secret_key)" garland/aws-cli-docker aws s3 rm "s3://$(peek_env s3_bucket)/data/${bundle_id}.meta"
+        fi
+
+    done
+}
+
+main "$@"

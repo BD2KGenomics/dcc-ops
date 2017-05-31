@@ -8,4 +8,4 @@ set -e
 
 cd "${_REDWOOD_ROOT}/.."
 set -x
-docker-compose -f base.yml -f db.yml -f prod.yml -f dev.yml down
+docker-compose -f base.yml -f db.yml -f prod.yml -f dev.yml down -v

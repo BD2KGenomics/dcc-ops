@@ -1,5 +1,7 @@
 version: '2'
 
+# Run development server
+# Use redwood server dev versions
 services:
   nginx:
     image: nginx:1.11.10

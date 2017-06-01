@@ -1,0 +1,75 @@
+version: '2'
+
+# Runs redwood databases in docker containers
+# Does daily backup of metadata and auth databases
+services:
+  redwood-auth-server:
+    depends_on:
+      - redwood-auth-db
+  redwood-auth-db:
+    container_name: redwood-auth-db
+    image: postgres:9.6.2
+    volumes:
+      - ./conf/auth-1-bootstrap-postgresql.sh:/docker-entrypoint-initdb.d/dcc-auth-db.sh
+      - ./conf/pg_hba.conf:/etc/postgres/9.6/main/pg_hba.conf
+      - redwood-auth-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${auth_db_admin_password}
+      - AUTH_DB=${auth_db}
+      - AUTH_DB_USERNAME=${auth_db_username}
+      - AUTH_DB_PASSWORD=${auth_db_password}
+      - METADATA_CLIENT_SECRET=${metadata_client_secret}
+      - STORAGE_CLIENT_SECRET=${storage_client_secret}
+      - MGMT_CLIENT_SECRET=${mgmt_client_secret}
+    # TODO: bootstrap auth-db even if external
+    networks:
+      - internal
+    restart: always
+  redwood-metadata-server:
+    depends_on:
+      - redwood-metadata-db
+  redwood-metadata-db:
+    container_name: redwood-metadata-db
+    image: mongo:3.4.2
+    volumes:
+      - redwood-metadata-data:/data/db
+    networks:
+      - internal
+    restart: always
+  redwood-metadata-backup:
+    container_name: redwood-metadata-backup
+    image: agmangas/mongo-backup-s3
+    environment:
+    - FILE_PREFIX=metadata-backup-
+    - BACKUP_INTERVAL=1
+    - AWS_ACCESS_KEY_ID=${access_key}
+    - AWS_SECRET_ACCESS_KEY=${secret_key}
+    - S3_BUCKET=${backup_bucket}
+    - MONGO_DB=${metadata_db}
+    - MONGO_HOST=${metadata_db_host}
+    depends_on:
+    - redwood-metadata-db
+    restart: always
+  redwood-auth-backup:
+    container_name: redwood-auth-backup
+    image: schickling/postgres-backup-s3
+    environment:
+    - POSTGRES_HOST=${auth_db_host}
+    - POSTGRES_USER=${auth_db_username}
+    - POSTGRES_PASSWORD=${auth_db_password}
+    - POSTGRES_DATABASE=${auth_db}
+    - S3_PREFIX=auth-backup
+    - S3_BUCKET=${backup_bucket}
+    - S3_ACCESS_KEY_ID=${access_key}
+    - S3_SECRET_ACCESS_KEY=${secret_key}
+    - SCHEDULE="@daily"
+    depends_on:
+    - redwood-auth-db
+    restart: always
+
+volumes:
+  redwood-auth-data:
+  redwood-metadata-data:
+
+networks:
+  internal:

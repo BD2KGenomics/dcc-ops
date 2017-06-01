@@ -3,7 +3,7 @@ set -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 mappings="${dir}/helper/mapping-2017-05-17.csv ${dir}/helper/mapping-manual.csv"
-blacklist="${dir}/helper/blacklist-failed-uploads.csv"
+blacklist=$(printf '['; cat ${dir}/helper/blacklist-failed-uploads.csv | xargs printf '"%s",' | sed 's/,$/\]/')
 
 # create projects
 if [[ -z ${_REDWOOD_ROOT} ]]; then
@@ -126,17 +126,16 @@ db.Entity.bulkWrite([
           }
       }
     }
-])
+]);
+db.Entity.deleteMany({
+  _id: {\$in: ${blacklist}}
+})
 EOF
 
 echo "running mongodb migration script ${tmpfile}"
 docker cp "${tmpfile}" redwood-metadata-db:"${tmpfile}"
-docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
+docker exec -i redwood-metadata-db mongo --norc "${tmpfile}"
 # TODO: this will fail for redwood with external databases
-
-for bundle in $(cat "${blacklist}"); do
-    "${_REDWOOD_ROOT}/bin/redwood" bundle delete -m "$bundle"
-done
 
 echo Done
 echo '`docker exec redwood-metadata-db mongo dcc-metadata --eval ''DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:"UNRESOLVED"})''` to see unresolved bundles. You still need to resolve these bundle programs manually.'

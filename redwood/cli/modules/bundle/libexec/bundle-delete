@@ -5,8 +5,6 @@
 #
 # Options:
 #   -m, --metadata-only    only delete metadata entries, not s3 data
-#
-# Tip: redwood bundle list | jq -s '.[] | select(.gnosId=="somebundleid")'
 set -e
 source "${_REDWOOD_ROOT}/libexec/lib.sh"
 

@@ -11,7 +11,7 @@ The _YYYY-MM-DD_ is used to recommend all migrations whose dates are after the d
 ## Migrations
 Listing of specific migrations
 
-### 2017-05-17
+### 2017-06-02
 Adds `{access: controlled, projectCode: $p}` redwood metadata per record where $p is a project identifier obtained from the latest _mapping.csv_ in the _helper_ subdirectory to be associated with the mapped bundle id and to be used as its authorization group (projectCode foo requires aws.foo.download priviledge to download). The _helper/build_mapping.sh_ script builds a _mapping.csv_ from a copy of the dcc-metadata-indexer's _endpoint_metadata_ directory. This is a total hack.
 
 Note: _mapping-2017-04-14.csv_ contains 3 lines that _mapping-2017-05-17_ wasn't generated with:
@@ -20,7 +20,8 @@ d0117ff1-cf53-43a0-aaab-cb15809fbb49,SU2C
 d0117ff1-cf53-43a0-aaab-cb15809fbb49,Treehouse
 efe617a1-ae1f-5592-b8d0-9b268d205938,Treehouse
 ```
+Not sure why (note that the same bundle appears with programs SU2C and Treehouse).
 
-I copy-pasted these into _mapping-2017-05-17_, which is otherwise a superset of the former.
+There is also a _helper/blacklist-failed-uploads.csv_ which contains bundle-ids that were found to be missing from aws but present in the metadata backups (likely artifacts of uploads that failed or were canceled after registration). These will be deleted from the metadata-db. The metadata can always be recovered from a backup.
 
-There is also a _helper/blacklist-failed-uploads.csv_ which contains bundle-ids that were found to be missing from aws but present in the metadata backups. These will be deleted from the metadata-db.
+The last backup that this migration is relevant to is _s3://redwood-backups/metadata-backup-20170601-024115.tar.gz_.

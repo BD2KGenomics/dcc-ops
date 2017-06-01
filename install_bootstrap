@@ -943,8 +943,8 @@ CONFIG
 
       cd boardwalk
       #Bringing stuff down in case there are some cached containers
-      echo "Bringing down any existing Boardwalk container"
-      sudo docker-compose -f ${boardwalk_mode}.yml down
+      echo "Bringing down any existing Boardwalk container and volumes"
+      sudo docker-compose -f ${boardwalk_mode}.yml down -v
       echo "Creating Boardwalk associated containers"
       sudo docker-compose -f ${boardwalk_mode}.yml up -d
       cd ..

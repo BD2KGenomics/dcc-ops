@@ -15,7 +15,7 @@ fi
 
 function mapping_for() {
     program="$1"
-    printf '["'; cat ${mappings} | sort | uniq | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
+    printf '["'; cat ${mappings} | grep -v '^#' | sort | uniq | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
 }
 
 # json arrays of bundle_ids

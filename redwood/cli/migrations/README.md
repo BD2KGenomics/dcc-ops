@@ -22,3 +22,5 @@ efe617a1-ae1f-5592-b8d0-9b268d205938,Treehouse
 ```
 
 I copy-pasted these into _mapping-2017-05-17_, which is otherwise a superset of the former.
+
+There is also a _helper/blacklist-failed-uploads.csv_ which contains bundle-ids that were found to be missing from aws but present in the metadata backups. These will be deleted from the metadata-db.

@@ -3,7 +3,7 @@ set -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 mappings="${dir}/helper/mapping-2017-05-17.csv ${dir}/helper/mapping-manual.csv"
-blacklist=$(printf '['; cat ${dir}/helper/blacklist-failed-uploads.csv | xargs printf '"%s",' | sed 's/,$/\]/')
+blacklist=$(printf '['; cat "${dir}/helper/blacklist-failed-uploads.csv" "${dir}/helper/blacklist-manual.csv" | grep -v '^#' | xargs printf '"%s",' | sed 's/,$/\]/')
 
 # create projects
 if [[ -z ${_REDWOOD_ROOT} ]]; then
@@ -130,11 +130,14 @@ db.Entity.bulkWrite([
 db.Entity.deleteMany({
   _id: {\$in: ${blacklist}}
 })
+db.Entity.deleteMany({
+  projectCode: "DEV"
+})
 EOF
 
 echo "running mongodb migration script ${tmpfile}"
 docker cp "${tmpfile}" redwood-metadata-db:"${tmpfile}"
-docker exec -i redwood-metadata-db mongo --norc "${tmpfile}"
+docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
 # TODO: this will fail for redwood with external databases
 
 echo Done

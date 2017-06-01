@@ -141,4 +141,4 @@ docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
 # TODO: this will fail for redwood with external databases
 
 echo Done
-echo '`docker exec redwood-metadata-db mongo dcc-metadata --eval ''DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:"UNRESOLVED"})''` to see unresolved bundles. You still need to resolve these bundle programs manually.'
+echo "You should check that no metadata-db entities have UNRESOLVED projectCodes"

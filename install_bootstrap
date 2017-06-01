@@ -840,7 +840,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       echo "generating SECRET_KEY for login"
       secret_key="$(generate_password)"
    
-      core_client_version='1.1.0-alpha'
+      #TODO: The script should snoop the .env file and check if it has a password assigned already and use that. Otherwise, generate a random password.
+      core_client_version='1.1.0'
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
 

@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:2.0.2
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.4
     #build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"
@@ -54,7 +54,7 @@ services:
       FLASK_APP: "/app/mapi.py"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
-    image: quay.io/ucsc_cgl/dashboard-service:1.0.2
+    image: quay.io/ucsc_cgl/dashboard-service:1.0.3
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
     #build: dcc-dashboard-service
@@ -75,7 +75,7 @@ services:
       - login-db
     restart: always
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:1.0.4
+    image: quay.io/ucsc_cgl/dashboard:1.0.5
     #build: dcc-dashboard
     ports:
       - "80"

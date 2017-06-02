@@ -3,11 +3,12 @@
 # Summary: Run auth/metadata migrations
 # Help: This comand recommends and runs auth or metadata db migrations. `backup` should be the filename of the backup that the current data was recovered from.
 #
-# Migrations are in dcc-ops/redwood/admin/migrations. Each migration should be an executable script with name matching redwood-{auth|metadata}-migration-YYYY-mm-dd...
+# Migrations are in dcc-ops/redwood/cli/migrations. Each migration should be an executable script with name matching redwood-{auth|metadata}-migration-YYYY-mm-dd...
 #
 # OPTIONS
 #   -y    non-interactive: run all migrations as recommended
 
+# note: see dcc-ops/redwood/cli/migrations/README.md
 function main() {
     # parse options
     yes=0
@@ -42,13 +43,13 @@ function main() {
     backup="${2}"
     migrations_dir="${_REDWOOD_ROOT}/migrations"
     if [[ "${service}" = "auth" ]]; then
-        migrated_date="$(echo "${backup}" | sed -E 's/^([0-9-]{10}).*/\1/g')"
+        migrated_date="$(basename "${backup}" | sed -E 's/^([0-9-]{10}).*/\1/g')"
     else
-        migrated_date="$(echo "${backup}" | sed -E 's/metadata-backup-([0-9]{4})([0-9]{2})([0-9]{2}).*/\1-\2-\3/g')"
+        migrated_date="$(basename "${backup}" | sed -E 's/metadata-backup-([0-9]{4})([0-9]{2})([0-9]{2}).*/\1-\2-\3/g')"
     fi
 
     for migration in "${migrations_dir}"/${service}-migration-*; do # bash glob is alphabetical
-        migration_date="$(echo "${migration}" | sed -E "s/${service}-migration-([0-9-]{10}).*/\1/g")"
+        migration_date="$(basename "${migration}" | sed -E "s/${service}-migration-([0-9-]{10}).*/\1/g")"
         if [[ "${migrated_date}" < "${migration_date}" ]]; then # recommend this migration
             run_migration=-1
             while [[ "${run_migration}" = -1 ]]; do
@@ -60,7 +61,7 @@ function main() {
                 fi
                 if [[ "${run_migration^^}" =~ ^(Y|YES)$ ]]; then
                     bash "${migration}"
-                elif [[ "${run_migration}" =~ ^(N|NO)$ ]]; then
+                elif [[ "${run_migration^^}" =~ ^(N|NO)$ ]]; then
                     run_migration=0
                 else
                     run_migration=-1

@@ -2,7 +2,7 @@
 set -e
 script_name=$(basename $0)
 
-echo 'DEPRECATED: use `dcc-ops/redwood/admin/redwood project create` instead'
+echo 'DEPRECATED: use `dcc-ops/redwood/cli/redwood project create` instead'
 
 function help {
     cat <<EOF

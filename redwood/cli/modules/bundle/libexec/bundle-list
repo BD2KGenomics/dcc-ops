@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Usage: redwood bundle list
+# Summary: List all bundle ids
+# Help: List all bundle ids
+#
+# Tip: redwood bundle list | jq -s '.[] | select(.gnosId=="somebundleid")'
+set -e
+source "${_REDWOOD_ROOT}/libexec/lib.sh"
+
+function main() {
+    # list bundles
+    docker exec redwood-metadata-db mongo dcc-metadata --quiet --eval "cursor = db.Entity.find({}, {gnosId: 1, projectCode: 1, access: 1, fileName:1}); while (cursor.hasNext()){ printjsononeline(cursor.next());}"
+}
+
+main "$@"

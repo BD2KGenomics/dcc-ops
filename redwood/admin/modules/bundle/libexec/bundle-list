@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# Usage: redwood bundle list
-# Summary: List all bundle ids
-# Help: List all bundle ids
-set -e
-
-echo "not yet implemented - if you want this make an issue"

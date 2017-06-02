@@ -2,15 +2,15 @@
 
 psql <<EOF
 -- Copyright (c) 2012-2014 The Ontario Institute for Cancer Research. All rights reserved.
--- 
+--
 -- Script to create the SQL schema for the dcc-auth server
 
-DROP DATABASE IF EXISTS dcc;
-DROP USER IF EXISTS dcc_auth;
+DROP DATABASE IF EXISTS ${AUTH_DB};
+DROP USER IF EXISTS ${AUTH_DB_USERNAME};
 
-CREATE DATABASE dcc;
-\connect dcc;
-CREATE USER dcc_auth WITH PASSWORD '${AUTH_DB_PASSWORD}';
+CREATE DATABASE ${AUTH_DB};
+\connect ${AUTH_DB};
+CREATE USER ${AUTH_DB_USERNAME} WITH PASSWORD '${AUTH_DB_PASSWORD}';
 
 CREATE TABLE IF NOT EXISTS oauth_client_details (
   client_id VARCHAR(256) PRIMARY KEY,

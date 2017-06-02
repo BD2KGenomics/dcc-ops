@@ -19,6 +19,7 @@ services:
       DOCKSTORE_TOKEN: "${dockstore_token}"
     volumes:
       - ~/dcc-action-service/logs:/home/ubuntu/logs
+      - ~/dcc-action-service/extra:/home/ubuntu/luigi_decider_runs/extra
     restart: always
     ports:
       - "8082"

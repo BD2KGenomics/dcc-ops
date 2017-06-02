@@ -3,6 +3,7 @@ set -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 mappings="${dir}/helper/mapping-2017-05-17.csv ${dir}/helper/mapping-manual.csv"
+blacklist=$(printf '['; cat "${dir}/helper/blacklist-failed-uploads.csv" "${dir}/helper/blacklist-manual.csv" | grep -v '^#' | xargs printf '"%s",' | sed 's/,$/\]/')
 
 # create projects
 if [[ -z ${_REDWOOD_ROOT} ]]; then
@@ -14,7 +15,7 @@ fi
 
 function mapping_for() {
     program="$1"
-    printf '["'; cat ${mappings} | sort | uniq | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
+    printf '["'; cat ${mappings} | grep -v '^#' | sort | uniq | grep "${program}" | cut -d, -f 1 | tr "\n" ',' | sed 's/,$//' | sed 's/,/","/g' | tr -d '\n'; printf '"]'
 }
 
 # json arrays of bundle_ids
@@ -125,7 +126,13 @@ db.Entity.bulkWrite([
           }
       }
     }
-])
+]);
+db.Entity.deleteMany({
+  _id: {\$in: ${blacklist}}
+})
+db.Entity.deleteMany({
+  projectCode: "DEV"
+})
 EOF
 
 echo "running mongodb migration script ${tmpfile}"
@@ -133,5 +140,5 @@ docker cp "${tmpfile}" redwood-metadata-db:"${tmpfile}"
 docker exec -i redwood-metadata-db mongo --norc --quiet "${tmpfile}"
 # TODO: this will fail for redwood with external databases
 
-echo done!
-echo '`docker exec redwood-metadata-db mongo dcc-metadata --eval ''DBQuery.shellBatchSize = 10000; db.Entity.find({projectCode:"UNRESOLVED"})''` to see unresolved bundles. You still need to resolve these bundle programs manually.'
+echo Done
+echo "You should check that no metadata-db entities have UNRESOLVED projectCodes"

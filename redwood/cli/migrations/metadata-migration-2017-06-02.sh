@@ -10,7 +10,7 @@ if [[ -z ${_REDWOOD_ROOT} ]]; then
     echo 'not running within redwood cli: you need to manually run `redwood project create TREEHOUSE SU2C PROTECT_NBL`'
 else
     echo "adding projects"
-    "${_REDWOOD_ROOT}/bin/redwood" project create TREEHOUSE SU2C PROTECT_NBL
+    "${_REDWOOD_ROOT}/bin/redwood" project create Treehouse SU2C PROTECT_NBL Quake_Brain_scRNA-Seq
 fi
 
 function mapping_for() {

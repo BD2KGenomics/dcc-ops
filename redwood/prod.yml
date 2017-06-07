@@ -14,7 +14,7 @@ services:
     - LETSENCRYPT_HOST=metadata.${base_url}
     - LETSENCRYPT_EMAIL=${email}
   redwood-storage-server:
-    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.25
+    image: quay.io/ucsc_cgl/redwood-storage-server:r1.0.26
     environment:
     - LETSENCRYPT_HOST=storage.${base_url}
     - LETSENCRYPT_EMAIL=${email}

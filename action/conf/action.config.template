@@ -11,3 +11,4 @@ aws_secret_access_key={{ AWS_SECRET_ACCESS_KEY }}
 aws_access_key_id={{ AWS_ACCESS_KEY_ID }}
 aws_region={{ AWS_REGION }}
 aws_profile={{ AWS_PROFILE }}
+email_address_for_owner_tag={{ EMAIL_FOR_VM_OWNER_TAG }}

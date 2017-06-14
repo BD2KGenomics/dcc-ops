@@ -105,12 +105,17 @@ services:
       SECRET_KEY: "${secret_key}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
       ES_SERVICE: "${es_service}"
+      BD_POSTGRES_USER: "${login_user}"
+      BD_POSTGRES_PASSWORD: "${login_password}"
+      BD_POSTGRES_DB: "${login_db}"
     networks:
       - esnet
       - server
       - login
+      - bd
     links:
       - login-db
+      - bdchart-db
     restart: always
   nginx:
     build: nginx-dev
@@ -246,13 +251,13 @@ services:
     networks:
       - billing
     restart: always
-  bd-chart:
+  bdchart-db:
     image: postgres:9.6-alpine
     container_name: "bd-chart"
     environment:
-      POSTGRES_PASSWORD: "${billing_password}"
-      POSTGRES_USER: "${billing_user}"
-      POSTGRES_DB: "${billing_db}"
+      POSTGRES_PASSWORD: "${login_password}"
+      POSTGRES_USER: "${login_user}"
+      POSTGRES_DB: "${login_db}"
     volumes:
       - bdchart_postgres:/var/lib/postgresql/data
     ports:

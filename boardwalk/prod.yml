@@ -82,6 +82,7 @@ services:
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
+      - ~/dcc-dashboard/logs:/app/log
 #      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
@@ -103,6 +104,7 @@ services:
       L_POSTGRES_DB: "${login_db}"
       SECRET_KEY: "${secret_key}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
+      ES_SERVICE: "${es_service}"
     networks:
       - esnet
       - server

@@ -82,6 +82,7 @@ services:
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
+      - ~/dcc-dashboard/logs:/app/log
 #      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
@@ -103,6 +104,7 @@ services:
       L_POSTGRES_DB: "${login_db}"
       SECRET_KEY: "${secret_key}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
+      ES_SERVICE: "${es_service}"
     networks:
       - esnet
       - server
@@ -244,6 +246,20 @@ services:
     networks:
       - billing
     restart: always
+  bd-chart:
+    image: postgres:9.6-alpine
+    container_name: "bd-chart"
+    environment:
+      POSTGRES_PASSWORD: "${billing_password}"
+      POSTGRES_USER: "${billing_user}"
+      POSTGRES_DB: "${billing_db}"
+    volumes:
+      - bdchart_postgres:/var/lib/postgresql/data
+    ports:
+      - 5432
+    networks:
+      - bd
+    restart: always
 
 volumes:
   esdata1:
@@ -251,8 +267,13 @@ volumes:
   esdata2:
     driver: local
   postgres:
+    driver: local
   billing_postgres:
+    driver: local
   login_postgres:
+    driver: local
+  bdchart_postgres:
+    driver: local
   dashboard1:
     driver: local
   boardwalk1:
@@ -270,4 +291,5 @@ networks:
     driver: bridge
   billing:
     driver: bridge
-
+  bd:
+    driver: bridge

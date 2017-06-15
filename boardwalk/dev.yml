@@ -108,6 +108,7 @@ services:
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "${login_db}"
+      FLASK_APP: "/app/app.py"
     networks:
       - esnet
       - server

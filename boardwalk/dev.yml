@@ -107,8 +107,7 @@ services:
       ES_SERVICE: "${es_service}"
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
-      BD_POSTGRES_DB: "${login_db}"
-      FLASK_APP: "/app/app.py"
+      BD_POSTGRES_DB: "burndown"
     networks:
       - esnet
       - server
@@ -258,7 +257,7 @@ services:
     environment:
       POSTGRES_PASSWORD: "${login_password}"
       POSTGRES_USER: "${login_user}"
-      POSTGRES_DB: "${login_db}"
+      POSTGRES_DB: "burndown"
     volumes:
       - bdchart_postgres:/var/lib/postgresql/data
     ports:

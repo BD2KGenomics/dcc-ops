@@ -54,6 +54,7 @@ RUN chmod u+x init_provisioner.sh
 # TODO: make sure you create these from the .template files and customize them
 RUN mkdir -p /root/.youxia /root/.consonance /root/.consonance/self-installs /root/.ssh
 COPY youxia_config /root/.youxia/config
+COPY logback.xml /root/logback.xml
 COPY config /root/.consonance/config
 COPY key.pem /root/.ssh/key.pem
 RUN chmod 600 /root/.ssh/key.pem

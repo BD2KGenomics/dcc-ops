@@ -370,6 +370,12 @@ while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}
     fi
   done
 
+
+  email_address_for_owner_tag='email_address_for_owner_tag'
+  ask_question "What is the email address for the 'Owner' tag on the worker VM?" "$EMAIL_FOR_VM_OWNER_TAG" "Email for VM Owner tag" $email_address_for_owner_tag
+  sed -ie "s~{.*}~{\"Owner\":\"${email_address_for_owner_tag}\"}~" ./consonance/example_tags.json
+
+
   # Now write a config for this file.
   [[ -f commons_launcher_config/consonance.config ]] || mkdir -p commons_launcher_config
   # Note: You can't have ANY blank lines in .consonance/consonance.config because the python library that will eventually process it does not like blank lines and will fail.
@@ -410,7 +416,8 @@ while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}
 "OS_ENDPOINT":"${user_os_endpoint}",
 "OS_NETWORK_ID":"${user_os_network_id}",
 "OS_REGION":"${user_os_region}",
-"OS_ZONE":"${user_os_zone}"
+"OS_ZONE":"${user_os_zone}",
+"EMAIL_FOR_VM_OWNER_TAG":"${email_address_for_owner_tag}"
 }
 CONFIG
   [[ -d "commons_launcher_config" ]] || mkdir "commons_launcher_config"

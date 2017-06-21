@@ -105,7 +105,6 @@ services:
       SECRET_KEY: "${secret_key}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
       ES_SERVICE: "${es_service}"
-      ES_SERVICE: "${es_service}"
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"

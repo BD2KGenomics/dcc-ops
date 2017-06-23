@@ -106,6 +106,10 @@ boardwalk/dcc-dashboard/
 boardwalk/dcc-metadata-indexer/
 boardwalk_launcher_config/boardwalk.config
 
+spinnaker/.env
+spinnaker/aws.config
+spinnaker_launcher_config/spinnaker.config
+
 aws.config
 bag_params.json
 commons_launcher_config/

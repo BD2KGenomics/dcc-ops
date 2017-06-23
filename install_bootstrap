@@ -166,7 +166,6 @@ else
 fi
 
 
-
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''
 while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}" != 'N' ]] ; do
@@ -1063,6 +1062,58 @@ CONFIG
 done
 
 
+# RUN THE SPINNAKER INSTALLER
+run_spinnaker=''
+while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
+    echo "Would you like to run the spinnaker installer now? [Y/N]"
+    read run_spinnaker
+
+    if [ "${run_spinnaker^^}" = 'Y' ] ; then
+
+      if [ -f spinnaker_launcher_config/spinnaker.config ] ; then
+        	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" spinnaker_launcher_config/spinnaker.config)
+      fi
+      echo "0"
+      #ask_question "What is your DCC Dashboard Host (base URL)?" "$BASE_URL" "Base url" $base_url
+      #base_url=$redwood_server
+      
+      #need to ask question
+      base_url='emily.ucsc-cgp-dev.org'
+      
+      #ask_question "What is your UCSC storage (redwood) token?" "$UCSC_STORAGE_TOKEN" "UCSC Storage Token" $ucsc_storage_token
+      #base_url=$redwood_server
+      
+      #need to ask question
+      ucsc_storage_token='token-string-here'
+      
+      echo "1"
+      # Now write a config for this file.
+      [[ -f spinnaker_launcher_config/spinnaker.config ]] || mkdir -p spinnaker_launcher_config
+      echo "2"
+      cat > spinnaker_launcher_config/spinnaker.config <<CONFIG
+{
+"BASE_URL":"${base_url}",
+"UCSC_STORAGE_TOKEN":"${ucsc_storage_token}"
+}
+CONFIG
+      echo "3"
+      # template out stuff
+      mustache spinnaker_launcher_config/spinnaker.config spinnaker/conf/spinnaker.config.template > spinnaker/.env
+      echo "4"
+      cd spinnaker
+      #Bringing stuff down in case there are some cached containers
+      echo "Bringing down any existing Spinnaker container and volumes"
+      sudo docker-compose -f spinnaker_compose.yml down -v
+      echo "Creating Spinnaker associated containers"
+      sudo docker-compose -f spinnaker_compose.yml up -d
+      cd ..
+
+   elif [ "${run_spinnaker^^}" = 'N' ] ; then
+      echo "You can run this script at another time to run the spinnaker installer"
+   fi
+done
+
 # FINISHED INSTALLER
 echo "Done with installation, exiting now."
 set +e
+

@@ -1,0 +1,33 @@
+version: '2'
+
+volumes:
+  postgres:
+
+services:
+  db:
+    image: postgres:9.6-alpine
+    container_name: "spinnaker_db"
+    environment:
+      POSTGRES_PASSWORD: gi123
+      POSTGRES_USER: spinnaker
+      POSTGRES_DB: spinnaker
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  spinnaker:
+    #build: .
+    image: quay.io/ucsc_cgl/dcc-spinnaker
+    container_name: "spinnaker"
+    environment:
+      POSTGRES_PASSWORD: gi123
+      POSTGRES_USER: spinnaker
+      POSTGRES_DB: spinnaker
+      UCSC_STORAGE_TOKEN: "${ucsc_storage_token}"
+      BASE_URL: "${base_url}"
+      #UCSC_STORAGE_TOKEN: thisisthetoken
+      #BASE_URL: emily.ucsc-cgp-dev.org
+    links:
+      - db
+    #this is for dev purposes only!
+    ports:
+      - "5000:5000"

@@ -1093,6 +1093,13 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
       #need to ask question
       ucsc_storage_token='token-string-here'
       
+      email_address=''
+      if [ ! -z $EMAIL_ADDRESS ] ; then
+          read -ep $'What is the email address for notification?  Previous value: \n' -i "$EMAIL_ADDRESS" email_address
+      else
+          read -ep $'What is the email address for notification? \n' email_address
+      fi
+      
       echo "1"
       # Now write a config for this file.
       [[ -f spinnaker_launcher_config/spinnaker.config ]] || mkdir -p spinnaker_launcher_config
@@ -1100,7 +1107,8 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
       cat > spinnaker_launcher_config/spinnaker.config <<CONFIG
 {
 "BASE_URL":"${base_url}",
-"UCSC_STORAGE_TOKEN":"${ucsc_storage_token}"
+"UCSC_STORAGE_TOKEN":"${ucsc_storage_token}",
+"EMAIL_ADDRESS":"${email_address}"
 }
 CONFIG
       echo "3"
@@ -1123,4 +1131,5 @@ done
 # FINISHED INSTALLER
 echo "Done with installation, exiting now."
 set +e
+
 

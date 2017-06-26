@@ -1,2 +1,3 @@
-base_url= {{ BASE_URL }}
+base_url = {{ BASE_URL }}
 ucsc_storage_token = {{ UCSC_STORAGE_TOKEN }}
+email_address = {{ EMAIL_ADDRESS }}

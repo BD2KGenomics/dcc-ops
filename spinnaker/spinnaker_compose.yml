@@ -22,12 +22,17 @@ services:
       POSTGRES_PASSWORD: gi123
       POSTGRES_USER: spinnaker
       POSTGRES_DB: spinnaker
-      UCSC_STORAGE_TOKEN: "${ucsc_storage_token}"
-      BASE_URL: "${base_url}"
+      UCSC_STORAGE_TOKEN: ${ucsc_storage_token}
+      BASE_URL: ${base_url}
       #UCSC_STORAGE_TOKEN: thisisthetoken
       #BASE_URL: emily.ucsc-cgp-dev.org
+      VIRTUAL_HOST: spinnaker.${base_url}
+      VIRTUAL_PORT: 5000
+      HTTPS_METHOD: redirect
+      LETSENCRYPT_HOST: spinnaker.${base_url}
+      LETSENCRYPT_EMAIL: ${email_address}
     links:
       - db
     #this is for dev purposes only!
-    ports:
-      - "5000:5000"
+    #ports:
+    #  - "5000"

@@ -13,6 +13,8 @@ services:
       POSTGRES_DB: spinnaker
     volumes:
       - postgres:/var/lib/postgresql/data
+    networks:
+      - default
 
   spinnaker:
     #build: .
@@ -33,6 +35,15 @@ services:
       LETSENCRYPT_EMAIL: ${email_address}
     links:
       - db
+    networks: 
+      - core_public
+      - default
     #this is for dev purposes only!
     #ports:
     #  - "5000"
+networks:
+  core_public:
+    external: true
+  default:
+    driver: bridge
+

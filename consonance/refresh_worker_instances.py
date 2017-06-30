@@ -51,7 +51,8 @@ def main():
                    # Connect/ssh to an instance
                    try:
                        # Here 'ubuntu' is user name and 'instance_ip' is public IP of EC2
-                       paramiko_client.connect(hostname=inst.ip_address, username="root", pkey=key)
+                       paramiko_client.connect(hostname=inst.ip_address,
+                               username="ubuntu", pkey=key)
 
                        # set up hosts file so we don't get warning message in stderr 'sudo: unable to resolve host i-xxxx'
                        # Execute a command(cmd) after connecting/ssh to an instance
@@ -153,7 +154,7 @@ def main():
                                    ls_datastore_stdout = stdout.read()
                                    ls_datastore_stderr = stderr.read()
     #                               print "ls /datastore/* stdout: %s stderr: %s" % (ls_datastore_stdout, ls_datastore_stderr)
-         
+
                                    #if the directory is empty
                                    if len(ls_datastore_stdout) == 0  and len(ls_datastore_stderr) == 0:
                                        print "Deleted contents of /datastore  on instance: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)
@@ -169,9 +170,9 @@ def main():
                            else:
                                print "INFORMATION: Worker log does not show worker exit: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)
                        else:
-                           print "ERROR: Did not find worker log arch_worker.log on: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)                   
+                           print "ERROR: Did not find worker log arch_worker.log on: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)
 
-            
+
                        # close the client connection once the job is done
                        paramiko_client.close()
 
@@ -181,8 +182,6 @@ def main():
                        time.sleep(5) 
 
                        #sys.exit(0)
-
-                       break
 
                    except Exception, e:
                        print "ERROR checking workers!!! %s" % e

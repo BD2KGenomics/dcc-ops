@@ -1080,18 +1080,24 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
       if [ -f spinnaker_launcher_config/spinnaker.config ] ; then
         	source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" spinnaker_launcher_config/spinnaker.config)
       fi
-      echo "0"
+
       #ask_question "What is your DCC Dashboard Host (base URL)?" "$BASE_URL" "Base url" $base_url
-      #base_url=$redwood_server
-      
-      #need to ask question
-      base_url='emily.ucsc-cgp-dev.org'
+      base_url='base_url'
+      if [ -f redwood/.env ] ; then
+          base_url=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is your Base Url?" "$BASE_URL" "Base_Url" $base_url
+      fi
       
       #ask_question "What is your UCSC storage (redwood) token?" "$UCSC_STORAGE_TOKEN" "UCSC Storage Token" $ucsc_storage_token
       #base_url=$redwood_server
       
-      #need to ask question
-      ucsc_storage_token='token-string-here'
+      ucsc_storage_token='redwood_access_token'
+      if [ -f redwood/cli/bin/redwood ] ; then
+           ucsc_storage_token=$(sudo redwood/cli/bin/redwood token create -u action_service -s 'aws.upload aws.download')
+      else
+          ask_question "What is your UCSC storage (Redwood) token?" "$UCSC_STORAGE_TOKEN" "UCSC Storage Token" $ucsc_storage_token
+      fi
       
       email_address=''
       if [ ! -z $EMAIL_ADDRESS ] ; then
@@ -1100,10 +1106,8 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
           read -ep $'What is the email address for notification? \n' email_address
       fi
       
-      echo "1"
       # Now write a config for this file.
       [[ -f spinnaker_launcher_config/spinnaker.config ]] || mkdir -p spinnaker_launcher_config
-      echo "2"
       cat > spinnaker_launcher_config/spinnaker.config <<CONFIG
 {
 "BASE_URL":"${base_url}",
@@ -1111,10 +1115,8 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
 "EMAIL_ADDRESS":"${email_address}"
 }
 CONFIG
-      echo "3"
       # template out stuff
       mustache spinnaker_launcher_config/spinnaker.config spinnaker/conf/spinnaker.config.template > spinnaker/.env
-      echo "4"
       cd spinnaker
       #Bringing stuff down in case there are some cached containers
       echo "Bringing down any existing Spinnaker container and volumes"

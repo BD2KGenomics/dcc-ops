@@ -15,6 +15,7 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - default
+    restart: always
 
   spinnaker:
     #build: .
@@ -26,18 +27,18 @@ services:
       POSTGRES_DB: spinnaker
       UCSC_STORAGE_TOKEN: ${ucsc_storage_token}
       BASE_URL: ${base_url}
-      #UCSC_STORAGE_TOKEN: thisisthetoken
-      #BASE_URL: emily.ucsc-cgp-dev.org
       VIRTUAL_HOST: spinnaker.${base_url}
       VIRTUAL_PORT: 5000
       HTTPS_METHOD: redirect
       LETSENCRYPT_HOST: spinnaker.${base_url}
       LETSENCRYPT_EMAIL: ${email_address}
+      #VIRTUAL_PROTO: uwsgi
     links:
       - db
     networks: 
       - core_public
       - default
+    restart: always
     #this is for dev purposes only!
     #ports:
     #  - "5000"
@@ -46,4 +47,3 @@ networks:
     external: true
   default:
     driver: bridge
-

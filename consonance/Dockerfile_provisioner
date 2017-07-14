@@ -72,6 +72,7 @@ COPY ansible.config /root/.ansible.cfg
 COPY ssh.py /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
 RUN rm -f /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
 
+# patch /usr/local/lib as well for Ansible
 COPY ssh.py /usr/local/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
 RUN rm -f /usr/local/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
 

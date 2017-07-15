@@ -65,6 +65,9 @@ RUN mkdir /consonance_logs && chmod a+rx /consonance_logs
 COPY bag_params.json /container-host-bag/example_params.json
 COPY example_tags.json /container-host-bag/example_tags.json
 
+# Remove ansible deprecation warnings
+COPY ansible.config /root/.ansible.cfg
+
 # patch for Ansible
 COPY ssh.py /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
 RUN rm -f /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc

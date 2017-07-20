@@ -1106,13 +1106,33 @@ while [[ "${run_spinnaker^^}" != 'Y' &&  "${run_spinnaker^^}" != 'N' ]] ; do
           read -ep $'What is the email address for notification? \n' email_address
       fi
       
+      google_client_id='google_client_id'
+      if [ -f boardwalk/.env ] ; then
+          google_client_id=$(cat boardwalk/.env | grep 'google_client_id=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is your Google Client ID?" "$GOOGLE_CLIENT_ID" "Google Client ID" $google_client_id
+      fi
+
+      google_client_secret='google_client_secret'
+      if [ -f boardwalk/.env ] ; then
+          google_client_secret=$(cat boardwalk/.env | grep 'google_client_secret=' | sed 's/[^=]*=//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      else
+          ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
+      fi
+      
+      session_secret='session_secret'
+      ask_question "Enter a random string to encrypt user sessions." "$SESSION_SECRET" "Session Secret" $session_secret
+      
       # Now write a config for this file.
       [[ -f spinnaker_launcher_config/spinnaker.config ]] || mkdir -p spinnaker_launcher_config
       cat > spinnaker_launcher_config/spinnaker.config <<CONFIG
 {
 "BASE_URL":"${base_url}",
 "UCSC_STORAGE_TOKEN":"${ucsc_storage_token}",
-"EMAIL_ADDRESS":"${email_address}"
+"EMAIL_ADDRESS":"${email_address}",
+"GOOGLE_CLIENT_ID":"${google_client_id}",
+"GOOGLE_CLIENT_SECRET":"${google_client_secret}",
+"SESSION_SECRET":"${session_secret}"
 }
 CONFIG
       # template out stuff

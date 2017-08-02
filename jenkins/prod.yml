@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  jenkins-ci:
+    image: jenkins/jenkins:lts
+    environment:
+      - VIRTUAL_HOST=jenkins.carlos.ucsc-cgp-dev.org
+      - VIRTUAL_PORT=8080
+      - HTTPS_METHOD=redirect
+      - LETSENCRYPT_HOST=jenkins.carlos.ucsc-cgp-dev.org
+      - LETSENCRYPT_EMAIL="caaespin@ucsc.edu"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    ports:
+      - "8080"
+      - "50000:50000"
+    networks:
+      - core_public
+    restart: always
+
+volumes:
+  jenkins_home:
+    driver: local
+
+networks:
+  core_public:
+    external: true

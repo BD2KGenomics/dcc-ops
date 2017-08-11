@@ -7,11 +7,7 @@
 cron -L 15 && echo "Cron Job set"
 
 #for remote debugging
-#export JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y
 java -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n  -cp "/root/:./*" io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out
 
-#test debug statement does this work?
-#java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -cp "/root/:./*" io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out
-
-#old command
+#regular run command
 #java -cp consonance-arch-*.jar io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out

@@ -24,7 +24,7 @@ ENV consonance_version=2.0.0-alpha.15
 #https://www.dropbox.com/s/giy9ayxlvpoohiz/consonance-arch-2.0-alpha.11-SNAPSHOT.jar #https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/io/consonance/consonance-arch/${consonance_version}/consonance-arch-${consonance_version}.jar
 
 # Copy in jury-rigged Consonance jar
-COPY consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar /consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar
+#COPY consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar /consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar
 
 
 # install dockerize

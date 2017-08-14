@@ -52,6 +52,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile_provisioner
+    ports:
+      - "8000:8000"
     links:
       - webservice
       - rabbitmq

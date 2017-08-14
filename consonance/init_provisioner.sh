@@ -5,5 +5,12 @@
 #the '/' path is second so that the rest of the code is found in 
 #consonance-arch-*.jar
 cron -L 15 && echo "Cron Job set"
-java -cp "/root/:./*" io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out
+
+#for remote debugging
+#java -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n  -cp "/root/:./*" io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out
+
+#regular run command
+java  -cp "/root/:./*" io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out
+
+#old command
 #java -cp consonance-arch-*.jar io.consonance.arch.containerProvisioner.ContainerProvisionerThreads --config config --endless | tee /consonance_logs/container_provisioner_nohup.out

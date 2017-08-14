@@ -135,7 +135,7 @@ def main():
                                    #outfile.write(worker_error_stdout)
                                    #outfile.write(worker_error_stderr)
                                    #outfile.close()  
-    #                           '''             
+                               '''             
                                # Execute a command(cmd) after connecting/ssh to an instance
                                stdin, stdout, stderr = paramiko_client.exec_command('ps aux | grep java | grep consonance-arch-.*.jar | grep -v grep')
                                worker_daemon_running_stdout = stdout.read()
@@ -166,7 +166,7 @@ def main():
 
                                        if len(run_worker_daemon_stdout) > 0: # and len(run_worker_daemon_stderr) == 0:
                                            print "Restarted worker daemon on instance: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)
-    #                           '''
+                               '''
                            else:
                                print "INFORMATION: Worker log does not show worker exit: %s (%s) [%s]" % (inst.tags['Name'], inst.id, inst.state)
                        else:

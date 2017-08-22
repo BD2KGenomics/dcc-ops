@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:1.0.1
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.7
     environment:
       USER_GROUP: "${user_group}"
       REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"

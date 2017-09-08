@@ -8,6 +8,8 @@ services:
       USER_GROUP: "${user_group}"
       REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
       ACCESS_TOKEN: "${redwood_access_token}"
+      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
       REDWOOD_SERVER: "${redwood_server}"
       REDWOOD_ENDPOINT: "${redwood_server}"
       ES_SERVICE: "${es_service}"

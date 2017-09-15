@@ -30,7 +30,7 @@ services:
       - internal
     restart: always
   letsencrypt-nginx-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion:v1.4
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.5
     container_name: core-letsencrypt-nginx-companion
     volumes_from:
       - nginx

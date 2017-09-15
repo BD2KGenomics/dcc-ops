@@ -92,6 +92,7 @@ while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^
     echo "Installing various apt packages"
     # need to install regardless
     set +e
+    sudo apt-get -y update 
     sudo apt-get install wget curl ruby-mustache=1.0.2-1 jq git --yes &> install_wget_curl.log
     install_wget_result=$?
     set -e
@@ -902,7 +903,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       secret_key="$(generate_password)"
    
       #TODO: The script should snoop the .env file and check if it has a password assigned already and use that. Otherwise, generate a random password.
-      core_client_version='1.1.0'
+      core_client_version='1.1.1'
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
 

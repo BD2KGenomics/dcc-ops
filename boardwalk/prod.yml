@@ -2,12 +2,14 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:2.0.4
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.8
     #build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"
       REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
       ACCESS_TOKEN: "${redwood_access_token}"
+      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
+      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
       REDWOOD_SERVER: "${redwood_server}"
       REDWOOD_ENDPOINT: "${redwood_server}"
       ES_SERVICE: "${es_service}"
@@ -54,7 +56,7 @@ services:
       FLASK_APP: "/app/mapi.py"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
-    image: quay.io/ucsc_cgl/dashboard-service:1.0.3
+    image: quay.io/ucsc_cgl/dashboard-service:1.0.7
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
     #build: dcc-dashboard-service
@@ -75,13 +77,14 @@ services:
       - login-db
     restart: always
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:1.0.6
+    image: quay.io/ucsc_cgl/dashboard:1.0.8
     #build: dcc-dashboard
     ports:
       - "80"
       - "443"
     volumes:
       - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
+      - ~/dcc-dashboard/logs:/app/log
 #      - dashboard1:/app
     depends_on:
       - dcc-metadata-indexer
@@ -103,12 +106,18 @@ services:
       L_POSTGRES_DB: "${login_db}"
       SECRET_KEY: "${secret_key}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
+      ES_SERVICE: "${es_service}"
+      BD_POSTGRES_USER: "${login_user}"
+      BD_POSTGRES_PASSWORD: "${login_password}"
+      BD_POSTGRES_DB: "burndown"
     networks:
       - esnet
       - server
       - login
+      - bd
     links:
       - login-db
+      - bdchart-db
     restart: always
   nginx:
     build: nginx-image
@@ -228,6 +237,20 @@ services:
     networks:
       - billing
     restart: always
+  bdchart-db:
+    image: postgres:9.6-alpine
+    container_name: "bd-chart"
+    environment:
+      POSTGRES_PASSWORD: "${login_password}"
+      POSTGRES_USER: "${login_user}"
+      POSTGRES_DB: "burndown"
+    volumes:
+      - bdchart_postgres:/var/lib/postgresql/data
+    ports:
+      - 5432
+    networks:
+      - bd
+    restart: always
 
 volumes:
   esdata1:
@@ -235,8 +258,13 @@ volumes:
   esdata2:
     driver: local
   postgres:
+    driver: local
   billing_postgres:
+    driver: local
   login_postgres:
+    driver: local
+  bdchart_postgres:
+    driver: local
   dashboard1:
     driver: local
   boardwalk1:
@@ -254,4 +282,5 @@ networks:
     driver: bridge
   billing:
     driver: bridge
-
+  bd:
+    driver: bridge

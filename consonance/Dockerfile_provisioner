@@ -30,9 +30,11 @@ RUN add-apt-repository -y ppa:webupd8team/java \
     && apt-get install -y oracle-java8-installer
 
 # install Consonance services
-ENV consonance_version=2.0.0-alpha.15
+ENV consonance_version=cgp-2.0.0-alpha.16
 
-RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
+# Switch to BD2K fork over Consonance source for reaping fix
+RUN wget --no-verbose https://github.com/BD2KGenomics/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
+#RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
 # https://www.dropbox.com/s/giy9ayxlvpoohiz/consonance-arch-2.0-alpha.11-SNAPSHOT.jar
 # https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/io/consonance/consonance-arch/${consonance_version}/consonance-arch-${consonance_version}.jar
 
@@ -65,9 +67,17 @@ RUN mkdir /consonance_logs && chmod a+rx /consonance_logs
 COPY bag_params.json /container-host-bag/example_params.json
 COPY example_tags.json /container-host-bag/example_tags.json
 
+ # Remove ansible deprecation warnings
+ # Copy Ansible config
+COPY ansible.config /root/.ansible.cfg
+
 # patch for Ansible
 COPY ssh.py /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
 RUN rm -f /usr/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
+
+# patch /usr/local/lib as well for Ansible
+COPY ssh.py /usr/local/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.py
+RUN rm -f /usr/local/lib/python2.7/dist-packages/ansible/plugins/connection/ssh.pyc
 
 # Setting up cronjob for refreshing worker's instance
 COPY boto.config /root/.boto

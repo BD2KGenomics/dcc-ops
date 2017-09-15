@@ -24,13 +24,10 @@ RUN add-apt-repository -y ppa:webupd8team/java \
 # install Consonance services
 ENV consonance_version=cgp-2.0.0-alpha.16
 
-RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
-#RUN wget --no-verbose https://github.com/wshands/consonance/releases/download/2.0.0-alpha.16/consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar
+# Switch to BD2K fork over Consonance source for reaping fix
+RUN wget --no-verbose https://github.com/BD2KGenomics/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
+#RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-arch-${consonance_version}.jar
 # https://www.dropbox.com/s/giy9ayxlvpoohiz/consonance-arch-2.0-alpha.11-SNAPSHOT.jar #https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/io/consonance/consonance-arch/${consonance_version}/consonance-arch-${consonance_version}.jar
-
-# Copy in jury-rigged Consonance jar
-#COPY consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar /consonance-arch-2.0.0-alpha.16-SNAPSHOT.jar
-
 
 RUN useradd -ms /bin/bash ubuntu
 # the web and Consonance config
@@ -57,8 +54,11 @@ RUN echo "postgres:5432:*:*:postgres" > /home/ubuntu/.pgpass && chmod 600 /home/
 
 
 # for youxia and the consonance command line on the main box
-RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance && mv consonance /home/ubuntu/bin && chmod a+x /home/ubuntu/bin/consonance
-RUN wget --no-verbose --no-check-certificate https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance-client-${consonance_version}.jar && mv consonance-client-*.jar /home/ubuntu/.consonance/self-installs/consonance-client-${consonance_version}.jar
+#RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/${consonance_version}/consonance && mv consonance /home/ubuntu/bin && chmod a+x /home/ubuntu/bin/consonance
+
+# Note: hard-coded patch to download executable
+RUN wget --no-verbose https://github.com/Consonance/consonance/releases/download/2.0.0-alpha.15/consonance && mv consonance /home/ubuntu/bin && chmod a+x /home/ubuntu/bin/consonance
+RUN wget --no-verbose --no-check-certificate https://github.com/BD2KGenomics/consonance/releases/download/${consonance_version}/consonance-client-${consonance_version}.jar && mv consonance-client-*.jar /home/ubuntu/.consonance/self-installs/consonance-client-${consonance_version}.jar
 #RUN wget --no-verbose --no-check-certificate https://www.dropbox.com/s/32hrcqgose2fpzz/consonance-client-2.0-alpha.11-SNAPSHOT.jar && mv consonance-client-*.jar /home/ubuntu/.consonance/self-installs/consonance-client-${consonance_version}.jar
 #RUN wget --no-verbose --no-check-certificate http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/io/consonance/consonance-client/${consonance_version}/consonance-client-${consonance_version}.jar && mv consonance-client-${consonance_version}.jar /home/ubuntu/.consonance/self-installs/
 

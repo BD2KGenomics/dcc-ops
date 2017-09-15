@@ -92,6 +92,7 @@ while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^
     echo "Installing various apt packages"
     # need to install regardless
     set +e
+    sudo apt-get -y update 
     sudo apt-get install wget curl ruby-mustache=1.0.2-1 jq git --yes &> install_wget_curl.log
     install_wget_result=$?
     set -e

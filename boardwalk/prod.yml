@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:2.0.8
+    image: quay.io/ucsc_cgl/metadata-indexer:2.0.9
     #build: dcc-metadata-indexer/v2
     environment:
       USER_GROUP: "${user_group}"

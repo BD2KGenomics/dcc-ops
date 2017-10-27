@@ -166,7 +166,12 @@ else
     echo "esnet docker network already exists"
 fi
 
-
+#add the command to
+#start the UCSC Computational Genomics Platform (CGP) container that sets up the
+#Nginx config template with the uuids for each of the containers in the CGP
+#at boot time
+echo "Attempting to add docker start core-config-gen to rc.local"
+sudo ./put_core_start_cmd_in_rc.sh
 
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''

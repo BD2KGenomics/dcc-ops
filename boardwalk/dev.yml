@@ -105,6 +105,8 @@ services:
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
       SECRET_KEY: "${secret_key}"
+      LOG_IN_TOKEN: "${login_token}"
+      SERVER_NAME: "${dcc_dashboard_host}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
       ES_SERVICE: "${es_service}"
       BD_POSTGRES_USER: "${login_user}"

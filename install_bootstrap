@@ -166,7 +166,12 @@ else
     echo "esnet docker network already exists"
 fi
 
-
+#add the command to
+#start the UCSC Computational Genomics Platform (CGP) container that sets up the
+#Nginx config template with the uuids for each of the containers in the CGP
+#at boot time
+echo "Attempting to add docker start core-config-gen to rc.local"
+sudo ./put_core_start_cmd_in_rc.sh
 
 # RUN THE CONSONANCE INSTALLER
 run_consonance_launcher=''
@@ -901,9 +906,12 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       login_password="$(generate_password)"      
       echo "generating SECRET_KEY for login"
       secret_key="$(generate_password)"
+
+      echo "generating LOG_IN_TOKEN for boardwalk check session"
+      login_token="$(generate_password)"
    
       #TODO: The script should snoop the .env file and check if it has a password assigned already and use that. Otherwise, generate a random password.
-      core_client_version='1.1.1'
+      core_client_version='1.1.2'
       # Now write a config for this file.
       [[ -f boardwalk_launcher_config/boardwalk.config ]] || mkdir -p boardwalk_launcher_config
 
@@ -942,6 +950,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "LOGIN_POSTGRES_DB":"${login_db}",
 "LOGIN_POSTGRES_PASSWORD":"${login_password}",
 "SECRET_KEY":"${secret_key}",
+"LOG_IN_TOKEN":"${login_token}",
+"SERVER_NAME":"${dcc_dashboard_host}",
 "DCC_CORE_CLIENT_VERSION":"${core_client_version}"
 }
 CONFIG

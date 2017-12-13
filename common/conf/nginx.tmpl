@@ -201,6 +201,15 @@ server {
                 {{ else if (exists "/etc/nginx/vhost.d/default_location") }}
                 include /etc/nginx/vhost.d/default_location;
                 {{ end }}
+		if ($http_origin ~* (.*)) {
+			add_header 'Access-Control-Allow-Origin' '*';
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+			add_header 'Access-Control-Allow-Credentials' 'true';
+			add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
+		}
+		if ($request_method = OPTIONS) {
+			return 204;
+		}
 	}
 }
 

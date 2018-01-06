@@ -30,4 +30,8 @@ DEFAULT_MONGODB_DB_NAME = 'dcc-metadata'
 MONGODB_URL = "{}/{}".format(DEFAULT_MONGODB_HOST,
                              DEFAULT_MONGODB_DB_NAME)
 
+INDEXER_CONTAINER = 'boardwalk_dcc-metadata-indexer_1'
+
 BUNDLE_METADATA_FILENAME = 'metadata.json'
+
+S3_BUCKET_EXPIRY_DAYS = 6

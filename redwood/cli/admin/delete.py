@@ -582,14 +582,14 @@ class RedwoodAdminDeleter:
             bundle_metadata_json_uuid = bundle_metadata['content'][0]['id']
 
             logger.info("Found file metadata for {} ({}) from Bundle {}\n"
-                        "Editing Bundle's metadata.json"
+                        "Editing Bundle's metadata.json and .meta files"
                         " ({})...".format(file_metadata['fileName'],
                                           file_uuid,
                                           file_metadata['gnosId'],
                                           bundle_metadata_json_uuid))
 
             try:
-                self._add_deletion_flag_in_bundle_metadata(
+                self._edit_bundle_metadata(
                     file_metadata['fileName'],
                     bundle_metadata_json_uuid)
             except RedwoodFileNotFoundError:
@@ -720,8 +720,8 @@ class RedwoodAdminDeleter:
             else:
                 raise
 
-    def _add_deletion_flag_in_bundle_metadata(self, file_name,
-                                              metadata_file_uuid):
+    def _edit_bundle_metadata(self, file_name,
+                              metadata_file_uuid):
         """
         This method gets the bundle's metadata.json file in the redwood storage
         S3 bucket. Then, in the json file, it finds the deleted file's entry
@@ -759,22 +759,43 @@ class RedwoodAdminDeleter:
 
         file_location = "{}/{}".format(self.data_root_folder,
                                        metadata_file_uuid)
+        listing_file_location = "{}.meta".format(file_location)
         s3_client = boto3.client('s3')
         if self.check_file_exists(file_location):
-            old_metadata_file = BytesIO()
+            old_bundle_metadata_file = BytesIO()
             s3_client.download_fileobj(self.bucket_name, file_location,
-                                       old_metadata_file)
-            old_metadata = json.loads(old_metadata_file.getvalue())
-
-            for wo in old_metadata["specimen"][0]["samples"][0] \
+                                       old_bundle_metadata_file)
+            bundle_metadata_json = json.loads(old_bundle_metadata_file.getvalue())
+            for wo in bundle_metadata_json["specimen"][0]["samples"][0] \
                     ["analysis"][0]["workflow_outputs"]:
                 if file_name == wo['file_path']:
                     wo['is_deleted'] = True
 
-            new_metadata = str(json.dumps(old_metadata)).decode()
-            s3_client.put_object(Body=new_metadata,
+            new_bundle_metadata_file = BytesIO()
+            json.dump(bundle_metadata_json, new_bundle_metadata_file)
+
+            s3_client.put_object(Body=new_bundle_metadata_file.getvalue(),
                                  Bucket=self.bucket_name,
                                  Key=file_location)
+            old_endpoint_info_file = BytesIO()
+            s3_client.download_fileobj(self.bucket_name, listing_file_location,
+                                       old_endpoint_info_file)
+
+            listing_info_json = json.loads(old_endpoint_info_file.getvalue())
+            listing_info_json["objectMd5"] = None
+            listing_info_json["parts"][0]["sourceMd5"] = None
+            bundle_metadata_filesize = len(new_bundle_metadata_file.getvalue())
+            listing_info_json["parts"][0]["partSize"] = bundle_metadata_filesize
+            listing_info_json["objectSize"] = bundle_metadata_filesize
+            new_listing_metadata = json.dumps(listing_info_json)
+            s3_client.put_object(Body=new_listing_metadata,
+                                 Bucket=self.bucket_name,
+                                 Key=listing_file_location)
+            client = docker.APIClient()
+            exec_info = client.exec_create(defaults.INDEXER_CONTAINER,
+                                           ['bash',
+                                            'update_endpoint_metadata.sh',
+                                            metadata_file_uuid])
         else:
             raise RedwoodFileNotFoundError(metadata_file_uuid)
 

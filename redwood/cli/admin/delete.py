@@ -194,6 +194,14 @@ class RedwoodFileMetadataAPI:
         self.table_url = table_url or defaults.MONGODB_URL
         self.endpoint = endpoint
 
+    def get_file_uuids_from_bundle(self, bundle_id, context=None):
+        context = context or self._generate_fake_context()
+        url = 'https://metadata.{}/entities?&gnosId={}'.format(
+            self.endpoint, bundle_id)
+        file_dict = json.load(urllib2.urlopen(url, context=context))
+
+        return [file_data['id'] for file_data in file_dict['content']]
+
     def _run_mongo_shell_script(self, js_command):
         """
         Access the redwood-metadata-db docker container. Then, runs a MongoDB
@@ -525,7 +533,7 @@ class RedwoodAdminDeleter:
         else:
             return True
 
-    def delete_file(self, file_uuid):
+    def delete_file(self, file_uuid, skip_missing_files=False):
         """
         Removes the deleted files entry in the metadata database,
         Adds a deletion flag in the file's entry in the bundle metadata.
@@ -616,15 +624,22 @@ class RedwoodAdminDeleter:
         target_file_name = "{}/{}".format(self.data_root_folder, file_uuid)
         listing_info_file_name = "{}/{}.meta".format(self.data_root_folder,
                                                      file_uuid)
-
-        self._safely_delete_file(target_file_name, always_throw_error=True)
+        self._safely_delete_file(target_file_name, always_throw_error=not skip_missing_files)
         self._safely_delete_file(listing_info_file_name)
-        logger.info("Creating file entry in redwood-metadata-db"
+        logger.info("Adding file entry in deleted file list for File"
                     " ({})...".format(file_uuid))
         self._record_deletion_data(
             file_uuid,
             file_metadata.get('fileName', '[No Metadata Found]'),
             file_metadata.get('gnosId', '[No Metadata Found]'))
+
+    def delete_files_in_bundle(self, bundle_uuid):
+        fls = self.redwood_metadata_api.get_file_uuids_from_bundle(bundle_uuid)
+        for file_uuid in fls:
+            try:
+                self.delete_file(file_uuid, skip_missing_files=True)
+            except ForbiddenDeleteError:
+                logging.error("Skipping Metadata.json file....")
 
     def _safely_delete_file(self, file_name, always_throw_error=False):
         """
@@ -792,15 +807,15 @@ class RedwoodAdminDeleter:
                                  Bucket=self.bucket_name,
                                  Key=listing_file_location)
             client = docker.APIClient()
-            exec_info = client.exec_create(defaults.INDEXER_CONTAINER,
-                                           ['bash',
-                                            'update_endpoint_metadata.sh',
-                                            metadata_file_uuid])
+            client.exec_create(defaults.INDEXER_CONTAINER,
+                               ['bash', 'update_endpoint_metadata.sh',
+                                metadata_file_uuid])
         else:
             raise RedwoodFileNotFoundError(metadata_file_uuid)
 
 
-def run_delete_file_cli(deleter, file_uuid, skip_prompt):
+def run_delete_file_cli(deleter, object_uuid, skip_prompt,
+                        will_delete_bundle=False):
     """
     The command interface for deleting a file in AWS S3 Buckets
 
@@ -808,29 +823,42 @@ def run_delete_file_cli(deleter, file_uuid, skip_prompt):
     ----------
     deleter: RedwoodAdminDeleter
         The object that manages file deletion
-    file_uuid
+    object_uuid
         The file_name of the file targeted for deletion
     skip_prompt
         If this value is True, then the user will not be asked to confirm
         the deletion
+    will_delete_bundle
+        If this value is True, the confirmation message with change and the
+        deleter will delete all files in the bundle
     """
 
     resp = ""
-
     if not skip_prompt:
-        resp = raw_input("Are you sure you want to delete {}?"
-                         " [Y]es/[N]o ".format(file_uuid))
+        prompt_obj_str = "EVERY FILE IN BUNDLE" if will_delete_bundle else "File"
+        resp = raw_input("Are you sure you want to delete {} {}?"
+                         " [Y]es/[N]o ".format(prompt_obj_str, object_uuid))
 
     if resp.lower() in {'y', 'yes'} or skip_prompt:
-        try:
-            deleter.delete_file(file_uuid)
-        except (RedwoodDeleteError, RedwoodFileNotFoundError) as e:
-            logger.error(str(e))
-            logger.error("Deletion Failed")
+        if will_delete_bundle:
+            try:
+                deleter.delete_files_in_bundle(object_uuid)
+            except (RedwoodDeleteError, RedwoodFileNotFoundError) as e:
+                logger.error(str(e))
+                logger.error("Deletion Failed")
+            else:
+                logger.info("Successfully Deleted "
+                            "All Files from Bundle {}.".format(object_uuid))
         else:
-            logger.info("Successfully deleted File {}.".format(file_uuid))
+            try:
+                deleter.delete_file(object_uuid)
+            except (RedwoodDeleteError, RedwoodFileNotFoundError) as e:
+                logger.error(str(e))
+                logger.error("Deletion Failed")
+            else:
+                logger.info("Successfully deleted File {}.".format(object_uuid))
     else:
-        logger.info("DID NOT delete File {}.".format(file_uuid))
+        logger.info("DID NOT delete File {}.".format(object_uuid))
 
 
 def run_cli():
@@ -850,6 +878,7 @@ def run_cli():
     parser.add_argument('FILE_UUID',
                         help='The file uuid of the file that will be'
                              ' deleted.')
+    parser.add_argument("--delete-bundle", action='store_true')
     args = parser.parse_args()
 
     dccops_env_vars = DCCOpsEnv(defaults.DCCOPS_DEFAULT_LOCATION)
@@ -862,7 +891,8 @@ def run_cli():
             logger.error(str(e))
             logger.error("Please check if your AWS keys are correct.")
         else:
-            run_delete_file_cli(deleter, args.FILE_UUID, args.skip_prompt)
+            run_delete_file_cli(deleter, args.FILE_UUID, args.skip_prompt,
+                                args.delete_bundle)
     else:
         logger.error("Please run this script as root.")
 

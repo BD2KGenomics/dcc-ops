@@ -1,6 +1,3 @@
-# admin
-Redwood CLI
-
 ## Overview
 Parent tool for administrating redwood. You'll probably want to add _bin/redwood_ to your PATH.
 

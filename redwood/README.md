@@ -101,3 +101,7 @@ $ download <objectid> .
 ```
 
 If that's as expected, things are looking good.
+
+### Admin Tools
+
+Please see [Readme.md](cli/admin/Readme.md) for a more detailed overview of Admin Tools.

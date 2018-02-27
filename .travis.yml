@@ -11,9 +11,9 @@ before_install:
  - git clone https://github.com/BD2KGenomics/dcc-ops.git
  - cd dcc-ops
  - git checkout feature/add-travis-ci
- - openssl aes-256-cbc -K $encrypted_82facae99918_key -iv $encrypted_82facae99918_iv -in super_secret.txt.enc -out super_secret.txt -d
 
 script:
+ - echo "Run install_bootstrap
  - sudo ./install_bootstrap -f
 
 #deploy:

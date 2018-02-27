@@ -13,6 +13,7 @@ before_install:
  - git checkout feature/add-travis-ci
 
 script:
+ - echo "My secret environment variable is: {$test_env_var}"
  - echo "Run install_bootstrap"
  - sudo ./install_bootstrap -f
 

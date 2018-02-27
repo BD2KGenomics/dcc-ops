@@ -13,7 +13,7 @@ before_install:
  - git checkout feature/add-travis-ci
 
 script:
- - echo "Run install_bootstrap
+ - echo "Run install_bootstrap"
  - sudo ./install_bootstrap -f
 
 #deploy:

@@ -781,17 +781,20 @@ class RedwoodAdminDeleter:
             s3_client.download_fileobj(self.bucket_name, file_location,
                                        old_bundle_metadata_file)
             bundle_metadata_json = json.loads(old_bundle_metadata_file.getvalue())
-            for wo in bundle_metadata_json["specimen"][0]["samples"][0] \
-                    ["analysis"][0]["workflow_outputs"]:
-                if file_name == wo['file_path']:
-                    wo['is_deleted'] = True
-
             new_bundle_metadata_file = BytesIO()
-            json.dump(bundle_metadata_json, new_bundle_metadata_file)
+            try:
+                for wo in bundle_metadata_json["specimen"][0]["samples"][0] \
+                        ["analysis"][0]["workflow_outputs"]:
+                    if file_name == wo['file_path']:
+                        wo['is_deleted'] = True
 
-            s3_client.put_object(Body=new_bundle_metadata_file.getvalue(),
-                                 Bucket=self.bucket_name,
-                                 Key=file_location)
+                json.dump(bundle_metadata_json, new_bundle_metadata_file)
+                s3_client.put_object(Body=new_bundle_metadata_file.getvalue(),
+                                     Bucket=self.bucket_name,
+                                     Key=file_location)
+            except KeyError as e:
+                print(str(e) + "::" + metadata_file_uuid)
+
             old_endpoint_info_file = BytesIO()
             s3_client.download_fileobj(self.bucket_name, listing_file_location,
                                        old_endpoint_info_file)

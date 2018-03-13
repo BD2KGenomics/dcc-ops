@@ -143,6 +143,7 @@ services:
     restart: always
   boardwalk:
     image: quay.io/ucsc_cgl/boardwalk:1.0.0
+    #build: boardwalk
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
     networks:

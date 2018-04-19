@@ -72,7 +72,7 @@ before_install:
  - git checkout feature/add-travis-ci
 
 install:
- - sudo apt-get install ruby
+ - sudo apt-get install ruby-full
  - sudo gem install mustache
 
 script:

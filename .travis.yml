@@ -65,14 +65,13 @@ env:
 
 before_install:
  - sudo apt-get update
- - gem --version
 # clone the github repo and cd into it
  - git clone https://github.com/BD2KGenomics/dcc-ops.git
  - cd dcc-ops
  - git checkout feature/add-travis-ci
 
 install:
- - sudo apt-get install ruby-full
+ - sudo apt-get install ruby2.2
  - sudo gem install mustache
 
 script:

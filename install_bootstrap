@@ -86,7 +86,7 @@ function remove_empty_lines {
 
     # Remove all instances where a ^M character and an extra newline might have been inserted into the file
     file_contents="$(sed ':a;N;$!ba;s/\n//g' $my_file)"
-    printf "${file_contents}" > "$my_file"
+    printf "%s" "$file_contents" > "$my_file"
 
     # If we removed a newline character at the end of the file, add it back in
     if [[ "$(tail -c 1 $my_file)" != "\n" ]]; then

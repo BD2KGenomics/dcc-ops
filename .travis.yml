@@ -72,7 +72,7 @@ before_install:
 
 script:
 # Create a file to hold the pem_key
- - printf "${PEM_KEY}" > travis-ci-key-pair-aws-dev-box.pem
+ - printf "%s" "$PEM_KEY" > travis-ci-key-pair-aws-dev-box.pem
 # Run install_bootstrap
  - sudo bash install_bootstrap -t
 # Bring down the containers afterward

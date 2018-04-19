@@ -72,13 +72,9 @@ before_install:
 
 script:
 # Create a file to hold the pem_key
- - echo "Creating pem_key file..."
  - printf "${PEM_KEY}" > travis-ci-key-pair-aws-dev-box.pem
- - echo "File created."
 # Run install_bootstrap
- - echo "Running install_bootstrap..."
  - sudo bash install_bootstrap -t
- - echo "Finished running install_bootstrap."
 # Bring down the containers afterward
  - sudo docker stop $(sudo docker ps -aq)
 

@@ -71,7 +71,7 @@ before_install:
  - git checkout feature/add-travis-ci
 
 install:
- - sudo apt-get install ruby2.2
+ - sudo apt-get install ruby2.3
  - sudo gem install mustache
 
 script:

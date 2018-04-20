@@ -558,9 +558,9 @@ CONFIG
       mustache commons_launcher_config/consonance.config consonance/web.yml.template  > consonance/web.yml
       mustache commons_launcher_config/consonance.config consonance/boto.config.template > consonance/boto.config
       if [[ "${run_mode}" = "travis" || "${run_mode}" = "file" ]]; then
-          cat ${PEM_PATH} > consonance/key.pem
+          printf "%s" "${PEM_PATH}" > consonance/key.pem
       else
-          cat ${user_pem_path} > consonance/key.pem
+          printf "%s" "${user_pem_path}" > consonance/key.pem
       fi
 
       cd consonance

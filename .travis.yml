@@ -65,14 +65,13 @@ env:
 
 before_install:
  - sudo apt-get -y update
- - sudo apt-get install wget curl ruby-mustache=1.0.2-1 jq git --yes
 # clone the github repo and cd into it
  - git clone https://github.com/BD2KGenomics/dcc-ops.git
  - cd dcc-ops
  - git checkout feature/add-travis-ci
 
 install:
-# - sudo apt-get install wget curl ruby-mustache=1.0.2-1 jq git --yes
+ - sudo apt-get install wget curl ruby-mustache jq git --yes
 
 script:
 # Create a file to hold the pem_key

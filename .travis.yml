@@ -16,7 +16,7 @@ env:
    - AWS_ZONE="us-west-2b"
    - AWS_AMI_IMAGE="ami-6e1a0117"
    - AWS_INSTANCE_TYPE="r4.4xlarge"
-   - PEM_PATH="$(pwd)"
+   - PEM_PATH="$(pwd)/${KEY_NAME}"
    - KEY_NAME="travis-ci-key-pair-aws-dev-box"
    - FLEET_NAME="travis-fleet"
    - FLEET_SIZE="8"

@@ -71,10 +71,7 @@ before_install:
  - git checkout feature/add-travis-ci
 
 install:
- - sudo apt-get install ruby-full
- - gem -v
- - ruby -v
- - sudo gem install mustache
+ - sudo apt-get install wget curl ruby-mustache=1.0.2-1 jq git --yes
 
 script:
 # Create a file to hold the pem_key

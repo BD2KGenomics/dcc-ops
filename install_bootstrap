@@ -569,7 +569,9 @@ CONFIG
 
       cd consonance
       sudo docker-compose -f docker-compose.yml build
+      echo "TEST: AFTER DOCKER COMPOSE BUILD"
       sudo docker-compose -f docker-compose.yml up -d
+      echo "TEST: AFTER DOCKER COMPOSE UP"
       ################sudo docker-compose run client
       cd ..
 

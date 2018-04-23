@@ -220,6 +220,7 @@ sudo ./put_core_start_cmd_in_rc.sh
 
 run_consonance_launcher=''
 while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}" != 'N' ]] ; do
+  echo "TEST: BEGIN CONSONANCE INSTALLER LOOP"
   # Check whether the script is being run by a user, with file input, or by TravisCI testing
   case $run_mode in
       # For user input
@@ -544,11 +545,13 @@ CONFIG
               # cp ~/.consonance/consonance.config commons_launcher_config/consonance.config
           fi
       fi
+      echo "TEST: AFTER MAKE CONFIG"
 
       # Clean the config file in case there are any unwanted newline characters in it
       sudo chmod -R ugo+w commons_launcher_config/consonance.config
       [[ -f "commons_launcher_config/consonance.config" ]] && remove_empty_lines "commons_launcher_config/consonance.config"
       sudo chmod -R ugo-w commons_launcher_config/consonance.config
+      echo "TEST: AFTER CLEAN"
 
       # template out stuff
       mustache commons_launcher_config/consonance.config consonance/aws.config.template > consonance/aws.config
@@ -562,6 +565,7 @@ CONFIG
       else
           printf "%s" "${user_pem_path}" > consonance/key.pem
       fi
+      echo "TEST: END OF MUSTACHE"
 
       cd consonance
       sudo docker-compose -f docker-compose.yml build
@@ -573,14 +577,16 @@ CONFIG
 
       # If running the script in Travis or with file input, exit the consonance installer loop
       if [[ "${run_mode}" != "user" ]]; then
+          echo "TEST: BREAK FROM CONSONANCE INSTALLER LOOP"
           break
       fi
   elif [ "${run_consonance_launcher^^}" = 'N' ] ; then
     echo "You can run this script at another time to run the consonance installer"
   fi
+  echo "TEST: END OF CONSONANCE INSTALLER LOOP"
 done
 
-
+echo "TEST: EXITED THE CONSONANCE INSTALLER LOOP"
 
 
 

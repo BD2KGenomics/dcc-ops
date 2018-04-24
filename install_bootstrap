@@ -71,7 +71,7 @@ function ask_question()
 
 
 # Clean a file and remove all instances of ^M (carriage return) adjacent to a newline character.
-# Sometimes, when the user pressed ENTER/RETURN, a carriage return character can get stuck in one of
+# Sometimes, when the user presses ENTER/RETURN, a carriage return character can get stuck in one of
 # the config files. This function was created to prevent errors when reading environment variables from config files.
 #   Arguments:
 #     $1 - file to remove carriage return characters from
@@ -88,6 +88,10 @@ function remove_empty_lines {
     file_contents="$(sed ':a;N;$!ba;s/\n//g' $my_file)"
     printf "%s" "$file_contents" > "$my_file"
 
+    # Remove all instances where just a ^M character might have been inserted into the file
+    file_contents="$(sed ':a;N;$!ba;s///g' $my_file)"
+    printf "%s" "$file_contents" > "$my_file"
+
     # If we removed a newline character at the end of the file, add it back in
     if [[ "$(tail -c 1 $my_file)" != "\n" ]]; then
         printf "\n" >> $my_file
@@ -95,10 +99,11 @@ function remove_empty_lines {
 }
 
 
+
 # INPUT MODE
-#   1) To accept previous values for all questions (with no user input required), use flag "-f"
+#   1) To accept previous values from config files for all questions (with no user input required), use flag "-f"
 #   2) To run the script in TravisCI mode, use the flag "-t"
-#   3) Default (no flag) is user input (answer questions as normal)
+#   3) Default (no flag) is user input (the user must answer questions as normal)
 run_mode=user
 if [[ ${1^^} = "-F" || ${1^^} = "-FILE" ]]; then
     run_mode=file
@@ -109,6 +114,7 @@ fi
 
 
 # RUN BASIC INSTALLERS
+# Skip this step if the script is being run with default file input or through TravisCI.
 # FYI: The weird "^^" is to make the user input into uppercase so that if they enter "y" the installer will still run.
 install_commons_launcher=''
 while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^^}" != 'N' && "${run_mode}" = "user" ]] ; do
@@ -233,15 +239,17 @@ while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}
               source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" commons_launcher_config/consonance.config)
             fi
             ;;
-      # For testing outside of TravisCI servers only: Use the encrypted environment variables in TravisCI instead of asking the user to enter them manually
+      # For testing outside of TravisCI servers only: Create environment variables from the config file instead of using the ones on the TravisCI console
 #      travis) # add environment variables to various files
 #            if [ -f commons_launcher_config/consonance.config ] ; then
 #              source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" commons_launcher_config/consonance.config)
 #            fi
 #            ;;
   esac
+
   # If the user would like to run consonance_launcher, then we have to get some config settings from them OR read them from an existing file
   if [[ "${run_mode}" = "user" && "${run_consonance_launcher^^}" = 'Y' ]] || [[ "${run_mode}" = "file" || "${run_mode}" = "travis" ]] ; then
+
       # If the mode is user input, then ask the user questions
       if [[ "${run_mode}" = "user" ]] ; then 
           #Read the config file if it exists and then show previous values...
@@ -446,9 +454,11 @@ while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}
           sed -ie "s~{.*}~{\"Owner\":\"${email_address_for_owner_tag}\"}~" ./consonance/example_tags.json
       fi
 
+      # Since there's no reason to change the config file if the script is being run with file input, skip this step
       if [[ "${run_mode}" != "file" ]]; then
           if [[ "${run_mode}" = "travis" ]]; then
-              # Write a config to use for Travis using the pre-made encrypted environment variables (this is so that the mustache commands below will still work)
+              # Write a config to use for Travis using the pre-made encrypted environment variables on the TravisCI console
+              # (This is so that the mustache commands below will still work)
               [[ -f commons_launcher_config/consonance.config ]] || mkdir -p commons_launcher_config
               # Note: You can't have ANY blank lines in .consonance/consonance.config because the python library that will eventually process it does not like blank lines and will fail.
               # we need to override the ethernet device on some systems
@@ -545,7 +555,7 @@ CONFIG
           fi
       fi
 
-      # Clean the config file in case there are any unwanted newline characters in it
+      # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w commons_launcher_config/consonance.config
       [[ -f "commons_launcher_config/consonance.config" ]] && remove_empty_lines "commons_launcher_config/consonance.config"
       sudo chmod -R ugo-w commons_launcher_config/consonance.config
@@ -575,6 +585,7 @@ CONFIG
       if [[ "${run_mode}" != "user" ]]; then
           break
       fi
+
   elif [ "${run_consonance_launcher^^}" = 'N' ] ; then
     echo "You can run this script at another time to run the consonance installer"
   fi
@@ -593,7 +604,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
                echo "Would you like to run the redwood installer now? [Y/N]"
                read run_redwood
                ;;
-        # For testing outside of TravisCI servers only: Use the encrypted environment variables in TravisCI instead of asking the user to enter them manually
+        # For testing outside of TravisCI servers only: Create environment variables from the config file instead of using the ones on the TravisCI console
 #        travis)
 #              if [ -f redwood_launcher_config/redwood.config ] ; then
 #                source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" redwood_launcher_config/redwood.config)
@@ -602,6 +613,7 @@ while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
     esac
 
     if [[ "${run_mode}" = "user" && "${run_redwood^^}" = 'Y' ]] || [[ "${run_mode}" = "file" || "${run_mode}" = "travis" ]] ; then
+
       # If the mode is user input, then ask the user questions
       if [[ "${run_mode}" = "user" ]] ; then
           # Read the config file if it exists and then show previous values...
@@ -803,7 +815,7 @@ CONFIG
           fi
       fi
 
-      # Clean the config file in case there are any unwanted newline characters in it
+      # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w redwood_launcher_config/redwood.config
       [[ -f "redwood_launcher_config/redwood.config" ]] && remove_empty_lines "redwood_launcher_config/redwood.config"
       sudo chmod -R ugo-w redwood_launcher_config/redwood.config
@@ -939,7 +951,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
         user) echo "Would you like to run the boardwalk installer now? [Y/N]"
               read run_boardwalk
               ;;
-        # For testing outside of TravisCI servers only: Use the encrypted environment variables in TravisCI instead of asking the user to enter them manually
+        # For testing outside of TravisCI servers only: Create environment variables from the config file instead of using the ones on the TravisCI console
 #        travis)
 #              if [ -f boardwalk_launcher_config/boardwalk.config ] ; then
 #                source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" boardwalk_launcher_config/boardwalk.config)
@@ -1228,7 +1240,7 @@ CONFIG
           fi
       fi
 
-      # Clean the config file in case there are any unwanted newline characters in it
+      # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w boardwalk_launcher_config/boardwalk.config
       [[ -f "boardwalk_launcher_config/boardwalk.config" ]] && remove_empty_lines "boardwalk_launcher_config/boardwalk.config"
       sudo chmod -R ugo-w boardwalk_launcher_config/boardwalk.config
@@ -1265,7 +1277,7 @@ while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
         user) echo "Would you like to run the action installer now? [Y/N]"
               read run_action
               ;;
-        # For testing outside of TravisCI servers only: Use the encrypted environment variables in TravisCI instead of asking the user to enter them manually
+        # For testing outside of TravisCI servers only: Create environment variables from the config file instead of using the ones on the TravisCI console
 #        travis)
 #              if [ -f action_launcher_config/action.config ] ; then
 #                source <(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" action_launcher_config/action.config)
@@ -1388,7 +1400,7 @@ CONFIG
 
       fi
 
-      # Clean the config file in case there are any unwanted newline characters in it
+      # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w action_launcher_config/action.config
       [[ -f "action_launcher_config/action.config" ]] && remove_empty_lines "action_launcher_config/action.config"
       sudo chmod -R ugo-w action_launcher_config/action.config

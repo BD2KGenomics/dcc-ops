@@ -70,36 +70,6 @@ function ask_question()
 }
 
 
-# Clean a file and remove all instances of ^M (carriage return) adjacent to a newline character.
-# Sometimes, when the user presses ENTER/RETURN, a carriage return character can get stuck in one of
-# the config files. This function was created to prevent errors when reading environment variables from config files.
-#   Arguments:
-#     $1 - file to remove carriage return characters from
-function remove_empty_lines {
-    if [[ $1 = "" ]]; then
-        echo "function remove_empty_lines: usage error: file argument is required"
-        exit 1
-    fi
-
-    my_file=$1
-    file_contents=''
-
-    # Remove all instances where a ^M character and an extra newline might have been inserted into the file
-    file_contents="$(sed ':a;N;$!ba;s/\n//g' $my_file)"
-    printf "%s" "$file_contents" > "$my_file"
-
-    # Remove all instances where just a ^M character might have been inserted into the file
-    file_contents="$(sed ':a;N;$!ba;s///g' $my_file)"
-    printf "%s" "$file_contents" > "$my_file"
-
-    # If we removed a newline character at the end of the file, add it back in
-    if [[ "$(tail -c 1 $my_file)" != "\n" ]]; then
-        printf "\n" >> $my_file
-    fi
-}
-
-
-
 # INPUT MODE
 #   1) To accept previous values from config files for all questions (with no user input required), use flag "-f"
 #   2) To run the script in TravisCI mode, use the flag "-t"
@@ -110,7 +80,6 @@ if [[ ${1^^} = "-F" || ${1^^} = "-FILE" ]]; then
 elif [[ ${1^^} = "-T" || ${1^^} = "-TRAVIS" || ${1^^} = "-TRAVISCI" ]]; then
     run_mode=travis
 fi
-
 
 
 # RUN BASIC INSTALLERS
@@ -196,7 +165,6 @@ while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^
 done
 
 
-
 # CORE COMMONS: initial steps
 if [[ $(sudo docker network ls | grep core_public | wc -l) = "0" ]]; then
     echo "creating core_public docker network"
@@ -221,9 +189,7 @@ echo "Attempting to add docker start core-config-gen to rc.local"
 sudo ./put_core_start_cmd_in_rc.sh
 
 
-
 # RUN THE CONSONANCE INSTALLER
-
 run_consonance_launcher=''
 while [[ "${run_consonance_launcher^^}" != 'Y' &&  "${run_consonance_launcher^^}" != 'N' ]] ; do
   # Check whether the script is being run by a user, with file input, or by TravisCI testing
@@ -557,7 +523,7 @@ CONFIG
 
       # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w commons_launcher_config/consonance.config
-      [[ -f "commons_launcher_config/consonance.config" ]] && remove_empty_lines "commons_launcher_config/consonance.config"
+      [[ -f "commons_launcher_config/consonance.config" ]] && sed -i ':a;N;$!ba;s/\n//g' commons_launcher_config/consonance.config
       sudo chmod -R ugo-w commons_launcher_config/consonance.config
 
       # template out stuff
@@ -592,10 +558,7 @@ CONFIG
 done
 
 
-
-
 # RUN THE REDWOOD INSTALLER
-
 run_redwood=''
 while [[ "${run_redwood^^}" != 'Y' &&  "${run_redwood^^}" != 'N' ]] ; do
     # Check whether the script is being run by a user, with file input, or by TravisCI testing
@@ -817,7 +780,7 @@ CONFIG
 
       # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w redwood_launcher_config/redwood.config
-      [[ -f "redwood_launcher_config/redwood.config" ]] && remove_empty_lines "redwood_launcher_config/redwood.config"
+      [[ -f "redwood_launcher_config/redwood.config" ]] && sed -i ':a;N;$!ba;s/\n//g' "redwood_launcher_config/redwood.config"
       sudo chmod -R ugo-w redwood_launcher_config/redwood.config
 
       # template out stuff
@@ -853,8 +816,8 @@ CONFIG
 
               # optionally recover backup and run migrations
               recover_metadata=-1
-              read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
               while [[ "${recover_metadata}" = "-1" ]]; do
+                  read -ep $'Do you want to recover metadata from a backup? [Y/N]\n' recover_metadata_response
                   if [[ "${recover_metadata_response^^}" =~ ^(Y|YES)$ ]]; then
                       recover_metadata=1
                   elif [[ "${recover_metadata_response^^}" =~ ^(N|NO)$ ]]; then
@@ -901,7 +864,6 @@ CONFIG
 done
 
 # CORE COMMON: bring up the primary nginx gateway server
-
 run_common=''
 while [[ "${run_common^^}" != 'Y' &&  "${run_common^^}" != 'N' && "${run_mode}" = "user" ]] ; do
     read -ep $'Are you ready to launch the public-facing gateway nginx server? [Y/N]\n' run_common
@@ -939,8 +901,6 @@ if [[ "${run_common^^}" = 'Y' && "${run_mode}" = "user" ]] || [[ "${run_mode}" =
 else
     echo "the core won't be publicly accessible until the gateway is started"
 fi
-
-
 
 # RUN THE BOARDWALK INSTALLER
 
@@ -1242,7 +1202,7 @@ CONFIG
 
       # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w boardwalk_launcher_config/boardwalk.config
-      [[ -f "boardwalk_launcher_config/boardwalk.config" ]] && remove_empty_lines "boardwalk_launcher_config/boardwalk.config"
+      [[ -f "boardwalk_launcher_config/boardwalk.config" ]] && sed -i ':a;N;$!ba;s/\n//g' "boardwalk_launcher_config/boardwalk.config"
       sudo chmod -R ugo-w boardwalk_launcher_config/boardwalk.config
 
       # template out stuff
@@ -1269,7 +1229,6 @@ done
 
 
 # RUN THE ACTION INSTALLER
-
 run_action=''
 while [[ "${run_action^^}" != 'Y' &&  "${run_action^^}" != 'N' ]] ; do
     # Check whether the script is being run by a user, with file input, or by TravisCI testing
@@ -1402,7 +1361,7 @@ CONFIG
 
       # Clean the config file in case there are any unwanted carriage return characters in it
       sudo chmod -R ugo+w action_launcher_config/action.config
-      [[ -f "action_launcher_config/action.config" ]] && remove_empty_lines "action_launcher_config/action.config"
+      [[ -f "action_launcher_config/action.config" ]] && sed -i ':a;N;$!ba;s/\n//g' "action_launcher_config/action.config"
       sudo chmod -R ugo-w action_launcher_config/action.config
 
       # template out stuff
@@ -1424,7 +1383,7 @@ CONFIG
 done
 
 
-# if running from TravisCI, automatically start core-config-gen
+# If running from TravisCI, automatically start core-config-gen
 if [[ "${run_mode}" = "travis" ]]; then
     sudo docker start core-config-gen
 fi

@@ -80,6 +80,10 @@ if [[ ${1^^} = "-F" || ${1^^} = "-FILE" ]]; then
 elif [[ ${1^^} = "-T" || ${1^^} = "-TRAVIS" || ${1^^} = "-TRAVISCI" ]]; then
     run_mode=travis
 fi
+echo "TEST: INPUT MODE IS ${run_mode}"
+echo "TEST: ARG0 IS ${0}"
+echo "TEST: ARG1 IS ${1}"
+echo "TEST: ARG2 IS ${2}"
 
 
 # RUN BASIC INSTALLERS

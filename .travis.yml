@@ -73,11 +73,6 @@ install:
  - sudo apt-get install wget curl ruby-mustache jq git --yes
 
 script:
-# Use these to check whether I need the git clone statements above
- - pwd
- - ls
-# Testing install_bootstrap
- - grep "TEST" install_bootstrap
 # Create a file to hold the pem_key
  - printf "%s" "$PEM_KEY" > travis-ci-key-pair-aws-dev-box.pem
 # Run install_bootstrap

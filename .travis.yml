@@ -62,8 +62,6 @@ env:
    - ELASTIC_SEARCH_SERVER="elasticsearch1"
    - ELASTIC_SEARCH_PORT="9200"
    - TOUCH_FILE_DIRECTORY="travis-cgp-action-service"
-# Define encrypted environment variables
-   - secure: "frXDCPqb6ahW6z9e5UVXCddMca+IfgArtIis6UqVDspbW9quaidnl0JbnMOy9jl73GtlKIHHWCepl+VOdxb61K48iiX1TehQ55WrpK0jxhbCXLApsOj+C0bp+c4HppuniCtTanEqB5D5Ofc8QvxHg2EBUAMIw9tgABoNJiDUKop7JMtumIyLOrin/omtvvlfo7T+hcI126xILlPiVEkGdGXgu9I7BtnN7E4BLkt3hlfd6ukbdLtB/1K/CavE2zE1z62qoPBgDk2C7slTESmMMQQRYAjVsec92XGffoFcxgpn16GD/2A7+oKWvjsv28nXp/bK7TS7gK3h7KJBrJFZ4vn5xHSldIu/ij2JUre1ZQonPfbPVRGXPbdwiFR2izsX6fv6khswYiK/L6qZnJbywgCkqRAFl6ddcp/7594mrH6CSaRRaIxjdx7L2S2FtKMUrVIRJD8t4Wy77Bvu5yndN1yIK1JPRKuXzuNDZYRVGn1LhFapTgnj4VXQndksT6X4JRjgye5dViQ13gA26D4+AkFPZBf249EK9NCaGNqYXanMz3UzbzmbIsD8euvkvCjm13+xrw4EjEy0BF6/hiMOZ5m9EWHWOgEgxIe/FpvkMWTGO9eXQ0hMyYnxnpUOfJDPRpSFthS6CGjwgeA8OkBPBs0h1io+tddZc5FqKcyAqL4="
 
 before_install:
  - sudo apt-get -y update
@@ -75,8 +73,9 @@ install:
  - sudo apt-get install wget curl ruby-mustache jq git --yes
 
 script:
-# First, echo the encrypted test env variable to make sure it's safe
- - echo "The value of the test env variable is: $TEST_ENV_VARIABLE"
+# Use these to check whether I need the git clone statements above
+ - pwd
+ - ls
 # Create a file to hold the pem_key
  - printf "%s" "$PEM_KEY" > travis-ci-key-pair-aws-dev-box.pem
 # Run install_bootstrap

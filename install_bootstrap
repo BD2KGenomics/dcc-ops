@@ -91,6 +91,7 @@ echo "TEST: ARG2 IS ${2}"
 # FYI: The weird "^^" is to make the user input into uppercase so that if they enter "y" the installer will still run.
 install_commons_launcher=''
 while [[ "${install_commons_launcher^^}" != 'Y' &&  "${install_commons_launcher^^}" != 'N' && "${run_mode}" = "user" ]] ; do
+  echo "TEST: INSIDE WHILE LOOP"
   echo "DO YOU WISH TO CONTINUE [Y/N]:"
   read install_commons_launcher
   if [ "${install_commons_launcher^^}" = 'Y' ] ; then

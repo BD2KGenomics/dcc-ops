@@ -84,4 +84,4 @@ script:
  - sudo bash install_bootstrap -t
 # Bring down the containers afterward
  - sudo docker stop $(sudo docker ps -aq)
- - sudo docker system prune -a
+ - sudo docker system prune -fa

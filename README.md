@@ -150,6 +150,14 @@ Once the above setup is done, clone this repository onto your server and run the
     # note, you may need to checkout the particular branch or release tag you are interested in...
     git clone https://github.com/BD2KGenomics/dcc-ops.git && cd dcc-ops && sudo bash install_bootstrap
 
+There are two optional flags that can be used when running the bootstrap script:
+* -f
+  * Denotes file input. Once you've run the installer once normally and the script has created .config files for Consonance, Redwood, Boardwalk, and Action, you can run the bootstrap script with -f.
+  * This flag allows you to skip the installer questions and accept previous values from the .config files automatically.
+  * Also note that executing the script in this way will run it without using external Redwood databases and without recovering Redwood metadata from a backup.
+* -t
+  * Denotes input with TravisCI testing. When executing the bootstrap script on TravisCI's servers, this flag allows you to accept encrypted environment variables straight from the repository settings in TravisCI.
+
 #### Installer Question Notes
 
 The `install_bootstrap` script will ask you to configure each service interactively.
@@ -301,3 +309,9 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
 * "What is the AWS profile?" -> you don't need this, get rid of it
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
+
+### Information on Continuous Integration
+
+* Currently, TravisCI has been set up to run `install_bootstrap` via the flag `-t` in `.travis.yml`.
+* When the bootstrap script is run in TravisCI, neither user input nor .config file input will work. For this reason, we use encrypted environment variables to run the script.
+* The environment variables which the bootstrap installer requires are encrypted securely in the TravisCI repository settings. See [here](https://docs.travis-ci.com/user/environment-variables/) for details on how they are set up.

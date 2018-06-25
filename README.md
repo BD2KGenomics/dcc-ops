@@ -310,8 +310,8 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 * "What is the AWS profile?" -> you don't need this, get rid of it
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does
 
-### Information on Continuous Integration
+### Continuous Integration Testing
 
-* Currently, TravisCI has been set up to run `install_bootstrap` via the flag `-t` in `.travis.yml`.
-* When the bootstrap script is run in TravisCI, neither user input nor .config file input will work. For this reason, we use encrypted environment variables to run the script.
+* Currently, TravisCI has been set up to run `install_bootstrap` in `.travis.yml` via the flag `-t`.
+* When the bootstrap script is run in TravisCI, entering user input will not work. For this reason, we must use encrypted environment variables to run the script.
 * The environment variables which the bootstrap installer requires are encrypted securely in the TravisCI repository settings. See [here](https://docs.travis-ci.com/user/environment-variables/) for details on how they are set up.
